@@ -373,75 +373,19 @@ function ResumesEditor({ resumes, setResumes }: { resumes: Resume[]; setResumes:
 }
 
 function ResumePreview({ json }: { json: string }) {
-  let data: Record<string, any>;
+  let data: any;
   try {
     data = JSON.parse(json);
   } catch {
     return <p className="text-xs text-muted-foreground">Invalid JSON — fix errors to see preview</p>;
   }
 
+  const pretty = JSON.stringify(data, null, 2);
+
   return (
-    <div className="space-y-5 text-xs">
-      <div>
-        <h3 className="font-display text-lg">{data.name || "Name"}</h3>
-        <p className="text-muted-foreground">{data.title || "Title"}</p>
-      </div>
-
-      {data.summary && (
-        <div>
-          <SectionLabel>Summary</SectionLabel>
-          <p className="text-muted-foreground">{data.summary}</p>
-        </div>
-      )}
-
-      {data.experience && data.experience.length > 0 && (
-        <div>
-          <SectionLabel>Experience</SectionLabel>
-          <div className="space-y-3">
-            {data.experience.map((exp: any, i: number) => (
-              <div key={i}>
-                <p className="font-medium">{exp.role}</p>
-                <p className="text-muted-foreground">{exp.company} — {exp.period}</p>
-                {exp.highlights && (
-                  <ul className="ml-4 mt-1 list-disc space-y-0.5 text-muted-foreground">
-                    {exp.highlights.map((h: string, j: number) => (
-                      <li key={j}>{h}</li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {data.education && data.education.length > 0 && (
-        <div>
-          <SectionLabel>Education</SectionLabel>
-          <div className="space-y-1">
-            {data.education.map((edu: any, i: number) => (
-              <p key={i}>
-                <span className="font-medium">{edu.degree}</span>
-                <span className="text-muted-foreground"> — {edu.school} ({edu.year})</span>
-              </p>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {data.skills && data.skills.length > 0 && (
-        <div>
-          <SectionLabel>Skills</SectionLabel>
-          <div className="flex flex-wrap gap-1">
-            {data.skills.map((s: string, i: number) => (
-              <span key={i} className="rounded-full border border-border px-2 py-0.5 text-[10px] text-muted-foreground">
-                {s}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
+    <pre className="whitespace-pre-wrap break-all font-mono text-xs leading-relaxed text-foreground">
+      {pretty}
+    </pre>
   );
 }
 
