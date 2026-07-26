@@ -10,6 +10,7 @@ import {
 import { type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { SanityProvider } from "../sanity/provider";
 
 function NotFoundComponent() {
   return (
@@ -116,7 +117,9 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <SanityProvider>
+        <Outlet />
+      </SanityProvider>
     </QueryClientProvider>
   );
 }

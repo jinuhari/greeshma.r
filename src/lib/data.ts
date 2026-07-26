@@ -15,7 +15,7 @@ export interface ArchiveItem {
   ratio: string;
 }
 
-const defaultArchive: ArchiveItem[] = [
+export const defaultArchive: ArchiveItem[] = [
   { src: archive1, label: "Kalighat, revisited", cat: "Illustration", year: "2024", medium: "Digital gouache", ratio: "aspect-[3/4]" },
   { src: archive2, label: "AN/AW", cat: "Typography", year: "2023", medium: "Poster series", ratio: "aspect-[3/4]" },
   { src: archive3, label: "Rosa damascena", cat: "Fine Art", year: "2024", medium: "Watercolour on paper", ratio: "aspect-[3/4]" },
@@ -60,7 +60,7 @@ export interface TimelineItem {
   where: string;
 }
 
-const defaultTimeline: TimelineItem[] = [
+export const defaultTimeline: TimelineItem[] = [
   { year: "2013", title: "Fine Arts", where: "Where it began — canvas, pigment, patience." },
   { year: "2016", title: "Graphic Design", where: "Learning to speak in systems, grids and voice." },
   { year: "2018", title: "Film Production", where: "Directing frame, light and story." },
