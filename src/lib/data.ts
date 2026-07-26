@@ -26,8 +26,49 @@ export interface TimelineItem {
 
 export interface Resume {
   role: string;
-  json: string;
+  latex: string;
   global?: boolean;
+}
+
+function latexTmpl(name: string, title: string, summary: string, experience: string, education: string, skills: string): string {
+  return `\\documentclass[a4paper,10pt]{article}
+\\usepackage[utf8]{inputenc}
+\\usepackage{geometry}
+\\geometry{margin=0.8in}
+\\usepackage{parskip}
+\\usepackage{hyperref}
+\\usepackage{enumitem}
+\\setlist{nosep,left=0pt..1.5em}
+
+\\begin{document}
+
+\\begin{center}
+{\\Huge\\bfseries ${name}}\\\\[4pt]
+{\\large ${title}}\\\\[4pt]
+\\rule{\\textwidth}{0.5pt}
+\\end{center}
+
+\\vspace{0.3in}
+
+\\section*{Summary}
+${summary}
+
+\\vspace{0.2in}
+
+\\section*{Experience}
+${experience}
+
+\\vspace{0.2in}
+
+\\section*{Education}
+${education}
+
+\\vspace{0.2in}
+
+\\section*{Skills}
+${skills}
+
+\\end{document}`;
 }
 
 export function defaultResumes(): Resume[] {
@@ -35,69 +76,105 @@ export function defaultResumes(): Resume[] {
     {
       role: "Visual Design",
       global: true,
-      json: JSON.stringify({
-        name: "Greeshma R",
-        title: "Visual Designer",
-        summary: "Multidisciplinary visual designer with 11+ years of experience across editorial, brand, illustration, and digital product surfaces.",
-        experience: [
-          { company: "Udaan", role: "Associate Manager, Visual Designer — UI", period: "2023 — Present", highlights: ["Brand campaigns", "Visual system design", "Design operations"] },
-          { company: "Suzuki Innovation Centre", role: "Design Consultant", period: "2021 — 2022", highlights: ["Mobility interfaces", "User research", "Prototyping"] },
-        ],
-        education: [
-          { degree: "M.Des Interaction Design", school: "IIT Hyderabad", year: "2020" },
-          { degree: "BFA Applied Arts", school: "Bangalore University", year: "2016" },
-        ],
-        skills: ["Typography", "Layout", "Color Theory", "Iconography", "Illustration", "Brand Identity", "Editorial Design", "Motion Design"],
-      }, null, 2),
+      latex: latexTmpl(
+        "Greeshma R",
+        "Visual Designer",
+        "Multidisciplinary visual designer with 11+ years of experience across editorial, brand, illustration, and digital product surfaces.",
+        `\\textbf{Associate Manager, Visual Designer --- UI} \\hfill 2023 -- Present\\\\
+Udaan
+\\begin{itemize}
+  \\item Brand campaigns and visual system design
+  \\item Design operations and team mentorship
+\\end{itemize}
+
+\\textbf{Design Consultant} \\hfill 2021 -- 2022\\\\
+Suzuki Innovation Centre
+\\begin{itemize}
+  \\item Mobility interfaces and prototyping
+  \\item User research and concept development
+\\end{itemize}`,
+        `\\textbf{M.Des Interaction Design} \\hfill 2020\\\\
+IIT Hyderabad
+
+\\textbf{BFA Applied Arts} \\hfill 2016\\\\
+Bangalore University`,
+        "Typography, Layout, Color Theory, Iconography, Illustration, Brand Identity, Editorial Design, Motion Design"
+      ),
     },
     {
       role: "UI Design",
-      json: JSON.stringify({
-        name: "Greeshma R",
-        title: "UI / Product Designer",
-        summary: "Product designer focused on mobile and web interfaces with a strong foundation in interaction design, design systems, and user research.",
-        experience: [
-          { company: "Udaan", role: "Associate Manager, Visual Designer — UI", period: "2023 — Present", highlights: ["Mobile app design", "Design system (240+ tokens)", "Campaign systems"] },
-          { company: "Tomodachi", role: "Lead Interaction Designer", period: "2023", highlights: ["Android app", "UX research", "Usability testing"] },
-        ],
-        education: [
-          { degree: "M.Des Interaction Design", school: "IIT Hyderabad", year: "2020" },
-        ],
-        skills: ["UI Design", "Interaction Design", "Prototyping", "Design Systems", "Accessibility", "Figma", "Principle", "Framer"],
-      }, null, 2),
+      latex: latexTmpl(
+        "Greeshma R",
+        "UI / Product Designer",
+        "Product designer focused on mobile and web interfaces with a strong foundation in interaction design, design systems, and user research.",
+        `\\textbf{Associate Manager, Visual Designer --- UI} \\hfill 2023 -- Present\\\\
+Udaan
+\\begin{itemize}
+  \\item Mobile app design and design system (240+ tokens)
+  \\item Campaign systems and cross-functional delivery
+\\end{itemize}
+
+\\textbf{Lead Interaction Designer} \\hfill 2023\\\\
+Tomodachi
+\\begin{itemize}
+  \\item Android app design and UX research
+  \\item Usability testing (42 participants, 38\\% retention lift)
+\\end{itemize}`,
+        `\\textbf{M.Des Interaction Design} \\hfill 2020\\\\
+IIT Hyderabad`,
+        "UI Design, Interaction Design, Prototyping, Design Systems, Accessibility, Figma, Principle, Framer"
+      ),
     },
     {
       role: "Product Design",
-      json: JSON.stringify({
-        name: "Greeshma R",
-        title: "Product Designer",
-        summary: "End-to-end product designer with experience across B2B commerce, mobile applications, and design systems at scale.",
-        experience: [
-          { company: "Udaan", role: "Associate Manager, Visual Designer — UI", period: "2023 — Present", highlights: ["B2B commerce platform", "Design system governance", "Cross-functional collaboration"] },
-          { company: "IISc NDIN", role: "Design Researcher", period: "2022", highlights: ["Field research", "Participatory design", "Artefact documentation"] },
-        ],
-        education: [
-          { degree: "M.Des Interaction Design", school: "IIT Hyderabad", year: "2020" },
-        ],
-        skills: ["Product Strategy", "UX Research", "Interaction Design", "Design Systems", "Prototyping", "Visual Design", "Stakeholder Management"],
-      }, null, 2),
+      latex: latexTmpl(
+        "Greeshma R",
+        "Product Designer",
+        "End-to-end product designer with experience across B2B commerce, mobile applications, and design systems at scale.",
+        `\\textbf{Associate Manager, Visual Designer --- UI} \\hfill 2023 -- Present\\\\
+Udaan
+\\begin{itemize}
+  \\item B2B commerce platform design
+  \\item Design system governance and cross-functional collaboration
+\\end{itemize}
+
+\\textbf{Design Researcher} \\hfill 2022\\\\
+IISc National Design Innovation Network
+\\begin{itemize}
+  \\item Field research with weaving communities
+  \\item Participatory design and artefact documentation
+\\end{itemize}`,
+        `\\textbf{M.Des Interaction Design} \\hfill 2020\\\\
+IIT Hyderabad`,
+        "Product Strategy, UX Research, Interaction Design, Design Systems, Prototyping, Visual Design, Stakeholder Management"
+      ),
     },
     {
       role: "Creative Associate / Design",
-      json: JSON.stringify({
-        name: "Greeshma R",
-        title: "Creative Associate",
-        summary: "Creative professional bridging design, research, and production — experienced in campaign execution, brand building, and cross-disciplinary collaboration.",
-        experience: [
-          { company: "Udaan", role: "Associate Manager, Visual Designer — UI", period: "2023 — Present", highlights: ["Campaign design & production", "Brand collateral", "Cross-team collaboration"] },
-          { company: "Qualin Wellness", role: "Brand & Visual Designer", period: "2023", highlights: ["Brand identity", "Guidelines (64 pages)", "Packaging design"] },
-        ],
-        education: [
-          { degree: "M.Des Interaction Design", school: "IIT Hyderabad", year: "2020" },
-          { degree: "BFA Applied Arts", school: "Bangalore University", year: "2016" },
-        ],
-        skills: ["Brand Identity", "Campaign Design", "Art Direction", "Illustration", "Typography", "Packaging", "Motion Design", "Team Collaboration"],
-      }, null, 2),
+      latex: latexTmpl(
+        "Greeshma R",
+        "Creative Associate",
+        "Creative professional bridging design, research, and production --- experienced in campaign execution, brand building, and cross-disciplinary collaboration.",
+        `\\textbf{Associate Manager, Visual Designer --- UI} \\hfill 2023 -- Present\\\\
+Udaan
+\\begin{itemize}
+  \\item Campaign design and production at scale
+  \\item Brand collateral and cross-team collaboration
+\\end{itemize}
+
+\\textbf{Brand \\& Visual Designer} \\hfill 2023\\\\
+Qualin Wellness
+\\begin{itemize}
+  \\item Brand identity and 64-page guidelines
+  \\item Packaging design and editorial systems
+\\end{itemize}`,
+        `\\textbf{M.Des Interaction Design} \\hfill 2020\\\\
+IIT Hyderabad
+
+\\textbf{BFA Applied Arts} \\hfill 2016\\\\
+Bangalore University`,
+        "Brand Identity, Campaign Design, Art Direction, Illustration, Typography, Packaging, Motion Design, Team Collaboration"
+      ),
     },
   ];
 }

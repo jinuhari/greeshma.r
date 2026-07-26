@@ -262,31 +262,14 @@ export function CmsPanel({
 
 function ResumesEditor({ resumes, setResumes }: { resumes: Resume[]; setResumes: (r: Resume[]) => void }) {
   const [activeIdx, setActiveIdx] = useState(0);
-  const [jsonInput, setJsonInput] = useState(resumes[0]?.json || "{}");
-  const [parseError, setParseError] = useState("");
+  const [latexInput, setLatexInput] = useState(resumes[0]?.latex || "");
 
   const active = resumes[activeIdx];
 
-  const updateJson = (val: string) => {
-    setJsonInput(val);
-    try {
-      JSON.parse(val);
-      setParseError("");
-    } catch {
-      setParseError("Invalid JSON");
-    }
-  };
-
-  const saveJson = () => {
-    try {
-      JSON.parse(jsonInput);
-      const next = [...resumes];
-      next[activeIdx] = { ...next[activeIdx], json: jsonInput };
-      setResumes(next);
-      setParseError("");
-    } catch {
-      setParseError("Cannot save — invalid JSON");
-    }
+  const saveLatex = () => {
+    const next = [...resumes];
+    next[activeIdx] = { ...next[activeIdx], latex: latexInput };
+    setResumes(next);
   };
 
   const setGlobal = () => {
@@ -302,8 +285,7 @@ function ResumesEditor({ resumes, setResumes }: { resumes: Resume[]; setResumes:
             key={r.role}
             onClick={() => {
               setActiveIdx(i);
-              setJsonInput(resumes[i].json);
-              setParseError("");
+              setLatexInput(resumes[i].latex);
             }}
             className={`rounded-full px-4 py-1.5 text-xs tracking-wide transition-all ${
               i === activeIdx ? "bg-foreground text-background" : "border border-border hover:bg-muted"
@@ -342,9 +324,9 @@ function ResumesEditor({ resumes, setResumes }: { resumes: Resume[]; setResumes:
       <div className="grid flex-1 grid-cols-2 gap-4 overflow-hidden">
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground">JSON Editor</span>
+            <span className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground">LaTeX Editor</span>
             <button
-              onClick={saveJson}
+              onClick={saveLatex}
               className="rounded-md bg-foreground px-3 py-1 text-[10px] text-background transition-opacity hover:opacity-80"
             >
               Apply
@@ -352,19 +334,16 @@ function ResumesEditor({ resumes, setResumes }: { resumes: Resume[]; setResumes:
           </div>
           <textarea
             className="flex-1 resize-none rounded-md border border-border bg-muted/30 p-3 font-mono text-xs leading-relaxed outline-none focus:border-foreground"
-            value={jsonInput}
-            onChange={(e) => updateJson(e.target.value)}
+            value={latexInput}
+            onChange={(e) => setLatexInput(e.target.value)}
             spellCheck={false}
           />
-          {parseError && (
-            <p className="text-xs text-red-500">{parseError}</p>
-          )}
         </div>
 
         <div className="flex flex-col gap-2 overflow-hidden">
           <span className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground">Preview</span>
           <div className="flex-1 overflow-y-auto rounded-md border border-border bg-muted/30 p-4">
-            <ResumePreview json={jsonInput} />
+            <LatexPreview latex={latexInput} />
           </div>
         </div>
       </div>
@@ -372,77 +351,63 @@ function ResumesEditor({ resumes, setResumes }: { resumes: Resume[]; setResumes:
   );
 }
 
-function ResumePreview({ json }: { json: string }) {
-  let data: Record<string, any>;
-  try {
-    data = JSON.parse(json);
-  } catch {
-    return <p className="text-xs text-muted-foreground">Invalid JSON — fix errors to see preview</p>;
-  }
+function LatexPreview({ latex }: { latex: string }) {
+  const lines = latex.split("\n");
 
-  return (
-    <div className="space-y-5 text-xs">
-      <div>
-        <h3 className="font-display text-lg">{data.name || "Name"}</h3>
-        <p className="text-muted-foreground">{data.title || "Title"}</p>
-      </div>
+  const rendered = lines.map((line, i) => {
+    const t = line.trim();
 
-      {data.summary && (
-        <div>
-          <SectionLabel>Summary</SectionLabel>
-          <p className="text-muted-foreground">{data.summary}</p>
-        </div>
-      )}
+    if (t.startsWith("\\section*{")) {
+      const title = t.replace("\\section*{", "").replace("}", "").trim();
+      return <h2 key={i} className="mb-2 mt-4 text-xs font-bold uppercase tracking-wider text-gray-500 first:mt-0">{title}</h2>;
+    }
 
-      {data.experience && data.experience.length > 0 && (
-        <div>
-          <SectionLabel>Experience</SectionLabel>
-          <div className="space-y-3">
-            {data.experience.map((exp: any, i: number) => (
-              <div key={i}>
-                <p className="font-medium">{exp.role}</p>
-                <p className="text-muted-foreground">{exp.company} — {exp.period}</p>
-                {exp.highlights && (
-                  <ul className="ml-4 mt-1 list-disc space-y-0.5 text-muted-foreground">
-                    {exp.highlights.map((h: string, j: number) => (
-                      <li key={j}>{h}</li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ))}
+    if (t.startsWith("\\textbf{") && t.includes("} \\\\")) {
+      const parts = t.match(/\\textbf\{(.+?)\}\s*\\hfill\s*(.+?)\s*\\\\/);
+      if (parts) {
+        return (
+          <div key={i} className="flex items-baseline justify-between text-sm">
+            <span className="font-semibold">{parts[1]}</span>
+            <span className="text-xs text-muted-foreground">{parts[2]}</span>
           </div>
-        </div>
-      )}
+        );
+      }
+    }
 
-      {data.education && data.education.length > 0 && (
-        <div>
-          <SectionLabel>Education</SectionLabel>
-          <div className="space-y-1">
-            {data.education.map((edu: any, i: number) => (
-              <p key={i}>
-                <span className="font-medium">{edu.degree}</span>
-                <span className="text-muted-foreground"> — {edu.school} ({edu.year})</span>
-              </p>
-            ))}
-          </div>
-        </div>
-      )}
+    if (t.startsWith("\\begin{itemize}")) {
+      return null;
+    }
 
-      {data.skills && data.skills.length > 0 && (
-        <div>
-          <SectionLabel>Skills</SectionLabel>
-          <div className="flex flex-wrap gap-1">
-            {data.skills.map((s: string, i: number) => (
-              <span key={i} className="rounded-full border border-border px-2 py-0.5 text-[10px] text-muted-foreground">
-                {s}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
+    if (t.startsWith("\\item ")) {
+      return <li key={i} className="ml-4 text-xs text-muted-foreground list-disc">{t.replace("\\item ", "")}</li>;
+    }
+
+    if (t === "\\end{itemize}") {
+      return null;
+    }
+
+    if (t.startsWith("\\end{center}") || t.startsWith("\\begin{center}") || t.startsWith("\\rule{") || t.startsWith("\\documentclass") || t.startsWith("\\usepackage") || t.startsWith("\\begin{document}") || t.startsWith("\\end{document}") || t.startsWith("\\setlist") || t.startsWith("\\vspace")) {
+      return null;
+    }
+
+    if (t.startsWith("{\\\\Huge\\bfseries ")) {
+      const name = t.replace("{\\\\Huge\\bfseries ", "").replace("}", "").trim();
+      return <h1 key={i} className="text-center text-lg font-bold">{name}</h1>;
+    }
+
+    if (t.startsWith("{\\\\large ")) {
+      const title = t.replace("{\\\\large ", "").replace("}", "").trim();
+      return <p key={i} className="text-center text-sm text-muted-foreground">{title}</p>;
+    }
+
+    if (t && !t.startsWith("\\")) {
+      return <p key={i} className="text-xs text-muted-foreground">{t}</p>;
+    }
+
+    return <p key={i} className="text-xs text-muted-foreground">&nbsp;</p>;
+  });
+
+  return <div className="space-y-0.5">{rendered}</div>;
 }
 
 function SectionLabel({ children }: { children: string }) {
