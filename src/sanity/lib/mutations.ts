@@ -145,7 +145,7 @@ export async function syncAllToSanity(works: CaseStudy[], archive: ArchiveItem[]
         _id: id,
         _type: "resume",
         role: r.role,
-        json: r.latex,
+        json: r.json,
         global: r.global || false,
         orderRank: i,
       });
