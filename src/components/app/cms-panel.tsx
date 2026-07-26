@@ -103,32 +103,53 @@ export function CmsPanel({
               }} onBack={() => setEditing(null)} />
             ) : (
               <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground">{works.length} case studies</p>
+                  <button
+                    onClick={() => {
+                      const n = String(works.length + 1).padStart(2, "0");
+                      const cs: CaseStudy = { slug: `case-${Date.now()}`, n, year: "", title: "New Case Study", kicker: "", img: "", role: "", summary: "", outcomes: [], tone: "terracotta", sections: [], tools: [] };
+                      setWorks([...works, cs]);
+                      setEditing(cs);
+                    }}
+                    className="rounded-md bg-foreground px-3 py-1 text-[10px] tracking-wide text-background"
+                  >
+                    + New
+                  </button>
+                </div>
                 {works.length === 0 && <p className="text-sm text-muted-foreground">No case studies yet.</p>}
                 {works.map((w: any, i) => (
-                  <button
-                    key={w._id || i}
-                    onClick={() => setEditing(works[i])}
-                    className="w-full rounded-lg border border-border p-4 text-left transition-colors hover:bg-muted/50"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3">
-                          <span className="font-display text-lg">{w.title || "Untitled"}</span>
-                          <span className="text-xs text-muted-foreground">{w.year}</span>
+                  <div key={w._id || i} className="group relative rounded-lg border border-border transition-colors hover:bg-muted/50">
+                    <button
+                      onClick={() => setEditing(works[i])}
+                      className="w-full p-4 text-left"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3">
+                            <span className="font-display text-lg">{w.title || "Untitled"}</span>
+                            <span className="text-xs text-muted-foreground">{w.year}</span>
+                          </div>
+                          <p className="mt-1 text-xs text-muted-foreground">{w.kicker}</p>
+                          <p className="mt-2 text-sm line-clamp-2">{w.summary}</p>
                         </div>
-                        <p className="mt-1 text-xs text-muted-foreground">{w.kicker}</p>
-                        <p className="mt-2 text-sm line-clamp-2">{w.summary}</p>
+                        {w.img && (
+                          <img src={w.img} alt="" className="h-14 w-20 flex-shrink-0 rounded-md object-cover" />
+                        )}
                       </div>
-                      {w.img && (
-                        <img src={w.img} alt="" className="h-14 w-20 flex-shrink-0 rounded-md object-cover" />
-                      )}
-                    </div>
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {(w.tools || []).map((t: string, j: number) => (
-                        <span key={j} className="rounded-full bg-muted px-2 py-px text-[10px] tracking-wide">{t}</span>
-                      ))}
-                    </div>
-                  </button>
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {(w.tools || []).map((t: string, j: number) => (
+                          <span key={j} className="rounded-full bg-muted px-2 py-px text-[10px] tracking-wide">{t}</span>
+                        ))}
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => setWorks(works.filter((_, j) => j !== i))}
+                      className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500/10 text-[10px] text-red-500 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-500/20"
+                    >
+                      ✕
+                    </button>
+                  </div>
                 ))}
               </div>
             )

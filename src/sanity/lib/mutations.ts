@@ -1,5 +1,5 @@
 import { client } from "./client";
-import { caseStudiesQuery, archiveItemsQuery } from "./queries";
+import { caseStudiesQuery, archiveItemsQuery, timelineItemsQuery } from "./queries";
 import type { CaseStudy, CaseStudySection } from "@/lib/cms";
 import type { ArchiveItem, TimelineItem } from "@/lib/data";
 
@@ -8,18 +8,22 @@ function sanitizeId(str: string): string {
 }
 
 export async function syncAllToSanity(works: CaseStudy[], archive: ArchiveItem[], timeline: TimelineItem[]) {
-  const [existingCaseStudies, existingArchive] = await Promise.all([
+  const [existingCaseStudies, existingArchive, existingTimeline] = await Promise.all([
     client.fetch(caseStudiesQuery).catch(() => []),
     client.fetch(archiveItemsQuery).catch(() => []),
+    client.fetch(timelineItemsQuery).catch(() => []),
   ]);
 
   const csMap = new Map((existingCaseStudies || []).map((c: any) => [c._id, c]));
   const archMap = new Map((existingArchive || []).map((a: any) => [a._id, a]));
+  const tlMap = new Map((existingTimeline || []).map((t: any) => [t._id, t]));
 
   const tx = client.transaction();
 
+  const savedCsIds = new Set<string>();
   for (const work of works) {
     const id = `caseStudy-${sanitizeId(work.slug)}`;
+    savedCsIds.add(id);
     const existing = csMap.get(id);
     const existingSections = existing?.sections || [];
 
@@ -71,9 +75,11 @@ export async function syncAllToSanity(works: CaseStudy[], archive: ArchiveItem[]
     });
   }
 
+  const savedArchIds = new Set<string>();
   for (let i = 0; i < archive.length; i++) {
     const item = archive[i];
     const id = `archiveItem-${sanitizeId(item.label)}`;
+    savedArchIds.add(id);
     const existing = archMap.get(id);
     tx.createOrReplace({
       _id: id,
@@ -88,10 +94,13 @@ export async function syncAllToSanity(works: CaseStudy[], archive: ArchiveItem[]
     });
   }
 
+  const savedTlIds = new Set<string>();
   for (let i = 0; i < timeline.length; i++) {
     const item = timeline[i];
+    const id = `timelineItem-${sanitizeId(item.year)}-${sanitizeId(item.title)}`;
+    savedTlIds.add(id);
     tx.createOrReplace({
-      _id: `timelineItem-${sanitizeId(item.year)}-${sanitizeId(item.title)}`,
+      _id: id,
       _type: "timelineItem",
       year: item.year,
       title: item.title,
@@ -99,6 +108,11 @@ export async function syncAllToSanity(works: CaseStudy[], archive: ArchiveItem[]
       orderRank: i,
     });
   }
+
+  // Delete items that were removed from the lists
+  for (const [id] of csMap) { if (!savedCsIds.has(id)) tx.delete(id); }
+  for (const [id] of archMap) { if (!savedArchIds.has(id)) tx.delete(id); }
+  for (const [id] of tlMap) { if (!savedTlIds.has(id)) tx.delete(id); }
 
   await tx.commit();
 }
