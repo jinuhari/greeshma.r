@@ -627,7 +627,7 @@ function About() {
 function Contact({ resumes }: { resumes?: Resume[] }) {
   const rs = resumes || defaultResumes();
   const global = rs.find(r => r.global) || rs[0];
-  const items: { k: string; v: string; href: string; dl?: string }[] = [
+  const items: { k: string; v: string; href: string }[] = [
     { k: "Email", v: "greeshma@studio.in", href: "mailto:greeshma@studio.in" },
     { k: "LinkedIn", v: "/in/greeshma-r", href: "https://linkedin.com" },
     { k: "Behance", v: "/greeshma", href: "https://behance.net" },
@@ -635,9 +635,8 @@ function Contact({ resumes }: { resumes?: Resume[] }) {
   if (global) {
     items.push({
       k: "Résumé — " + global.role,
-      v: "Download JSON",
-      href: `data:application/json;charset=utf-8,${encodeURIComponent(global.json)}`,
-      dl: `resume-${global.role.toLowerCase().replace(/[\s\/]+/g, "-")}.json`,
+      v: "Download PDF",
+      href: `/print-resume?role=${encodeURIComponent(global.role)}`,
     });
   }
   return (
@@ -658,7 +657,7 @@ function Contact({ resumes }: { resumes?: Resume[] }) {
             <a
               key={c.k}
               href={c.href}
-              download={c.dl}
+              target="_blank"
               className="group block"
             >
               <p className="text-[10px] tracking-[0.25em] uppercase text-muted-foreground">

@@ -1,8 +1,8 @@
 import { client } from "./client";
-import { caseStudiesQuery, archiveItemsQuery, timelineItemsQuery } from "./queries";
+import { caseStudiesQuery, archiveItemsQuery, timelineItemsQuery, resumesQuery } from "./queries";
 import { projectId, dataset } from "@/sanity/env";
 import type { CaseStudy, CaseStudySection } from "@/lib/cms";
-import type { ArchiveItem, TimelineItem } from "@/lib/data";
+import type { ArchiveItem, TimelineItem, Resume } from "@/lib/data";
 
 function sanitizeId(str: string): string {
   return str.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "") || "untitled";
@@ -32,11 +32,12 @@ function resolveImage(url: string | undefined, existing: any): any {
   return existing || undefined;
 }
 
-export async function syncAllToSanity(works: CaseStudy[], archive: ArchiveItem[], timeline: TimelineItem[]) {
-  const [existingCaseStudies, existingArchive, existingTimeline] = await Promise.all([
+export async function syncAllToSanity(works: CaseStudy[], archive: ArchiveItem[], timeline: TimelineItem[], resumes?: Resume[]) {
+  const [existingCaseStudies, existingArchive, existingTimeline, existingResumes] = await Promise.all([
     client.fetch(caseStudiesQuery).catch(() => []),
     client.fetch(archiveItemsQuery).catch(() => []),
     client.fetch(timelineItemsQuery).catch(() => []),
+    resumes ? client.fetch(resumesQuery).catch(() => []) : [],
   ]);
 
   const csMap = new Map((existingCaseStudies || []).map((c: any) => [c._id, c]));
@@ -131,6 +132,25 @@ export async function syncAllToSanity(works: CaseStudy[], archive: ArchiveItem[]
       where: item.where,
       orderRank: i,
     });
+  }
+
+  const savedResumeIds = new Set<string>();
+  if (resumes) {
+    const resumeMap = new Map((existingResumes || []).map((r: any) => [r._id, r]));
+    for (let i = 0; i < resumes.length; i++) {
+      const r = resumes[i];
+      const id = `resume-${sanitizeId(r.role)}`;
+      savedResumeIds.add(id);
+      tx.createOrReplace({
+        _id: id,
+        _type: "resume",
+        role: r.role,
+        json: r.json,
+        global: r.global || false,
+        orderRank: i,
+      });
+    }
+    for (const [id] of resumeMap) { if (!savedResumeIds.has(id)) tx.delete(id); }
   }
 
   // Delete items that were removed from the lists

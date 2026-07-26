@@ -178,6 +178,13 @@ export const timelineItemsQuery = `*[_type == "timelineItem"] | order(orderRank 
   where
 }`;
 
+export const resumesQuery = `*[_type == "resume"] | order(orderRank asc){
+  _id,
+  role,
+  json,
+  global
+}`;
+
 export const allContentQuery = `{
   "siteSettings": ${siteSettingsQuery},
   "navigation": ${navigationQuery},

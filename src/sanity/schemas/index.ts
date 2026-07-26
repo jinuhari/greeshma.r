@@ -9,6 +9,7 @@ import { errorPage } from "./errorPage";
 import { caseStudy } from "./caseStudy";
 import { archiveItem } from "./archiveItem";
 import { timelineItem } from "./timelineItem";
+import { resume } from "./resume";
 
 export const schemaTypes = [
   siteSettings,
@@ -22,4 +23,5 @@ export const schemaTypes = [
   caseStudy,
   archiveItem,
   timelineItem,
+  resume,
 ];

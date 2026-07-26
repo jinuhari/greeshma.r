@@ -39,7 +39,7 @@ export function CmsPanel({
     setSaving(true);
     setError("");
     try {
-      await syncAllToSanity(works, archive, timeline);
+      await syncAllToSanity(works, archive, timeline, resumes);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
       onRefresh?.();
@@ -319,13 +319,15 @@ function ResumesEditor({ resumes, setResumes }: { resumes: Resume[]; setResumes:
           {active?.global ? "\u2605 Global resume" : "Select a global resume"}
         </span>
         <div className="flex items-center gap-2">
-          <a
-            href={`data:application/json;charset=utf-8,${encodeURIComponent(active?.json || "{}")}`}
-            download={`resume-${(active?.role || "untitled").toLowerCase().replace(/[\s\/]+/g, "-")}.json`}
+          <button
+            onClick={() => {
+              localStorage.setItem("gr-resumes", JSON.stringify(resumes));
+              window.open(`/print-resume?role=${encodeURIComponent(active?.role || "")}`, "_blank");
+            }}
             className="rounded-md border border-border px-3 py-1 text-[10px] tracking-wide transition-colors hover:bg-muted"
           >
-            Download
-          </a>
+            Download PDF
+          </button>
           {!active?.global && (
             <button
               onClick={setGlobal}
