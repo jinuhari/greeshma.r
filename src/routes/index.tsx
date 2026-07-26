@@ -626,17 +626,18 @@ function About() {
 
 function Contact({ resumes }: { resumes?: Resume[] }) {
   const rs = resumes || defaultResumes();
+  const global = rs.find(r => r.global) || rs[0];
   const items: { k: string; v: string; href: string; dl?: string }[] = [
     { k: "Email", v: "greeshma@studio.in", href: "mailto:greeshma@studio.in" },
     { k: "LinkedIn", v: "/in/greeshma-r", href: "https://linkedin.com" },
     { k: "Behance", v: "/greeshma", href: "https://behance.net" },
   ];
-  if (rs.length > 0) {
+  if (global) {
     items.push({
-      k: "Résumé — " + rs[0].role,
+      k: "Résumé — " + global.role,
       v: "Download JSON",
-      href: `data:application/json;charset=utf-8,${encodeURIComponent(rs[0].json)}`,
-      dl: `resume-${rs[0].role.toLowerCase().replace(/[\s\/]+/g, "-")}.json`,
+      href: `data:application/json;charset=utf-8,${encodeURIComponent(global.json)}`,
+      dl: `resume-${global.role.toLowerCase().replace(/[\s\/]+/g, "-")}.json`,
     });
   }
   return (

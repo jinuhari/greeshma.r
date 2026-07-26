@@ -27,12 +27,14 @@ export interface TimelineItem {
 export interface Resume {
   role: string;
   json: string;
+  global?: boolean;
 }
 
 export function defaultResumes(): Resume[] {
   return [
     {
       role: "Visual Design",
+      global: true,
       json: JSON.stringify({
         name: "Greeshma R",
         title: "Visual Designer",

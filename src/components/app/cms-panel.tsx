@@ -289,9 +289,14 @@ function ResumesEditor({ resumes, setResumes }: { resumes: Resume[]; setResumes:
     }
   };
 
+  const setGlobal = () => {
+    const next = resumes.map((r, i) => ({ ...r, global: i === activeIdx }));
+    setResumes(next);
+  };
+
   return (
     <div className="flex h-full flex-col gap-4">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         {resumes.map((r, i) => (
           <button
             key={r.role}
@@ -304,9 +309,32 @@ function ResumesEditor({ resumes, setResumes }: { resumes: Resume[]; setResumes:
               i === activeIdx ? "bg-foreground text-background" : "border border-border hover:bg-muted"
             }`}
           >
-            {r.role}
+            {r.global ? "\u2605 " : ""}{r.role}
           </button>
         ))}
+      </div>
+
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
+          {active?.global ? "\u2605 Global resume" : "Select a global resume"}
+        </span>
+        <div className="flex items-center gap-2">
+          <a
+            href={`data:application/json;charset=utf-8,${encodeURIComponent(active?.json || "{}")}`}
+            download={`resume-${(active?.role || "untitled").toLowerCase().replace(/[\s\/]+/g, "-")}.json`}
+            className="rounded-md border border-border px-3 py-1 text-[10px] tracking-wide transition-colors hover:bg-muted"
+          >
+            Download
+          </a>
+          {!active?.global && (
+            <button
+              onClick={setGlobal}
+              className="rounded-md bg-foreground px-3 py-1 text-[10px] text-background transition-opacity hover:opacity-80"
+            >
+              Set as Global
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="grid flex-1 grid-cols-2 gap-4 overflow-hidden">
