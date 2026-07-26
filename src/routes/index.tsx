@@ -3,8 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useReveal, useTheme, toggleTheme } from "@/hooks/use-reveal";
 import { AppShell } from "@/components/app/app-shell";
 import { type CaseStudy } from "@/lib/cms";
-import { loadWorks, loadWorksFromSanity, saveWorks, loadArchive, loadArchiveFromSanity, saveArchive, loadTimeline, loadTimelineFromSanity, saveTimeline } from "@/lib/data";
-import { syncAllToSanity } from "@/sanity/lib/mutations";
+import { loadWorks, loadWorksFromSanity, loadArchive, loadArchiveFromSanity, loadTimeline, loadTimelineFromSanity } from "@/lib/data";
 import { CmsPanel } from "@/components/app/cms-panel";
 
 import heroArt from "@/assets/hero-artwork.jpg";
@@ -88,30 +87,7 @@ function Home() {
       <Footer />
       {lightbox !== null && <Lightbox archive={cmsArchive} index={lightbox} onClose={() => setLightbox(null)} onNav={setLightbox} />}
       {cmsOpen && (
-        <CmsPanel
-          works={cmsWorks}
-          archive={cmsArchive}
-          timeline={cmsTimeline}
-          onSaveWorks={async (w) => {
-            setCmsWorks(w); saveWorks(w);
-            await syncAllToSanity(w, cmsArchive, cmsTimeline);
-            const fresh = await loadWorksFromSanity();
-            if (fresh && fresh.length > 0) setCmsWorks(fresh);
-          }}
-          onSaveArchive={async (a) => {
-            setCmsArchive(a); saveArchive(a);
-            await syncAllToSanity(cmsWorks, a, cmsTimeline);
-            const fresh = await loadArchiveFromSanity();
-            if (fresh && fresh.length > 0) setCmsArchive(fresh);
-          }}
-          onSaveTimeline={async (t) => {
-            setCmsTimeline(t); saveTimeline(t);
-            await syncAllToSanity(cmsWorks, cmsArchive, t);
-            const fresh = await loadTimelineFromSanity();
-            if (fresh && fresh.length > 0) setCmsTimeline(fresh);
-          }}
-          onClose={() => setCmsOpen(false)}
-        />
+        <CmsPanel onClose={() => setCmsOpen(false)} />
       )}
       <AppShell />
     </div>
