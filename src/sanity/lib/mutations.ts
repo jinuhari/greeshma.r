@@ -2,6 +2,10 @@ import { client } from "./client";
 import type { CaseStudy, CaseStudySection } from "@/lib/cms";
 import type { ArchiveItem, TimelineItem } from "@/lib/data";
 
+function sanitizeId(str: string): string {
+  return str.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "") || "untitled";
+}
+
 async function getExistingDoc(id: string): Promise<Record<string, any> | null> {
   try {
     return await client.getDocument(id);
@@ -11,7 +15,7 @@ async function getExistingDoc(id: string): Promise<Record<string, any> | null> {
 }
 
 export async function syncCaseStudyToSanity(work: CaseStudy) {
-  const id = `caseStudy-${work.slug}`;
+  const id = `caseStudy-${sanitizeId(work.slug)}`;
   const existing = await getExistingDoc(id);
 
   const existingCover = existing?.coverImage;
@@ -68,7 +72,7 @@ export async function syncCaseStudyToSanity(work: CaseStudy) {
 }
 
 export async function syncArchiveItemToSanity(item: ArchiveItem, index: number) {
-  const id = `archiveItem-${item.label.toLowerCase().replace(/\s+/g, "-")}`;
+  const id = `archiveItem-${sanitizeId(item.label)}`;
   const existing = await getExistingDoc(id);
 
   const doc = {
@@ -88,7 +92,7 @@ export async function syncArchiveItemToSanity(item: ArchiveItem, index: number) 
 
 export async function syncTimelineItemToSanity(item: TimelineItem, index: number) {
   const doc = {
-    _id: `timelineItem-${item.year}-${item.title.toLowerCase().replace(/\s+/g, "-")}`,
+    _id: `timelineItem-${sanitizeId(item.year)}-${sanitizeId(item.title)}`,
     _type: "timelineItem",
     year: item.year,
     title: item.title,
@@ -124,13 +128,13 @@ export async function syncAllToSanity(works: CaseStudy[], archive: ArchiveItem[]
 }
 
 export async function deleteCaseStudyFromSanity(slug: string) {
-  await client.delete(`caseStudy-${slug}`);
+  await client.delete(`caseStudy-${sanitizeId(slug)}`);
 }
 
 export async function deleteArchiveItemFromSanity(label: string) {
-  await client.delete(`archiveItem-${label.toLowerCase().replace(/\s+/g, "-")}`);
+  await client.delete(`archiveItem-${sanitizeId(label)}`);
 }
 
 export async function deleteTimelineItemFromSanity(year: string, title: string) {
-  await client.delete(`timelineItem-${year}-${title.toLowerCase().replace(/\s+/g, "-")}`);
+  await client.delete(`timelineItem-${sanitizeId(year)}-${sanitizeId(title)}`);
 }
