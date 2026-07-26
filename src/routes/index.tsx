@@ -87,7 +87,14 @@ function Home() {
       <Footer />
       {lightbox !== null && <Lightbox archive={cmsArchive} index={lightbox} onClose={() => setLightbox(null)} onNav={setLightbox} />}
       {cmsOpen && (
-        <CmsPanel onClose={() => setCmsOpen(false)} />
+        <CmsPanel
+          onClose={() => {
+            setCmsOpen(false);
+            loadWorksFromSanity().then((w) => { if (w.length) setCmsWorks(w); });
+            loadArchiveFromSanity().then((a) => { if (a.length) setCmsArchive(a); });
+            loadTimelineFromSanity().then((t) => { if (t.length) setCmsTimeline(t); });
+          }}
+        />
       )}
       <AppShell />
     </div>
