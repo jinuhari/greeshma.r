@@ -123,46 +123,16 @@ export async function loadTimelineFromSanity(): Promise<TimelineItem[]> {
 }
 
 export function loadWorks(): CaseStudy[] {
-  try {
-    const saved = localStorage.getItem("cms-works");
-    if (saved) {
-      const parsed = JSON.parse(saved) as CaseStudy[];
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-    }
-  } catch { /* ignore */ }
+  try { localStorage.removeItem("cms-works"); } catch {}
   return defaultWorks;
 }
 
-export function saveWorks(works: CaseStudy[]) {
-  localStorage.setItem("cms-works", JSON.stringify(works));
-}
-
 export function loadArchive(): ArchiveItem[] {
-  try {
-    const saved = localStorage.getItem("cms-archive");
-    if (saved) {
-      const parsed = JSON.parse(saved) as ArchiveItem[];
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-    }
-  } catch { /* ignore */ }
+  try { localStorage.removeItem("cms-archive"); } catch {}
   return defaultArchive;
 }
 
-export function saveArchive(items: ArchiveItem[]) {
-  localStorage.setItem("cms-archive", JSON.stringify(items));
-}
-
 export function loadTimeline(): TimelineItem[] {
-  try {
-    const saved = localStorage.getItem("cms-timeline");
-    if (saved) {
-      const parsed = JSON.parse(saved) as TimelineItem[];
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-    }
-  } catch { /* ignore */ }
+  try { localStorage.removeItem("cms-timeline"); } catch {}
   return defaultTimeline;
-}
-
-export function saveTimeline(items: TimelineItem[]) {
-  localStorage.setItem("cms-timeline", JSON.stringify(items));
 }
