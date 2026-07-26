@@ -88,6 +88,9 @@ function Home() {
       {lightbox !== null && <Lightbox archive={cmsArchive} index={lightbox} onClose={() => setLightbox(null)} onNav={setLightbox} />}
       {cmsOpen && (
         <CmsPanel
+          works={cmsWorks}
+          archive={cmsArchive}
+          timeline={cmsTimeline}
           onClose={() => {
             setCmsOpen(false);
             loadWorksFromSanity().then((w) => { if (w.length) setCmsWorks(w); });

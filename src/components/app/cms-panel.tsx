@@ -1,6 +1,4 @@
-import { useState, useEffect } from "react";
-import { client } from "@/sanity/lib/client";
-import { caseStudiesQuery, archiveItemsQuery, timelineItemsQuery } from "@/sanity/lib/queries";
+import { useState } from "react";
 import { urlFor } from "@/sanity/lib/image";
 import { syncAllToSanity } from "@/sanity/lib/mutations";
 import type { CaseStudy } from "@/lib/cms";
@@ -8,23 +6,23 @@ import type { ArchiveItem, TimelineItem } from "@/lib/data";
 
 type Tab = "works" | "archive" | "experience";
 
-export function CmsPanel({ onClose }: { onClose: () => void }) {
+export function CmsPanel({
+  works: initialWorks,
+  archive: initialArchive,
+  timeline: initialTimeline,
+  onClose,
+}: {
+  works: CaseStudy[];
+  archive: ArchiveItem[];
+  timeline: TimelineItem[];
+  onClose: () => void;
+}) {
   const [tab, setTab] = useState<Tab>("works");
-  const [works, setWorks] = useState<CaseStudy[]>([]);
-  const [archive, setArchive] = useState<ArchiveItem[]>([]);
-  const [timeline, setTimeline] = useState<TimelineItem[]>([]);
-  const [editing, setEditing] = useState<any>(null);
-  const [isNew, setIsNew] = useState(false);
+  const [works, setWorks] = useState(initialWorks);
+  const [archive, setArchive] = useState(initialArchive);
+  const [timeline, setTimeline] = useState(initialTimeline);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-
-  useEffect(() => {
-    Promise.all([
-      client.fetch(caseStudiesQuery).then(r => setWorks(r || [])),
-      client.fetch(archiveItemsQuery).then(r => setArchive(r || [])),
-      client.fetch(timelineItemsQuery).then(r => setTimeline(r || [])),
-    ]);
-  }, []);
 
   const handleSave = async () => {
     setSaving(true);
