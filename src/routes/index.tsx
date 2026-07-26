@@ -96,9 +96,6 @@ function Home() {
           setTimeline={setCmsTimeline}
           onClose={() => {
             setCmsOpen(false);
-            loadWorksFromSanity().then((w) => { if (w.length) setCmsWorks(w); });
-            loadArchiveFromSanity().then((a) => { if (a.length) setCmsArchive(a); });
-            loadTimelineFromSanity().then((t) => { if (t.length) setCmsTimeline(t); });
           }}
         />
       )}
