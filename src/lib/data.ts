@@ -68,31 +68,61 @@ function adaptSanityCaseStudy(s: any): CaseStudy {
   };
 }
 
+async function fetchFromSanity<T>(query: string, params?: Record<string, unknown>): Promise<T | null> {
+  try {
+    const result: T = await client.fetch(query, params || {});
+    return result ?? null;
+  } catch (err) {
+    console.error("[Sanity] Fetch error:", err);
+    return null;
+  }
+}
+
 export async function loadWorksFromSanity(): Promise<CaseStudy[]> {
   try {
-    const result = await client.fetch(caseStudiesQuery);
-    if (!result || !Array.isArray(result) || result.length === 0) return loadWorks();
+    const result = await fetchFromSanity<any[]>(caseStudiesQuery);
+    if (!result || result.length === 0) {
+      console.warn("[Sanity] No case studies found, using static defaults");
+      return loadWorks();
+    }
     const adapted = result.map(adaptSanityCaseStudy).filter((c: any) => c.slug);
-    return adapted.length > 0 ? adapted : loadWorks();
-  } catch {
+    if (adapted.length === 0) {
+      console.warn("[Sanity] All case studies filtered out, using static defaults");
+      return loadWorks();
+    }
+    const defaultsBySlug = new Map(defaultWorks.map((w) => [w.slug, w]));
+    return adapted.map((s: CaseStudy) => {
+      const fallback = defaultsBySlug.get(s.slug);
+      if (!fallback) return s;
+      return { ...s, img: s.img || fallback.img };
+    });
+  } catch (err) {
+    console.error("[Sanity] Failed to load case studies:", err);
     return loadWorks();
   }
 }
 
 export async function loadCaseStudyFromSanity(slug: string): Promise<CaseStudy | undefined> {
   try {
-    const result = await client.fetch(caseStudyBySlugQuery, { slug });
+    const result = await fetchFromSanity<any>(caseStudyBySlugQuery, { slug });
     if (!result) return loadWorks().find((w) => w.slug === slug);
-    return adaptSanityCaseStudy(result);
-  } catch {
+    const adapted = adaptSanityCaseStudy(result);
+    const fallback = defaultWorks.find((w) => w.slug === slug);
+    if (!fallback) return adapted;
+    return { ...adapted, img: adapted.img || fallback.img };
+  } catch (err) {
+    console.error("[Sanity] Failed to load case study:", err);
     return loadWorks().find((w) => w.slug === slug);
   }
 }
 
 export async function loadArchiveFromSanity(): Promise<ArchiveItem[]> {
   try {
-    const result = await client.fetch(archiveItemsQuery);
-    if (!result || !Array.isArray(result) || result.length === 0) return loadArchive();
+    const result = await fetchFromSanity<any[]>(archiveItemsQuery);
+    if (!result || result.length === 0) {
+      console.warn("[Sanity] No archive items found, using static defaults");
+      return loadArchive();
+    }
     const adapted = result.map((item: any) => ({
       src: item.image ? urlFor(item.image).width(600).url() : "",
       label: item.label || "",
@@ -101,38 +131,46 @@ export async function loadArchiveFromSanity(): Promise<ArchiveItem[]> {
       medium: item.medium || "",
       ratio: item.aspectRatio || "aspect-[3/4]",
     })).filter((i: ArchiveItem) => i.label);
-    return adapted.length > 0 ? adapted : loadArchive();
-  } catch {
+    if (adapted.length === 0) {
+      console.warn("[Sanity] All archive items filtered out, using static defaults");
+      return loadArchive();
+    }
+    const defaultsByLabel = new Map(defaultArchive.map((a) => [a.label, a]));
+    return adapted.map((a: ArchiveItem) => {
+      const fallback = defaultsByLabel.get(a.label);
+      if (!fallback) return a;
+      return { ...a, src: a.src || fallback.src };
+    });
+  } catch (err) {
+    console.error("[Sanity] Failed to load archive:", err);
     return loadArchive();
   }
 }
 
 export async function loadTimelineFromSanity(): Promise<TimelineItem[]> {
   try {
-    const result = await client.fetch(timelineItemsQuery);
-    if (!result || !Array.isArray(result) || result.length === 0) return loadTimeline();
+    const result = await fetchFromSanity<any[]>(timelineItemsQuery);
+    if (!result || result.length === 0) return loadTimeline();
     const adapted = result.map((item: any) => ({
       year: item.year || "",
       title: item.title || "",
       where: item.where || "",
     })).filter((i: TimelineItem) => i.title);
     return adapted.length > 0 ? adapted : loadTimeline();
-  } catch {
+  } catch (err) {
+    console.error("[Sanity] Failed to load timeline:", err);
     return loadTimeline();
   }
 }
 
 export function loadWorks(): CaseStudy[] {
-  try { localStorage.removeItem("cms-works"); } catch {}
   return defaultWorks;
 }
 
 export function loadArchive(): ArchiveItem[] {
-  try { localStorage.removeItem("cms-archive"); } catch {}
   return defaultArchive;
 }
 
 export function loadTimeline(): TimelineItem[] {
-  try { localStorage.removeItem("cms-timeline"); } catch {}
   return defaultTimeline;
 }

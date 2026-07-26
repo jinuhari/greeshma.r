@@ -1,5 +1,5 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useReveal, useTheme, toggleTheme } from "@/hooks/use-reveal";
 import { AppShell } from "@/components/app/app-shell";
 import { type CaseStudy } from "@/lib/cms";
@@ -34,11 +34,20 @@ function Home() {
   const [cmsTimeline, setCmsTimeline] = useState(() => loadTimeline());
   const [cmsOpen, setCmsOpen] = useState(false);
 
-  useEffect(() => {
-    loadWorksFromSanity().then(setCmsWorks);
-    loadArchiveFromSanity().then(setCmsArchive);
-    loadTimelineFromSanity().then(setCmsTimeline);
+  const refreshAll = useCallback(async () => {
+    const [w, a, t] = await Promise.all([
+      loadWorksFromSanity(),
+      loadArchiveFromSanity(),
+      loadTimelineFromSanity(),
+    ]);
+    if (w.length) setCmsWorks(w);
+    if (a.length) setCmsArchive(a);
+    if (t.length) setCmsTimeline(t);
   }, []);
+
+  useEffect(() => {
+    refreshAll();
+  }, [refreshAll]);
 
   useEffect(() => {
     const html = document.documentElement;
@@ -94,8 +103,10 @@ function Home() {
           setArchive={setCmsArchive}
           timeline={cmsTimeline}
           setTimeline={setCmsTimeline}
+          onRefresh={refreshAll}
           onClose={() => {
             setCmsOpen(false);
+            refreshAll();
           }}
         />
       )}
@@ -290,7 +301,7 @@ function SelectedWork({ works: worksProp }: { works: CaseStudy[] }) {
       <div className="mt-24 space-y-40">
         {worksProp.map((w, i) => (
           <article
-            key={w.title}
+            key={w.slug}
             className={`reveal grid grid-cols-1 items-center gap-12 md:grid-cols-12 ${
               i % 2 === 1 ? "md:[direction:rtl]" : ""
             }`}
@@ -386,7 +397,7 @@ function Archive({ archive: archiveProp, onOpen }: { archive: import("@/lib/data
         <div className="mt-16 columns-1 gap-6 sm:columns-2 lg:columns-3 [&>*]:mb-6">
           {shown.map((a) => (
             <button
-              key={a.label}
+              key={`${a.label}-${a.i}`}
               onClick={() => onOpen(a.i)}
               className="hover-zoom group relative block w-full break-inside-avoid text-left"
             >

@@ -1,10 +1,35 @@
 import { client } from "./client";
 import { caseStudiesQuery, archiveItemsQuery, timelineItemsQuery } from "./queries";
+import { projectId, dataset } from "@/sanity/env";
 import type { CaseStudy, CaseStudySection } from "@/lib/cms";
 import type { ArchiveItem, TimelineItem } from "@/lib/data";
 
 function sanitizeId(str: string): string {
   return str.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "") || "untitled";
+}
+
+const SANITY_CDN_RE = new RegExp(
+  `https://cdn\\.sanity\\.io/images/${projectId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/${dataset.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/([^?\\s]+)`,
+);
+
+function urlToAssetRef(url: string): { _type: "image"; asset: { _ref: string } } | undefined {
+  const m = SANITY_CDN_RE.exec(url);
+  if (!m) return undefined;
+  const filename = m[1];
+  const parts = filename.split("-");
+  if (parts.length < 2) return undefined;
+  const rest = parts.slice(0, -1).join("-");
+  const dimsExt = parts[parts.length - 1];
+  const dimMatch = dimsExt.match(/^(\d+x\d+)\./);
+  const ref = dimMatch ? `image-${rest}-${dimMatch[1]}` : `image-${rest}`;
+  return { _type: "image", asset: { _ref: ref } };
+}
+
+function resolveImage(url: string | undefined, existing: any): any {
+  if (!url) return existing || undefined;
+  const ref = urlToAssetRef(url);
+  if (ref) return ref;
+  return existing || undefined;
 }
 
 export async function syncAllToSanity(works: CaseStudy[], archive: ArchiveItem[], timeline: TimelineItem[]) {
@@ -34,7 +59,7 @@ export async function syncAllToSanity(works: CaseStudy[], archive: ArchiveItem[]
       if (s.type === "image" || s.type === "full-bleed") {
         return {
           _type: "imageSection",
-          image: existingSections[i]?.image || undefined,
+          image: resolveImage(s.images?.[0]?.src, existingSections[i]?.image),
           caption: s.images?.[0]?.caption,
           fullBleed: s.type === "full-bleed",
           _key: existingSections[i]?._key,
@@ -45,14 +70,13 @@ export async function syncAllToSanity(works: CaseStudy[], archive: ArchiveItem[]
           _type: "imageTextSection",
           title: s.title,
           content: s.content,
-          image: existingSections[i]?.image || undefined,
+          image: resolveImage(s.images?.[0]?.src, existingSections[i]?.image),
           imagePosition: s.imagePosition || "left",
           _key: existingSections[i]?._key,
         };
       }
       return { _type: "textSection", content: "" };
     });
-
     tx.createOrReplace({
       _id: id,
       _type: "caseStudy",

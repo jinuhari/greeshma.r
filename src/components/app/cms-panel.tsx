@@ -13,6 +13,7 @@ export function CmsPanel({
   setArchive,
   timeline,
   setTimeline,
+  onRefresh,
   onClose,
 }: {
   works: CaseStudy[];
@@ -21,6 +22,7 @@ export function CmsPanel({
   setArchive: (a: ArchiveItem[]) => void;
   timeline: TimelineItem[];
   setTimeline: (t: TimelineItem[]) => void;
+  onRefresh?: () => void;
   onClose: () => void;
 }) {
   const [tab, setTab] = useState<Tab>("works");
@@ -36,6 +38,7 @@ export function CmsPanel({
       await syncAllToSanity(works, archive, timeline);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
+      onRefresh?.();
     } catch (e: any) {
       setError(e?.message || "Save failed. Check console for details.");
     } finally {
