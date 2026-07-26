@@ -380,13 +380,59 @@ function ResumePreview({ json }: { json: string }) {
     return <p className="text-xs text-muted-foreground">Invalid JSON — fix errors to see preview</p>;
   }
 
-  const pretty = JSON.stringify(data, null, 2);
-
   return (
-    <pre className="whitespace-pre-wrap break-all font-mono text-xs leading-relaxed text-foreground">
-      {pretty}
-    </pre>
+    <div className="space-y-4 text-xs">
+      {Object.entries(data).map(([key, value]) => (
+        <div key={key}>
+          <SectionLabel>{key}</SectionLabel>
+          {renderValue(value)}
+        </div>
+      ))}
+    </div>
   );
+}
+
+function renderValue(value: any): React.ReactNode {
+  if (Array.isArray(value)) {
+    if (value.length === 0) return <p className="text-muted-foreground italic">(empty)</p>;
+    return (
+      <div className="space-y-2">
+        {value.map((item, i) => (
+          <div key={i}>
+            {typeof item === "object" && item !== null ? (
+              <div className="rounded-md border border-border p-2">
+                {Object.entries(item).map(([k, v]) => (
+                  <div key={k} className="flex items-baseline gap-2">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground min-w-16">{k}</span>
+                    <span className="text-foreground">{String(v ?? "")}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-foreground">- {String(item)}</p>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (typeof value === "object" && value !== null) {
+    return (
+      <div className="rounded-md border border-border p-2 space-y-1">
+        {Object.entries(value).map(([k, v]) => (
+          <div key={k} className="flex items-baseline gap-2">
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground min-w-16">{k}</span>
+            <span className="text-foreground">{String(v ?? "")}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (typeof value === "string" && !value) return <p className="text-muted-foreground italic">(empty)</p>;
+
+  return <p className="text-foreground">{String(value)}</p>;
 }
 
 function SectionLabel({ children }: { children: string }) {
