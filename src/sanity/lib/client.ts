@@ -1,11 +1,11 @@
 import { createClient } from "@sanity/client";
-import { projectId, dataset, apiVersion, useCdn } from "../env";
+import { projectId, dataset, apiVersion, studioUrl } from "../env";
 
 export const client = createClient({
   projectId,
   dataset,
   apiVersion,
-  useCdn,
+  useCdn: false,
   perspective: "published",
 });
 
@@ -17,6 +17,6 @@ export const previewClient = createClient({
   perspective: "previewDrafts",
   stega: {
     enabled: true,
-    studioUrl: "/studio",
+    studioUrl,
   },
 });

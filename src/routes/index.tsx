@@ -92,9 +92,24 @@ function Home() {
           works={cmsWorks}
           archive={cmsArchive}
           timeline={cmsTimeline}
-          onSaveWorks={(w) => { setCmsWorks(w); saveWorks(w); syncAllToSanity(w, cmsArchive, cmsTimeline); }}
-          onSaveArchive={(a) => { setCmsArchive(a); saveArchive(a); syncAllToSanity(cmsWorks, a, cmsTimeline); }}
-          onSaveTimeline={(t) => { setCmsTimeline(t); saveTimeline(t); syncAllToSanity(cmsWorks, cmsArchive, t); }}
+          onSaveWorks={async (w) => {
+            setCmsWorks(w); saveWorks(w);
+            await syncAllToSanity(w, cmsArchive, cmsTimeline);
+            const fresh = await loadWorksFromSanity();
+            if (fresh && fresh.length > 0) setCmsWorks(fresh);
+          }}
+          onSaveArchive={async (a) => {
+            setCmsArchive(a); saveArchive(a);
+            await syncAllToSanity(cmsWorks, a, cmsTimeline);
+            const fresh = await loadArchiveFromSanity();
+            if (fresh && fresh.length > 0) setCmsArchive(fresh);
+          }}
+          onSaveTimeline={async (t) => {
+            setCmsTimeline(t); saveTimeline(t);
+            await syncAllToSanity(cmsWorks, cmsArchive, t);
+            const fresh = await loadTimelineFromSanity();
+            if (fresh && fresh.length > 0) setCmsTimeline(fresh);
+          }}
           onClose={() => setCmsOpen(false)}
         />
       )}
