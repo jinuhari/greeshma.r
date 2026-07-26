@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useReveal, useTheme, toggleTheme } from "@/hooks/use-reveal";
 import { AppShell } from "@/components/app/app-shell";
 import { type CaseStudy } from "@/lib/cms";
-import { loadWorks, saveWorks, loadArchive, saveArchive, loadTimeline, saveTimeline } from "@/lib/data";
+import { loadWorks, loadWorksFromSanity, saveWorks, loadArchive, loadArchiveFromSanity, saveArchive, loadTimeline, loadTimelineFromSanity, saveTimeline } from "@/lib/data";
 import { CmsPanel } from "@/components/app/cms-panel";
 
 import heroArt from "@/assets/hero-artwork.jpg";
@@ -33,6 +33,12 @@ function Home() {
   const [cmsArchive, setCmsArchive] = useState(() => loadArchive());
   const [cmsTimeline, setCmsTimeline] = useState(() => loadTimeline());
   const [cmsOpen, setCmsOpen] = useState(false);
+
+  useEffect(() => {
+    loadWorksFromSanity().then(setCmsWorks);
+    loadArchiveFromSanity().then(setCmsArchive);
+    loadTimelineFromSanity().then(setCmsTimeline);
+  }, []);
 
   useEffect(() => {
     const html = document.documentElement;

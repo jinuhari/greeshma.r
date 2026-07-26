@@ -1,7 +1,8 @@
 import { Link, createFileRoute, notFound } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 import { useTheme } from "@/hooks/use-reveal";
 import { type CaseStudy } from "@/lib/cms";
-import { loadWorks } from "@/lib/data";
+import { loadWorks, loadCaseStudyFromSanity } from "@/lib/data";
 import { AppShell } from "@/components/app/app-shell";
 
 export const Route = createFileRoute("/work/$slug")({
@@ -28,24 +29,35 @@ export const Route = createFileRoute("/work/$slug")({
 function CaseStudyPage() {
   useTheme();
   const { slug } = Route.useParams();
-  const allWorks = loadWorks();
-  const work = allWorks.find((w) => w.slug === slug);
+  const [work, setWork] = useState<CaseStudy | undefined>(() =>
+    loadWorks().find((w) => w.slug === slug),
+  );
+  const [allWorks, setAllWorks] = useState(() => loadWorks());
+
+  useEffect(() => {
+    loadCaseStudyFromSanity(slug).then((result) => {
+      if (result) setWork(result);
+    });
+  }, [slug]);
+
+  useEffect(() => {
+    import("@/lib/data").then((m) => m.loadWorksFromSanity().then(setAllWorks));
+  }, []);
 
   if (!work) throw notFound();
 
   return (
     <div className="bg-background text-foreground">
-      <CaseStudyNav work={work} />
+      <CaseStudyNav work={work} allWorks={allWorks} />
       <CaseStudyHero work={work} />
       <CaseStudyContent work={work} />
-      <CaseStudyFooter work={work} />
+      <CaseStudyFooter work={work} allWorks={allWorks} />
       <AppShell />
     </div>
   );
 }
 
-function CaseStudyNav({ work }: { work: CaseStudy }) {
-  const allWorks = loadWorks();
+function CaseStudyNav({ work, allWorks }: { work: CaseStudy; allWorks: CaseStudy[] }) {
   return (
     <header className="fixed inset-x-0 top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 py-5 md:px-12">
@@ -250,8 +262,8 @@ function SectionRenderer({ section }: { section: import("@/lib/cms").CaseStudySe
   );
 }
 
-function CaseStudyFooter({ work }: { work: CaseStudy }) {
-  const allWorks = loadWorks();
+function CaseStudyFooter({ work, allWorks: _allWorks }: { work: CaseStudy; allWorks: CaseStudy[] }) {
+  const allWorks = _allWorks;
   const currentIndex = allWorks.findIndex((w) => w.slug === work.slug);
   const prev = currentIndex > 0 ? allWorks[currentIndex - 1] : allWorks[allWorks.length - 1];
   const next = currentIndex < allWorks.length - 1 ? allWorks[currentIndex + 1] : allWorks[0];
