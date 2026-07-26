@@ -7,20 +7,23 @@ import type { ArchiveItem, TimelineItem } from "@/lib/data";
 type Tab = "works" | "archive" | "experience";
 
 export function CmsPanel({
-  works: initialWorks,
-  archive: initialArchive,
-  timeline: initialTimeline,
+  works,
+  setWorks,
+  archive,
+  setArchive,
+  timeline,
+  setTimeline,
   onClose,
 }: {
   works: CaseStudy[];
+  setWorks: (w: CaseStudy[]) => void;
   archive: ArchiveItem[];
+  setArchive: (a: ArchiveItem[]) => void;
   timeline: TimelineItem[];
+  setTimeline: (t: TimelineItem[]) => void;
   onClose: () => void;
 }) {
   const [tab, setTab] = useState<Tab>("works");
-  const [works, setWorks] = useState(initialWorks);
-  const [archive, setArchive] = useState(initialArchive);
-  const [timeline, setTimeline] = useState(initialTimeline);
   const [editing, setEditing] = useState<CaseStudy | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -136,32 +139,42 @@ export function CmsPanel({
               {archive.length === 0 && <p className="col-span-full text-sm text-muted-foreground">No archive items yet.</p>}
               {archive.map((item: any, i) => (
                 <div key={item._id || i} className="rounded-lg border border-border p-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <input
+                        className="w-full bg-transparent text-sm font-medium outline-none"
+                        value={item.label || ""}
+                        onChange={(e) => {
+                          const next = [...archive];
+                          next[i] = { ...next[i], label: e.target.value };
+                          setArchive(next);
+                        }}
+                      />
+                      <input
+                        className="mt-1 w-full bg-transparent text-[10px] text-muted-foreground outline-none"
+                        value={item.category || ""}
+                        onChange={(e) => {
+                          const next = [...archive];
+                          next[i] = { ...next[i], cat: e.target.value };
+                          setArchive(next);
+                        }}
+                      />
+                    </div>
+                    <button
+                      onClick={() => setArchive(archive.filter((_, j) => j !== i))}
+                      className="ml-2 text-xs text-muted-foreground hover:text-red-500"
+                    >
+                      ✕
+                    </button>
+                  </div>
                   {item.image && (
                     <img
                       src={urlFor(item.image).width(200).height(260).url()}
                       alt={item.label}
-                      className="mb-2 w-full rounded-md object-cover"
+                      className="mt-2 w-full rounded-md object-cover"
                       style={{ aspectRatio: "3/4" }}
                     />
                   )}
-                  <input
-                    className="w-full bg-transparent text-sm font-medium outline-none"
-                    value={item.label || ""}
-                    onChange={(e) => {
-                      const next = [...archive];
-                      next[i] = { ...next[i], label: e.target.value };
-                      setArchive(next);
-                    }}
-                  />
-                  <input
-                    className="mt-1 w-full bg-transparent text-[10px] text-muted-foreground outline-none"
-                    value={item.category || ""}
-                    onChange={(e) => {
-                      const next = [...archive];
-                      next[i] = { ...next[i], cat: e.target.value };
-                      setArchive(next);
-                    }}
-                  />
                 </div>
               ))}
             </div>
@@ -194,6 +207,12 @@ export function CmsPanel({
                         }}
                       />
                     </div>
+                    <button
+                      onClick={() => setTimeline(timeline.filter((_, j) => j !== i))}
+                      className="mt-0.5 text-xs text-muted-foreground hover:text-red-500"
+                    >
+                      ✕
+                    </button>
                   </div>
                 </div>
               ))}

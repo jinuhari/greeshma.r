@@ -89,8 +89,11 @@ function Home() {
       {cmsOpen && (
         <CmsPanel
           works={cmsWorks}
+          setWorks={setCmsWorks}
           archive={cmsArchive}
+          setArchive={setCmsArchive}
           timeline={cmsTimeline}
+          setTimeline={setCmsTimeline}
           onClose={() => {
             setCmsOpen(false);
             loadWorksFromSanity().then((w) => { if (w.length) setCmsWorks(w); });
