@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-19T00:00:00.000Z",
+  "title": "Design System: Greeshma R. — A Digital Exhibition",
+  "extensions": {
+    "colorMeta": {
+      "background": { "role": "neutral", "displayName": "Gallery Ivory", "canonical": "oklch(0.982 0.006 85)", "tonalRamp": ["oklch(0.15 0.006 85)", "oklch(0.3 0.006 85)", "oklch(0.45 0.006 85)", "oklch(0.6 0.006 85)", "oklch(0.72 0.006 85)", "oklch(0.84 0.006 85)", "oklch(0.92 0.006 85)", "oklch(0.982 0.006 85)"] },
+      "foreground": { "role": "neutral", "displayName": "Ink", "canonical": "oklch(0.185 0.005 60)", "tonalRamp": ["oklch(0.185 0.005 60)", "oklch(0.28 0.006 60)", "oklch(0.38 0.007 60)", "oklch(0.48 0.008 60)", "oklch(0.6 0.007 60)", "oklch(0.72 0.006 60)", "oklch(0.85 0.005 60)", "oklch(0.95 0.004 60)"] },
+      "accent": { "role": "accent", "displayName": "Terracotta", "canonical": "oklch(0.62 0.14 45)", "tonalRamp": ["oklch(0.2 0.14 45)", "oklch(0.3 0.14 45)", "oklch(0.4 0.14 45)", "oklch(0.5 0.14 45)", "oklch(0.62 0.14 45)", "oklch(0.72 0.12 45)", "oklch(0.82 0.08 45)", "oklch(0.92 0.04 45)"] },
+      "muted-foreground": { "role": "neutral", "displayName": "Muted Ink", "canonical": "oklch(0.48 0.008 60)", "tonalRamp": [] },
+      "secondary": { "role": "neutral", "displayName": "Warm Gray", "canonical": "oklch(0.952 0.006 85)", "tonalRamp": [] },
+      "terracotta": { "role": "accent", "displayName": "Terracotta", "canonical": "oklch(0.62 0.14 45)", "tonalRamp": [] },
+      "forest": { "role": "accent", "displayName": "Forest Moss", "canonical": "oklch(0.42 0.07 155)", "tonalRamp": [] },
+      "coral": { "role": "accent", "displayName": "Soft Coral", "canonical": "oklch(0.72 0.15 30)", "tonalRamp": [] },
+      "indigo": { "role": "accent", "displayName": "Muted Indigo", "canonical": "oklch(0.48 0.11 265)", "tonalRamp": [] },
+      "ochre": { "role": "accent", "displayName": "Warm Ochre", "canonical": "oklch(0.72 0.14 80)", "tonalRamp": [] },
+      "rose": { "role": "accent", "displayName": "Faded Rose", "canonical": "oklch(0.79 0.06 30)", "tonalRamp": [] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Hero headings only — the largest type in the system." },
+      "headline": { "displayName": "Headline", "purpose": "Section headings for every page section." },
+      "title": { "displayName": "Title", "purpose": "Case study titles, timeline events, archive labels." },
+      "body": { "displayName": "Body", "purpose": "All paragraph text. Max line length 65–75ch." },
+      "label": { "displayName": "Label / Eyebrow", "purpose": "Section kickers, numbered indices, metadata." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "ease-out-expo", "value": "cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Default easing for all reveals and decorative transitions." },
+      { "name": "ease-standard", "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "State transitions (hover, focus, button backgrounds)." },
+      { "name": "duration-reveal", "value": "1100ms", "purpose": "Reveal animation duration (opacity + translateY)." },
+      { "name": "duration-hover-zoom", "value": "1600ms", "purpose": "Image hover-zoom scale transition." },
+      { "name": "duration-marquee", "value": "40s", "purpose": "Marquee scroll animation (one full pass)." },
+      { "name": "duration-drift", "value": "22s", "purpose": "Hero background slow drift animation." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" },
+      { "name": "max-content", "value": "1440px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary CTA Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Hero call-to-action — pill-shaped, foreground background, hover shifts to terracotta.",
+      "html": "<a href=\"#work\" class=\"ds-btn-primary\">View Selected Work <span class=\"ds-arrow\">→</span></a>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 0.75rem; border-radius: 9999px; background: oklch(0.185 0.005 60); color: oklch(0.982 0.006 85); padding: 1.75rem 1.75rem; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; line-height: 1; text-decoration: none; transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; } .ds-btn-primary:hover { background: oklch(0.62 0.14 45); } .ds-arrow { display: inline-block; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-primary:hover .ds-arrow { transform: translateX(4px); }"
+    },
+    {
+      "name": "Text Link (Underline)",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Underline-border text link — no background, bottom border shifts to terracotta on hover.",
+      "html": "<a href=\"#\" class=\"ds-link-underline\">Download Résumé →</a>",
+      "css": ".ds-link-underline { display: inline-flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid oklch(0.185 0.005 60); padding-bottom: 0.25rem; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; letter-spacing: 0.025em; color: oklch(0.185 0.005 60); text-decoration: none; transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; } .ds-link-underline:hover { color: oklch(0.62 0.14 45); border-color: oklch(0.62 0.14 45); }"
+    },
+    {
+      "name": "Nav Link (Animated Underline)",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Desktop navigation link with hover-reveal underline that animates from 0 to full width.",
+      "html": "<a href=\"#work\" class=\"ds-nav-link\">Work</a>",
+      "css": ".ds-nav-link { position: relative; padding-bottom: 0.25rem; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; letter-spacing: 0.025em; color: oklch(0.185 0.005 60); text-decoration: none; transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; } .ds-nav-link::after { content: ''; position: absolute; left: 0; bottom: 0; width: 0; height: 1px; background: oklch(0.62 0.14 45); transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); } .ds-nav-link:hover { color: oklch(0.62 0.14 45); } .ds-nav-link:hover::after { width: 100%; }"
+    },
+    {
+      "name": "Filter Pill",
+      "kind": "chip",
+      "refersTo": "filter-pill",
+      "description": "Archive filter toggle — rounded pill with border, active state inverts.",
+      "html": "<button class=\"ds-filter-pill ds-filter-pill--active\">Illustration</button><button class=\"ds-filter-pill\">Typography</button>",
+      "css": ".ds-filter-pill { display: inline-flex; align-items: center; border-radius: 9999px; border: 1px solid oklch(0.88 0.006 60); padding: 0.5rem 1rem; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 0.75rem; letter-spacing: 0.025em; color: oklch(0.185 0.005 60); background: transparent; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; } .ds-filter-pill:hover { border-color: oklch(0.185 0.005 60); } .ds-filter-pill--active { background: oklch(0.185 0.005 60); color: oklch(0.982 0.006 85); border-color: oklch(0.185 0.005 60); }"
+    },
+    {
+      "name": "Skill Tag",
+      "kind": "chip",
+      "refersTo": "skill-tag",
+      "description": "Discrete skill badge — rounded pill with border, hover shifts to terracotta.",
+      "html": "<span class=\"ds-skill-tag\">UI Design</span>",
+      "css": ".ds-skill-tag { display: inline-block; border-radius: 9999px; border: 1px solid oklch(0.88 0.006 60); padding: 0.375rem 0.75rem; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 0.75rem; letter-spacing: 0.025em; color: oklch(0.185 0.005 60); background: oklch(0.982 0.006 85); transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1); } .ds-skill-tag:hover { color: oklch(0.62 0.14 45); border-color: oklch(0.62 0.14 45); }"
+    },
+    {
+      "name": "Case Study Tone Badge",
+      "kind": "chip",
+      "refersTo": "tone-badge",
+      "description": "Atmosphere-tinted badge for case study metadata — colored fill at 15% opacity with full-tone border.",
+      "html": "<span class=\"ds-tone-badge ds-tone-badge--coral\">Independent research project</span>",
+      "css": ".ds-tone-badge { display: inline-block; border-radius: 9999px; border: 1px solid; padding: 0.375rem 0.75rem; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 0.75rem; letter-spacing: 0.025em; background: oklch(0.72 0.15 30 / 0.15); color: oklch(0.72 0.15 30); border-color: oklch(0.72 0.15 30 / 0.3); } .ds-tone-badge--terracotta { background: oklch(0.62 0.14 45 / 0.15); color: oklch(0.62 0.14 45); border-color: oklch(0.62 0.14 45 / 0.3); } .ds-tone-badge--forest { background: oklch(0.42 0.07 155 / 0.15); color: oklch(0.42 0.07 155); border-color: oklch(0.42 0.07 155 / 0.3); } .ds-tone-badge--indigo { background: oklch(0.48 0.11 265 / 0.15); color: oklch(0.48 0.11 265); border-color: oklch(0.48 0.11 265 / 0.3); }"
+    },
+    {
+      "name": "Input",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Standard text input with transparent background, border stroke, and terracotta focus ring.",
+      "html": "<input type=\"text\" class=\"ds-input\" placeholder=\"Your email\" />",
+      "css": ".ds-input { display: flex; height: 2.25rem; width: 100%; border-radius: 6px; border: 1px solid oklch(0.88 0.006 60); background: transparent; padding: 0.5rem 0.75rem; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; color: oklch(0.185 0.005 60); transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1); } .ds-input::placeholder { color: oklch(0.48 0.008 60); } .ds-input:focus { outline: none; border-color: oklch(0.62 0.14 45); box-shadow: 0 0 0 1px oklch(0.62 0.14 45); } .ds-input:disabled { opacity: 0.5; cursor: not-allowed; }"
+    },
+    {
+      "name": "Case Study Section (Text)",
+      "kind": "custom",
+      "refersTo": "case-study-text",
+      "description": "Narrative text block within a case study — centered prose with optional title and accent divider.",
+      "html": "<article class=\"ds-cs-text\"><h2>The Challenge</h2><div class=\"ds-accent-line\"></div><p>Udaan's existing visual language had grown organically across surfaces, resulting in inconsistency between the mobile app, web dashboard, and marketing campaigns.</p></article>",
+      "css": ".ds-cs-text { margin: 0 auto; max-width: 48rem; margin-bottom: 5rem; } .ds-cs-text h2 { font-family: Fraunces, Cormorant Garamond, ui-serif, Georgia, serif; font-size: clamp(1.875rem, 3vw, 2.25rem); font-weight: 400; line-height: 1.1; letter-spacing: -0.02em; color: oklch(0.185 0.005 60); } .ds-accent-line { width: 3rem; height: 1px; background: oklch(0.62 0.14 45); margin-top: 1.5rem; margin-bottom: 1.5rem; } .ds-cs-text p { font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 1rem; line-height: 1.75; color: oklch(0.48 0.008 60); } .ds-cs-text p:not(:first-of-type) { margin-top: 1.5rem; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Exhibition Space",
+    "overview": "Every project on this site is a standalone exhibit with its own atmosphere — a distinct tonal palette, a narrative arc, a defined viewer path. The site itself is the gallery: warm, quiet, letting the work speak. The viewer moves through rooms (sections), pauses at exhibits (case studies), and wanders into the archive. Nothing competes with the work because the gallery is designed to recede.\n\nThe system is editorial rather than app-like — generous white space, a serif-driven typographic scale, and tonal layering in place of shadows. Motion is restrained and purposeful: scroll-driven reveals use an exponential ease-out curve, and the only continuous animation (the marquee) is a deliberate exhibition-wall device.\n\nWhat this system explicitly rejects: the Dribbble/Behance portfolio cliché (identical card grids, gradient overlays, browseable shots without context) and the corporate/SaaS template (blue-gray palettes, stock photography, generic hero metrics).",
+    "keyCharacteristics": [
+      "Editorial serif scale with negative letter-spacing at display sizes",
+      "Tonal surface layering (ivory → warm-gray → white) for depth; zero box-shadows",
+      "One anchor accent (terracotta) applied to ≤5% of any given surface",
+      "Per-case-study tonal atmospheres drawn from the artistic palette (forest, coral, indigo)",
+      "Reveal animations driven by a single exponential ease-out curve",
+      "Custom cursor on desktop as a gallery-attendant gesture"
+    ],
+    "rules": [
+      { "name": "The Tonal Atmosphere Rule", "body": "Each case study gets exactly one atmospheric treatment: the section background gets a /10 tint of its assigned tone, and badges carry the tone at /15 fill with the full-tone border. No mixing, no blending, no gradient transitions between atmospheres.", "section": "colors" },
+      { "name": "The No-Inexpressive-Scaling Rule", "body": "Clamp scales are tuned per breakpoint so no line overflows its container. The display size 13vw at hero is capped at 8rem (128px) so it never exceeds the viewport width on tablet or desktop.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Surfaces are flat at rest. What reads as 'elevation' is always a tone shift, never a shadow. The scrolling nav gets a hairline bottom border plus blur, not a drop-shadow.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use the serif display scale for every heading. No heading should be set in Inter.",
+      "Do use terracotta as the single accent across all interactive elements — link hovers, underline animations, focus rings, selection highlight.",
+      "Do alternate background tones (ivory → warm-gray → ivory) to create section rhythm.",
+      "Do scope the artistic palette (forest, coral, indigo, ochre, rose) exclusively to case study atmospheres.",
+      "Do use the monospace eyebrow label for section kickers, numbered indices, and metadata — never for body copy or headings.",
+      "Do use the exponential ease-out curve (cubic-bezier(0.22, 1, 0.36, 1)) for all reveal animations and decorative transitions.",
+      "Do test every heading at every breakpoint for overflow."
+    ],
+    "donts": [
+      "Don't use box-shadows or drop-shadows anywhere. Use tonal layering (ivory → warm-gray → white) for depth.",
+      "Don't use gradient text (background-clip: text). Emphasis comes from weight, size, or terracotta color.",
+      "Don't use glassmorphism or backdrop-blur decoratively. The blur is reserved for the nav and lightbox overlay.",
+      "Don't use numbered section markers (01 / 02 / 03) as default scaffolding.",
+      "Don't use the tiny uppercase tracked eyebrow above every section.",
+      "Don't use identical card grids (icon + heading + text) repeated across sections.",
+      "Don't use border-left or border-right greater than 1px as a colored accent stripe.",
+      "Don't use the Dribbble/Behance portfolio template or the corporate/SaaS template."
+    ]
+  }
+}
