@@ -24,6 +24,82 @@ export interface TimelineItem {
   where: string;
 }
 
+export interface Resume {
+  role: string;
+  json: string;
+}
+
+export function defaultResumes(): Resume[] {
+  return [
+    {
+      role: "Visual Design",
+      json: JSON.stringify({
+        name: "Greeshma R",
+        title: "Visual Designer",
+        summary: "Multidisciplinary visual designer with 11+ years of experience across editorial, brand, illustration, and digital product surfaces.",
+        experience: [
+          { company: "Udaan", role: "Associate Manager, Visual Designer — UI", period: "2023 — Present", highlights: ["Brand campaigns", "Visual system design", "Design operations"] },
+          { company: "Suzuki Innovation Centre", role: "Design Consultant", period: "2021 — 2022", highlights: ["Mobility interfaces", "User research", "Prototyping"] },
+        ],
+        education: [
+          { degree: "M.Des Interaction Design", school: "IIT Hyderabad", year: "2020" },
+          { degree: "BFA Applied Arts", school: "Bangalore University", year: "2016" },
+        ],
+        skills: ["Typography", "Layout", "Color Theory", "Iconography", "Illustration", "Brand Identity", "Editorial Design", "Motion Design"],
+      }, null, 2),
+    },
+    {
+      role: "UI Design",
+      json: JSON.stringify({
+        name: "Greeshma R",
+        title: "UI / Product Designer",
+        summary: "Product designer focused on mobile and web interfaces with a strong foundation in interaction design, design systems, and user research.",
+        experience: [
+          { company: "Udaan", role: "Associate Manager, Visual Designer — UI", period: "2023 — Present", highlights: ["Mobile app design", "Design system (240+ tokens)", "Campaign systems"] },
+          { company: "Tomodachi", role: "Lead Interaction Designer", period: "2023", highlights: ["Android app", "UX research", "Usability testing"] },
+        ],
+        education: [
+          { degree: "M.Des Interaction Design", school: "IIT Hyderabad", year: "2020" },
+        ],
+        skills: ["UI Design", "Interaction Design", "Prototyping", "Design Systems", "Accessibility", "Figma", "Principle", "Framer"],
+      }, null, 2),
+    },
+    {
+      role: "Product Design",
+      json: JSON.stringify({
+        name: "Greeshma R",
+        title: "Product Designer",
+        summary: "End-to-end product designer with experience across B2B commerce, mobile applications, and design systems at scale.",
+        experience: [
+          { company: "Udaan", role: "Associate Manager, Visual Designer — UI", period: "2023 — Present", highlights: ["B2B commerce platform", "Design system governance", "Cross-functional collaboration"] },
+          { company: "IISc NDIN", role: "Design Researcher", period: "2022", highlights: ["Field research", "Participatory design", "Artefact documentation"] },
+        ],
+        education: [
+          { degree: "M.Des Interaction Design", school: "IIT Hyderabad", year: "2020" },
+        ],
+        skills: ["Product Strategy", "UX Research", "Interaction Design", "Design Systems", "Prototyping", "Visual Design", "Stakeholder Management"],
+      }, null, 2),
+    },
+    {
+      role: "Creative Associate / Design",
+      json: JSON.stringify({
+        name: "Greeshma R",
+        title: "Creative Associate",
+        summary: "Creative professional bridging design, research, and production — experienced in campaign execution, brand building, and cross-disciplinary collaboration.",
+        experience: [
+          { company: "Udaan", role: "Associate Manager, Visual Designer — UI", period: "2023 — Present", highlights: ["Campaign design & production", "Brand collateral", "Cross-team collaboration"] },
+          { company: "Qualin Wellness", role: "Brand & Visual Designer", period: "2023", highlights: ["Brand identity", "Guidelines (64 pages)", "Packaging design"] },
+        ],
+        education: [
+          { degree: "M.Des Interaction Design", school: "IIT Hyderabad", year: "2020" },
+          { degree: "BFA Applied Arts", school: "Bangalore University", year: "2016" },
+        ],
+        skills: ["Brand Identity", "Campaign Design", "Art Direction", "Illustration", "Typography", "Packaging", "Motion Design", "Team Collaboration"],
+      }, null, 2),
+    },
+  ];
+}
+
 export const defaultArchive: ArchiveItem[] = [
   { src: archive1, label: "Kalighat, revisited", cat: "Illustration", year: "2024", medium: "Digital gouache", ratio: "aspect-[3/4]" },
   { src: archive2, label: "AN/AW", cat: "Typography", year: "2023", medium: "Poster series", ratio: "aspect-[3/4]" },

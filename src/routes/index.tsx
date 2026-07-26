@@ -3,7 +3,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useReveal, useTheme, toggleTheme } from "@/hooks/use-reveal";
 import { AppShell } from "@/components/app/app-shell";
 import { type CaseStudy } from "@/lib/cms";
-import { loadWorks, loadWorksFromSanity, loadArchive, loadArchiveFromSanity, loadTimeline, loadTimelineFromSanity } from "@/lib/data";
+import { loadWorks, loadWorksFromSanity, loadArchive, loadArchiveFromSanity, loadTimeline, loadTimelineFromSanity, defaultResumes } from "@/lib/data";
+import type { Resume } from "@/lib/data";
 import { CmsPanel } from "@/components/app/cms-panel";
 
 import heroArt from "@/assets/hero-artwork.jpg";
@@ -32,6 +33,7 @@ function Home() {
   const [cmsWorks, setCmsWorks] = useState(() => loadWorks());
   const [cmsArchive, setCmsArchive] = useState(() => loadArchive());
   const [cmsTimeline, setCmsTimeline] = useState(() => loadTimeline());
+  const [cmsResumes, setCmsResumes] = useState(() => defaultResumes());
   const [cmsOpen, setCmsOpen] = useState(false);
 
   const refreshAll = useCallback(async () => {
@@ -92,7 +94,7 @@ function Home() {
       <Timeline items={cmsTimeline} />
       <Skills />
       <About />
-      <Contact />
+      <Contact resumes={cmsResumes} />
       <Footer />
       {lightbox !== null && <Lightbox archive={cmsArchive} index={lightbox} onClose={() => setLightbox(null)} onNav={setLightbox} />}
       {cmsOpen && (
@@ -103,6 +105,8 @@ function Home() {
           setArchive={setCmsArchive}
           timeline={cmsTimeline}
           setTimeline={setCmsTimeline}
+          resumes={cmsResumes}
+          setResumes={setCmsResumes}
           onRefresh={refreshAll}
           onClose={() => {
             setCmsOpen(false);
@@ -620,7 +624,21 @@ function About() {
   );
 }
 
-function Contact() {
+function Contact({ resumes }: { resumes?: Resume[] }) {
+  const rs = resumes || defaultResumes();
+  const items: { k: string; v: string; href: string; dl?: string }[] = [
+    { k: "Email", v: "greeshma@studio.in", href: "mailto:greeshma@studio.in" },
+    { k: "LinkedIn", v: "/in/greeshma-r", href: "https://linkedin.com" },
+    { k: "Behance", v: "/greeshma", href: "https://behance.net" },
+  ];
+  if (rs.length > 0) {
+    items.push({
+      k: "Résumé — " + rs[0].role,
+      v: "Download JSON",
+      href: `data:application/json;charset=utf-8,${encodeURIComponent(rs[0].json)}`,
+      dl: `resume-${rs[0].role.toLowerCase().replace(/[\s\/]+/g, "-")}.json`,
+    });
+  }
   return (
     <section id="contact" className="border-t border-border py-32 md:py-48">
       <div className="mx-auto max-w-[1440px] px-6 md:px-12">
@@ -635,15 +653,11 @@ function Contact() {
         </div>
 
         <div className="reveal mt-24 grid gap-12 border-t border-border pt-12 md:grid-cols-4">
-          {[
-            { k: "Email", v: "greeshma@studio.in", href: "mailto:greeshma@studio.in" },
-            { k: "LinkedIn", v: "/in/greeshma-r", href: "https://linkedin.com" },
-            { k: "Behance", v: "/greeshma", href: "https://behance.net" },
-            { k: "Résumé", v: "Download PDF", href: "#" },
-          ].map((c) => (
+          {items.map((c) => (
             <a
               key={c.k}
               href={c.href}
+              download={c.dl}
               className="group block"
             >
               <p className="text-[10px] tracking-[0.25em] uppercase text-muted-foreground">

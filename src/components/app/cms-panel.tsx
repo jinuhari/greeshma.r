@@ -2,9 +2,9 @@ import { useState } from "react";
 import { urlFor } from "@/sanity/lib/image";
 import { syncAllToSanity } from "@/sanity/lib/mutations";
 import type { CaseStudy, CaseStudySection, Outcome, SectionType } from "@/lib/cms";
-import type { ArchiveItem, TimelineItem } from "@/lib/data";
+import type { ArchiveItem, TimelineItem, Resume } from "@/lib/data";
 
-type Tab = "works" | "archive" | "experience";
+type Tab = "works" | "archive" | "experience" | "resumes";
 
 export function CmsPanel({
   works,
@@ -13,6 +13,8 @@ export function CmsPanel({
   setArchive,
   timeline,
   setTimeline,
+  resumes,
+  setResumes,
   onRefresh,
   onClose,
 }: {
@@ -22,6 +24,8 @@ export function CmsPanel({
   setArchive: (a: ArchiveItem[]) => void;
   timeline: TimelineItem[];
   setTimeline: (t: TimelineItem[]) => void;
+  resumes: Resume[];
+  setResumes: (r: Resume[]) => void;
   onRefresh?: () => void;
   onClose: () => void;
 }) {
@@ -64,7 +68,7 @@ export function CmsPanel({
           <div className="flex items-center gap-4">
             <h2 className="font-display text-xl">CMS</h2>
             <div className="flex gap-1 rounded-full border border-border p-0.5">
-              {(["works", "archive", "experience"] as const).map((t) => (
+              {(["works", "archive", "experience", "resumes"] as const).map((t) => (
                 <button
                   key={t}
                   onClick={() => { setTab(t); setEditing(null); }}
@@ -72,7 +76,7 @@ export function CmsPanel({
                     tab === t ? "bg-foreground text-background" : "hover:bg-muted"
                   }`}
                 >
-                  {t === "works" ? "Case Studies" : t === "archive" ? "Archive" : "Experience"}
+                  {t === "works" ? "Case Studies" : t === "archive" ? "Archive" : t === "experience" ? "Experience" : "Resumes"}
                 </button>
               ))}
             </div>
@@ -83,10 +87,10 @@ export function CmsPanel({
               disabled={saving}
               className="rounded-md bg-foreground px-4 py-1.5 text-xs text-background transition-opacity hover:opacity-80 disabled:opacity-50"
             >
-              {saving ? "Saving..." : saved ? "Saved ✓" : "Save to Sanity"}
+              {saving ? "Saving..." : saved ? "Saved \u2713" : "Save to Sanity"}
             </button>
             <button onClick={onClose} className="text-xs tracking-[0.2em] uppercase text-muted-foreground hover:text-foreground">
-              Close ✕
+              Close \u2715
             </button>
           </div>
         </div>
@@ -150,7 +154,7 @@ export function CmsPanel({
                       onClick={() => setWorks(works.filter((_, j) => j !== i))}
                       className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500/10 text-[10px] text-red-500 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-500/20"
                     >
-                      ✕
+                      \u2715
                     </button>
                   </div>
                 ))}
@@ -188,7 +192,7 @@ export function CmsPanel({
                       onClick={() => setArchive(archive.filter((_, j) => j !== i))}
                       className="ml-2 text-xs text-muted-foreground hover:text-red-500"
                     >
-                      ✕
+                      \u2715
                     </button>
                   </div>
                   {item.image && (
@@ -235,12 +239,16 @@ export function CmsPanel({
                       onClick={() => setTimeline(timeline.filter((_, j) => j !== i))}
                       className="mt-0.5 text-xs text-muted-foreground hover:text-red-500"
                     >
-                      ✕
+                      \u2715
                     </button>
                   </div>
                 </div>
               ))}
             </div>
+          )}
+
+          {tab === "resumes" && (
+            <ResumesEditor resumes={resumes} setResumes={setResumes} />
           )}
         </div>
 
@@ -250,6 +258,165 @@ export function CmsPanel({
       </div>
     </div>
   );
+}
+
+function ResumesEditor({ resumes, setResumes }: { resumes: Resume[]; setResumes: (r: Resume[]) => void }) {
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [jsonInput, setJsonInput] = useState(resumes[0]?.json || "{}");
+  const [parseError, setParseError] = useState("");
+
+  const active = resumes[activeIdx];
+
+  const updateJson = (val: string) => {
+    setJsonInput(val);
+    try {
+      JSON.parse(val);
+      setParseError("");
+    } catch {
+      setParseError("Invalid JSON");
+    }
+  };
+
+  const saveJson = () => {
+    try {
+      JSON.parse(jsonInput);
+      const next = [...resumes];
+      next[activeIdx] = { ...next[activeIdx], json: jsonInput };
+      setResumes(next);
+      setParseError("");
+    } catch {
+      setParseError("Cannot save — invalid JSON");
+    }
+  };
+
+  return (
+    <div className="flex h-full flex-col gap-4">
+      <div className="flex flex-wrap gap-2">
+        {resumes.map((r, i) => (
+          <button
+            key={r.role}
+            onClick={() => {
+              setActiveIdx(i);
+              setJsonInput(resumes[i].json);
+              setParseError("");
+            }}
+            className={`rounded-full px-4 py-1.5 text-xs tracking-wide transition-all ${
+              i === activeIdx ? "bg-foreground text-background" : "border border-border hover:bg-muted"
+            }`}
+          >
+            {r.role}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid flex-1 grid-cols-2 gap-4 overflow-hidden">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground">JSON Editor</span>
+            <button
+              onClick={saveJson}
+              className="rounded-md bg-foreground px-3 py-1 text-[10px] text-background transition-opacity hover:opacity-80"
+            >
+              Apply
+            </button>
+          </div>
+          <textarea
+            className="flex-1 resize-none rounded-md border border-border bg-muted/30 p-3 font-mono text-xs leading-relaxed outline-none focus:border-foreground"
+            value={jsonInput}
+            onChange={(e) => updateJson(e.target.value)}
+            spellCheck={false}
+          />
+          {parseError && (
+            <p className="text-xs text-red-500">{parseError}</p>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-2 overflow-hidden">
+          <span className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground">Preview</span>
+          <div className="flex-1 overflow-y-auto rounded-md border border-border bg-muted/30 p-4">
+            <ResumePreview json={jsonInput} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ResumePreview({ json }: { json: string }) {
+  let data: Record<string, any>;
+  try {
+    data = JSON.parse(json);
+  } catch {
+    return <p className="text-xs text-muted-foreground">Invalid JSON — fix errors to see preview</p>;
+  }
+
+  return (
+    <div className="space-y-5 text-xs">
+      <div>
+        <h3 className="font-display text-lg">{data.name || "Name"}</h3>
+        <p className="text-muted-foreground">{data.title || "Title"}</p>
+      </div>
+
+      {data.summary && (
+        <div>
+          <SectionLabel>Summary</SectionLabel>
+          <p className="text-muted-foreground">{data.summary}</p>
+        </div>
+      )}
+
+      {data.experience && data.experience.length > 0 && (
+        <div>
+          <SectionLabel>Experience</SectionLabel>
+          <div className="space-y-3">
+            {data.experience.map((exp: any, i: number) => (
+              <div key={i}>
+                <p className="font-medium">{exp.role}</p>
+                <p className="text-muted-foreground">{exp.company} — {exp.period}</p>
+                {exp.highlights && (
+                  <ul className="ml-4 mt-1 list-disc space-y-0.5 text-muted-foreground">
+                    {exp.highlights.map((h: string, j: number) => (
+                      <li key={j}>{h}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {data.education && data.education.length > 0 && (
+        <div>
+          <SectionLabel>Education</SectionLabel>
+          <div className="space-y-1">
+            {data.education.map((edu: any, i: number) => (
+              <p key={i}>
+                <span className="font-medium">{edu.degree}</span>
+                <span className="text-muted-foreground"> — {edu.school} ({edu.year})</span>
+              </p>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {data.skills && data.skills.length > 0 && (
+        <div>
+          <SectionLabel>Skills</SectionLabel>
+          <div className="flex flex-wrap gap-1">
+            {data.skills.map((s: string, i: number) => (
+              <span key={i} className="rounded-full border border-border px-2 py-0.5 text-[10px] text-muted-foreground">
+                {s}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SectionLabel({ children }: { children: string }) {
+  return <div className="mb-1 text-[10px] tracking-[0.2em] uppercase text-muted-foreground">{children}</div>;
 }
 
 function WorkEditor({ work, onChange, onBack }: { work: CaseStudy; onChange: (patch: Partial<CaseStudy>) => void; onBack: () => void }) {
@@ -285,7 +452,7 @@ function WorkEditor({ work, onChange, onBack }: { work: CaseStudy; onChange: (pa
   return (
     <div className="max-w-3xl space-y-6">
       <button onClick={onBack} className="text-xs tracking-[0.2em] uppercase text-muted-foreground hover:text-foreground">
-        ← Back to list
+        \u2190 Back to list
       </button>
 
       <div className="grid grid-cols-2 gap-4">
@@ -357,7 +524,7 @@ function WorkEditor({ work, onChange, onBack }: { work: CaseStudy; onChange: (pa
                 value={o.v}
                 onChange={e => updOutcome(i, o.k, e.target.value)}
               />
-              <button onClick={() => delOutcome(i)} className="text-xs text-muted-foreground hover:text-red-500">✕</button>
+              <button onClick={() => delOutcome(i)} className="text-xs text-muted-foreground hover:text-red-500">\u2715</button>
             </div>
           ))}
         </div>
@@ -397,11 +564,11 @@ function SectionEditor({ section, index, onChange, onDelete, onMove, isFirst, is
   return (
     <div className="rounded-lg border border-border p-4">
       <div className="mb-2 flex items-center justify-between">
-        <span className="font-mono text-[10px] tracking-wide text-muted-foreground">Section {index + 1} · {section.type}</span>
+        <span className="font-mono text-[10px] tracking-wide text-muted-foreground">Section {index + 1} \u00b7 {section.type}</span>
         <div className="flex items-center gap-1">
-          <button onClick={() => onMove(-1)} disabled={isFirst} className="text-xs text-muted-foreground disabled:opacity-30">↑</button>
-          <button onClick={() => onMove(1)} disabled={isLast} className="text-xs text-muted-foreground disabled:opacity-30">↓</button>
-          <button onClick={onDelete} className="ml-2 text-xs text-muted-foreground hover:text-red-500">✕</button>
+          <button onClick={() => onMove(-1)} disabled={isFirst} className="text-xs text-muted-foreground disabled:opacity-30">\u2191</button>
+          <button onClick={() => onMove(1)} disabled={isLast} className="text-xs text-muted-foreground disabled:opacity-30">\u2193</button>
+          <button onClick={onDelete} className="ml-2 text-xs text-muted-foreground hover:text-red-500">\u2715</button>
         </div>
       </div>
 
