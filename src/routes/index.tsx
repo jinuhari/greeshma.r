@@ -4,6 +4,7 @@ import { useReveal, useTheme, toggleTheme } from "@/hooks/use-reveal";
 import { AppShell } from "@/components/app/app-shell";
 import { type CaseStudy } from "@/lib/cms";
 import { loadWorks, loadWorksFromSanity, saveWorks, loadArchive, loadArchiveFromSanity, saveArchive, loadTimeline, loadTimelineFromSanity, saveTimeline } from "@/lib/data";
+import { syncAllToSanity } from "@/sanity/lib/mutations";
 import { CmsPanel } from "@/components/app/cms-panel";
 
 import heroArt from "@/assets/hero-artwork.jpg";
@@ -91,9 +92,9 @@ function Home() {
           works={cmsWorks}
           archive={cmsArchive}
           timeline={cmsTimeline}
-          onSaveWorks={(w) => { setCmsWorks(w); saveWorks(w); }}
-          onSaveArchive={(a) => { setCmsArchive(a); saveArchive(a); }}
-          onSaveTimeline={(t) => { setCmsTimeline(t); saveTimeline(t); }}
+          onSaveWorks={(w) => { setCmsWorks(w); saveWorks(w); syncAllToSanity(w, cmsArchive, cmsTimeline); }}
+          onSaveArchive={(a) => { setCmsArchive(a); saveArchive(a); syncAllToSanity(cmsWorks, a, cmsTimeline); }}
+          onSaveTimeline={(t) => { setCmsTimeline(t); saveTimeline(t); syncAllToSanity(cmsWorks, cmsArchive, t); }}
           onClose={() => setCmsOpen(false)}
         />
       )}
