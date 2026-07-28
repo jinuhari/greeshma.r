@@ -690,10 +690,23 @@ function SectionEditor({ section, index, onChange, onDelete, onMove, isFirst, is
       {(section.type === "image" || section.type === "full-bleed" || section.type === "image-text") && (
         <div className="mt-2 space-y-2">
           {(section.images || []).map((img, j) => (
-            <div key={j}>
+            <div key={j} className="rounded-md border border-border p-2">
+              <div className="flex items-start justify-between">
+                <span className="text-[10px] font-mono text-muted-foreground">Image {j + 1}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = (section.images || []).filter((_, k) => k !== j);
+                    onChange({ images: next.length > 0 ? next : [] });
+                  }}
+                  className="text-xs text-muted-foreground hover:text-red-500"
+                >
+                  \u2715
+                </button>
+              </div>
               <input
                 placeholder="Image URL"
-                className="text-xs"
+                className="mt-1 text-xs"
                 value={img.src}
                 onChange={e => {
                   const next = [...(section.images || [])];
@@ -701,15 +714,17 @@ function SectionEditor({ section, index, onChange, onDelete, onMove, isFirst, is
                   onChange({ images: next });
                 }}
               />
-              <ImageUploader
-                value={img.src}
-                onUpload={(url) => {
-                  const next = [...(section.images || [])];
-                  next[j] = { ...next[j], src: url };
-                  onChange({ images: next });
-                }}
-                label="Upload image"
-              />
+              <div className="mt-1">
+                <ImageUploader
+                  value={img.src}
+                  onUpload={(url) => {
+                    const next = [...(section.images || [])];
+                    next[j] = { ...next[j], src: url };
+                    onChange({ images: next });
+                  }}
+                  label="Upload"
+                />
+              </div>
               <input
                 placeholder="Caption (optional)"
                 className="mt-1 text-xs"
@@ -722,6 +737,23 @@ function SectionEditor({ section, index, onChange, onDelete, onMove, isFirst, is
               />
             </div>
           ))}
+          <button
+            type="button"
+            onClick={() => onChange({ images: [...(section.images || []), { src: "", caption: "" }] })}
+            className="w-full rounded-md border border-dashed border-border px-3 py-2 text-[10px] tracking-wide text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
+          >
+            + Add image
+          </button>
+          {(section.images || []).length === 0 && (
+            <div className="rounded-md border border-dashed border-border p-3 text-center">
+              <p className="mb-2 text-[10px] text-muted-foreground">No images yet</p>
+              <ImageUploader
+                value=""
+                onUpload={(url) => onChange({ images: [{ src: url, caption: "" }] })}
+                label="Upload from device"
+              />
+            </div>
+          )}
         </div>
       )}
     </div>
