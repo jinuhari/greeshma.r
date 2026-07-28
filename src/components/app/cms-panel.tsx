@@ -1,6 +1,5 @@
-import { useState } from "react";
-import { urlFor } from "@/sanity/lib/image";
-import { syncAllToSanity } from "@/sanity/lib/mutations";
+import { useState, useRef } from "react";
+import { syncAllToSanity, uploadImage } from "@/sanity/lib/mutations";
 import type { CaseStudy, CaseStudySection, Outcome, SectionType } from "@/lib/cms";
 import type { ArchiveItem, TimelineItem, Resume } from "@/lib/data";
 
@@ -192,17 +191,18 @@ export function CmsPanel({
                       onClick={() => setArchive(archive.filter((_, j) => j !== i))}
                       className="ml-2 text-xs text-muted-foreground hover:text-red-500"
                     >
-                      \u2715
+                      ✕
                     </button>
                   </div>
-                  {item.image && (
-                    <img
-                      src={urlFor(item.image).width(200).height(260).url()}
-                      alt={item.label}
-                      className="mt-2 w-full rounded-md object-cover"
-                      style={{ aspectRatio: "3/4" }}
-                    />
-                  )}
+                  <ImageUploader
+                    value={item.src}
+                    onUpload={(url) => {
+                      const next = [...archive];
+                      next[i] = { ...next[i], src: url };
+                      setArchive(next);
+                    }}
+                    label="Upload image"
+                  />
                 </div>
               ))}
             </div>
@@ -493,6 +493,16 @@ function WorkEditor({ work, onChange, onBack }: { work: CaseStudy; onChange: (pa
         </Field>
       </div>
 
+      <Field label="Cover Image">
+        <input
+          placeholder="Paste image URL"
+          className="mb-2"
+          value={work.img}
+          onChange={e => set({ img: e.target.value })}
+        />
+        <ImageUploader value={work.img} onUpload={(url) => set({ img: url })} label="Upload cover image" />
+      </Field>
+
       <Field label="Role">
         <input value={work.role} onChange={e => set({ role: e.target.value })} />
       </Field>
@@ -572,6 +582,52 @@ function WorkEditor({ work, onChange, onBack }: { work: CaseStudy; onChange: (pa
   );
 }
 
+function ImageUploader({ value, onUpload, label }: { value?: string; onUpload: (url: string) => void; label?: string }) {
+  const [uploading, setUploading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadImage(file);
+      onUpload(url);
+    } catch (err) {
+      console.error("Upload failed", err);
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-3">
+      {value && (
+        <img src={value} alt="" className="h-14 w-20 flex-shrink-0 rounded-md object-cover" />
+      )}
+      <input ref={inputRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={uploading}
+        className="rounded-md bg-muted px-3 py-1.5 text-[10px] tracking-wide transition-colors hover:bg-muted/70 disabled:opacity-50"
+      >
+        {uploading ? "Uploading..." : label || "Upload from device"}
+      </button>
+      {value && (
+        <button
+          type="button"
+          onClick={() => onUpload("")}
+          className="rounded-md bg-red-500/10 px-2 py-1 text-[10px] text-red-500 hover:bg-red-500/20"
+        >
+          Remove
+        </button>
+      )}
+    </div>
+  );
+}
+
 function SectionEditor({ section, index, onChange, onDelete, onMove, isFirst, isLast }: {
   section: CaseStudySection;
   index: number;
@@ -644,6 +700,15 @@ function SectionEditor({ section, index, onChange, onDelete, onMove, isFirst, is
                   next[j] = { ...next[j], src: e.target.value };
                   onChange({ images: next });
                 }}
+              />
+              <ImageUploader
+                value={img.src}
+                onUpload={(url) => {
+                  const next = [...(section.images || [])];
+                  next[j] = { ...next[j], src: url };
+                  onChange({ images: next });
+                }}
+                label="Upload image"
               />
               <input
                 placeholder="Caption (optional)"

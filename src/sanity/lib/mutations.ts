@@ -4,6 +4,11 @@ import { projectId, dataset } from "@/sanity/env";
 import type { CaseStudy, CaseStudySection } from "@/lib/cms";
 import type { ArchiveItem, TimelineItem, Resume } from "@/lib/data";
 
+export async function uploadImage(file: File): Promise<string> {
+  const asset = await client.assets.upload("image", file);
+  return asset.url;
+}
+
 function sanitizeId(str: string): string {
   return str.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "") || "untitled";
 }
@@ -40,9 +45,9 @@ export async function syncAllToSanity(works: CaseStudy[], archive: ArchiveItem[]
     resumes ? client.fetch(resumesQuery).catch(() => []) : [],
   ]);
 
-  const csMap = new Map((existingCaseStudies || []).map((c: any) => [c._id, c]));
-  const archMap = new Map((existingArchive || []).map((a: any) => [a._id, a]));
-  const tlMap = new Map((existingTimeline || []).map((t: any) => [t._id, t]));
+  const csMap = new Map<string, any>((existingCaseStudies || []).map((c: any) => [c._id, c]));
+  const archMap = new Map<string, any>((existingArchive || []).map((a: any) => [a._id, a]));
+  const tlMap = new Map<string, any>((existingTimeline || []).map((t: any) => [t._id, t]));
 
   const tx = client.transaction();
 
@@ -86,7 +91,7 @@ export async function syncAllToSanity(works: CaseStudy[], archive: ArchiveItem[]
       number: parseInt(work.n) || 0,
       year: work.year,
       kicker: work.kicker,
-      coverImage: existing?.coverImage || undefined,
+      coverImage: resolveImage(work.img, existing?.coverImage),
       role: work.role,
       summary: work.summary,
       outcomes: work.outcomes.map((o) => ({ label: o.k, value: o.v })),
@@ -114,7 +119,7 @@ export async function syncAllToSanity(works: CaseStudy[], archive: ArchiveItem[]
       year: item.year,
       medium: item.medium,
       aspectRatio: item.ratio,
-      image: existing?.image || undefined,
+      image: resolveImage(item.src, existing?.image),
       orderRank: i,
     });
   }
@@ -136,7 +141,7 @@ export async function syncAllToSanity(works: CaseStudy[], archive: ArchiveItem[]
 
   const savedResumeIds = new Set<string>();
   if (resumes) {
-    const resumeMap = new Map((existingResumes || []).map((r: any) => [r._id, r]));
+    const resumeMap = new Map<string, any>((existingResumes || []).map((r: any) => [r._id, r]));
     for (let i = 0; i < resumes.length; i++) {
       const r = resumes[i];
       const id = `resume-${sanitizeId(r.role)}`;
