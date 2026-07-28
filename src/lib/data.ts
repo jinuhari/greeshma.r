@@ -143,7 +143,7 @@ function adaptSanityCaseStudy(s: any): CaseStudy {
     sections: (s.sections || []).map((sec: any) => {
       if (sec._type === "textSection") return { type: "text" as const, title: sec.title, content: sec.content };
       if (sec._type === "imageSection") return { type: (sec.fullBleed ? "full-bleed" : "image") as any, images: [{ src: sec.image ? urlFor(sec.image).width(1200).url() : "", caption: sec.caption || "", _ref: sec.image?.asset?._ref || undefined }] };
-      if (sec._type === "imageTextSection") return { type: "image-text" as const, title: sec.title, content: sec.content, images: [{ src: sec.image ? urlFor(sec.image).width(800).url() : "", _ref: sec.image?.asset?._ref || undefined }], imagePosition: sec.imagePosition || "left" };
+      if (sec._type === "imageTextSection") return { type: "image-text" as const, title: sec.title, content: sec.content, images: [{ src: sec.image ? urlFor(sec.image).width(1200).url() : "", _ref: sec.image?.asset?._ref || undefined }], imagePosition: sec.imagePosition || "left" };
       return { type: "text" as const, content: "" };
     }),
   };
