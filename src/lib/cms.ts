@@ -11,6 +11,7 @@ export interface Outcome {
 export interface MediaItem {
   src: string;
   caption?: string;
+  _ref?: string;
 }
 
 export type SectionType = "text" | "image" | "image-text" | "full-bleed";
@@ -30,6 +31,7 @@ export interface CaseStudy {
   title: string;
   kicker: string;
   img: string;
+  imgRef?: string;
   role: string;
   summary: string;
   outcomes: Outcome[];

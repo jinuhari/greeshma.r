@@ -196,9 +196,9 @@ export function CmsPanel({
                   </div>
                   <ImageUploader
                     value={item.src}
-                    onUpload={(url) => {
+                    onUpload={(url, _ref) => {
                       const next = [...archive];
-                      next[i] = { ...next[i], src: url };
+                      next[i] = { ...next[i], src: url, imageRef: _ref || undefined };
                       setArchive(next);
                     }}
                     label="Upload image"
@@ -500,7 +500,7 @@ function WorkEditor({ work, onChange, onBack }: { work: CaseStudy; onChange: (pa
           value={work.img}
           onChange={e => set({ img: e.target.value })}
         />
-        <ImageUploader value={work.img} onUpload={(url) => set({ img: url })} label="Upload cover image" />
+        <ImageUploader value={work.img} onUpload={(url, _ref) => set({ img: url, imgRef: _ref || undefined })} label="Upload cover image" />
       </Field>
 
       <Field label="Role">
@@ -582,7 +582,7 @@ function WorkEditor({ work, onChange, onBack }: { work: CaseStudy; onChange: (pa
   );
 }
 
-function ImageUploader({ value, onUpload, label }: { value?: string; onUpload: (url: string) => void; label?: string }) {
+function ImageUploader({ value, onUpload, label }: { value?: string; onUpload: (url: string, _ref?: string) => void; label?: string }) {
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -591,8 +591,8 @@ function ImageUploader({ value, onUpload, label }: { value?: string; onUpload: (
     if (!file) return;
     setUploading(true);
     try {
-      const url = await uploadImage(file);
-      onUpload(url);
+      const result = await uploadImage(file);
+      onUpload(result.url, result._ref);
     } catch (err) {
       console.error("Upload failed", err);
     } finally {
@@ -715,15 +715,15 @@ function SectionEditor({ section, index, onChange, onDelete, onMove, isFirst, is
                 }}
               />
               <div className="mt-1">
-                <ImageUploader
-                  value={img.src}
-                  onUpload={(url) => {
-                    const next = [...(section.images || [])];
-                    next[j] = { ...next[j], src: url };
-                    onChange({ images: next });
-                  }}
-                  label="Upload"
-                />
+              <ImageUploader
+                value={img.src}
+                onUpload={(url, _ref) => {
+                  const next = [...(section.images || [])];
+                  next[j] = { ...next[j], src: url, _ref: _ref || undefined };
+                  onChange({ images: next });
+                }}
+                label="Upload"
+              />
               </div>
               <input
                 placeholder="Caption (optional)"
@@ -749,7 +749,7 @@ function SectionEditor({ section, index, onChange, onDelete, onMove, isFirst, is
               <p className="mb-2 text-[10px] text-muted-foreground">No images yet</p>
               <ImageUploader
                 value=""
-                onUpload={(url) => onChange({ images: [{ src: url, caption: "" }] })}
+                onUpload={(url, _ref) => onChange({ images: [{ src: url, caption: "", _ref: _ref || undefined }] })}
                 label="Upload from device"
               />
             </div>

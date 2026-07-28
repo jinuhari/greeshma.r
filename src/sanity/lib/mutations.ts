@@ -4,9 +4,9 @@ import { projectId, dataset } from "@/sanity/env";
 import type { CaseStudy, CaseStudySection } from "@/lib/cms";
 import type { ArchiveItem, TimelineItem, Resume } from "@/lib/data";
 
-export async function uploadImage(file: File): Promise<string> {
+export async function uploadImage(file: File): Promise<{ url: string; _ref: string }> {
   const asset = await client.assets.upload("image", file);
-  return asset.url;
+  return { url: asset.url, _ref: asset._id };
 }
 
 function sanitizeId(str: string): string {
@@ -30,7 +30,12 @@ function urlToAssetRef(url: string): { _type: "image"; asset: { _ref: string } }
   return { _type: "image", asset: { _ref: ref } };
 }
 
-function resolveImage(url: string | undefined, existing: any): any {
+function resolveImage(value: string | { url: string; _ref?: string } | undefined, existing: any): any {
+  if (!value) return existing || undefined;
+  if (typeof value === "object" && value._ref) {
+    return { _type: "image", asset: { _ref: value._ref } };
+  }
+  const url = typeof value === "string" ? value : value.url;
   if (!url) return existing || undefined;
   const ref = urlToAssetRef(url);
   if (ref) return ref;
@@ -63,20 +68,22 @@ export async function syncAllToSanity(works: CaseStudy[], archive: ArchiveItem[]
         return { _type: "textSection", title: s.title, content: s.content, _key: existingSections[i]?._key };
       }
       if (s.type === "image" || s.type === "full-bleed") {
+        const imgItem = s.images?.[0];
         return {
           _type: "imageSection",
-          image: resolveImage(s.images?.[0]?.src, existingSections[i]?.image),
-          caption: s.images?.[0]?.caption,
+          image: resolveImage(imgItem?._ref ? { url: imgItem.src, _ref: imgItem._ref } : imgItem?.src, existingSections[i]?.image),
+          caption: imgItem?.caption,
           fullBleed: s.type === "full-bleed",
           _key: existingSections[i]?._key,
         };
       }
       if (s.type === "image-text") {
+        const imgItem = s.images?.[0];
         return {
           _type: "imageTextSection",
           title: s.title,
           content: s.content,
-          image: resolveImage(s.images?.[0]?.src, existingSections[i]?.image),
+          image: resolveImage(imgItem?._ref ? { url: imgItem.src, _ref: imgItem._ref } : imgItem?.src, existingSections[i]?.image),
           imagePosition: s.imagePosition || "left",
           _key: existingSections[i]?._key,
         };
@@ -91,7 +98,7 @@ export async function syncAllToSanity(works: CaseStudy[], archive: ArchiveItem[]
       number: parseInt(work.n) || 0,
       year: work.year,
       kicker: work.kicker,
-      coverImage: resolveImage(work.img, existing?.coverImage),
+      coverImage: resolveImage(work.imgRef ? { url: work.img, _ref: work.imgRef } : work.img, existing?.coverImage),
       role: work.role,
       summary: work.summary,
       outcomes: work.outcomes.map((o) => ({ label: o.k, value: o.v })),
@@ -119,7 +126,7 @@ export async function syncAllToSanity(works: CaseStudy[], archive: ArchiveItem[]
       year: item.year,
       medium: item.medium,
       aspectRatio: item.ratio,
-      image: resolveImage(item.src, existing?.image),
+      image: resolveImage(item.imageRef ? { url: item.src, _ref: item.imageRef } : item.src, existing?.image),
       orderRank: i,
     });
   }

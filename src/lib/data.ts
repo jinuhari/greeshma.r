@@ -16,6 +16,7 @@ export interface ArchiveItem {
   year: string;
   medium: string;
   ratio: string;
+  imageRef?: string;
 }
 
 export interface TimelineItem {
@@ -122,6 +123,7 @@ export const defaultTimeline: TimelineItem[] = [
 ];
 
 function adaptSanityCaseStudy(s: any): CaseStudy {
+  const coverRef = s.coverImage?.asset?._ref;
   return {
     slug: s.slug?.current || "",
     n: String(s.number || "").padStart(2, "0"),
@@ -129,6 +131,7 @@ function adaptSanityCaseStudy(s: any): CaseStudy {
     title: s.title || "",
     kicker: s.kicker || "",
     img: s.coverImage ? urlFor(s.coverImage).width(1200).url() : "",
+    imgRef: coverRef || undefined,
     role: s.role || "",
     summary: s.summary || "",
     outcomes: (s.outcomes || []).map((o: any) => ({ k: o.label || "", v: o.value || "" })),
@@ -139,8 +142,8 @@ function adaptSanityCaseStudy(s: any): CaseStudy {
     liveUrl: s.liveUrl || "",
     sections: (s.sections || []).map((sec: any) => {
       if (sec._type === "textSection") return { type: "text" as const, title: sec.title, content: sec.content };
-      if (sec._type === "imageSection") return { type: (sec.fullBleed ? "full-bleed" : "image") as any, images: [{ src: sec.image ? urlFor(sec.image).width(1200).url() : "", caption: sec.caption || "" }] };
-      if (sec._type === "imageTextSection") return { type: "image-text" as const, title: sec.title, content: sec.content, images: [{ src: sec.image ? urlFor(sec.image).width(800).url() : "" }], imagePosition: sec.imagePosition || "left" };
+      if (sec._type === "imageSection") return { type: (sec.fullBleed ? "full-bleed" : "image") as any, images: [{ src: sec.image ? urlFor(sec.image).width(1200).url() : "", caption: sec.caption || "", _ref: sec.image?.asset?._ref || undefined }] };
+      if (sec._type === "imageTextSection") return { type: "image-text" as const, title: sec.title, content: sec.content, images: [{ src: sec.image ? urlFor(sec.image).width(800).url() : "", _ref: sec.image?.asset?._ref || undefined }], imagePosition: sec.imagePosition || "left" };
       return { type: "text" as const, content: "" };
     }),
   };
@@ -208,6 +211,7 @@ export async function loadArchiveFromSanity(): Promise<ArchiveItem[]> {
       year: item.year || "",
       medium: item.medium || "",
       ratio: item.aspectRatio || "aspect-[3/4]",
+      imageRef: item.image?.asset?._ref || undefined,
     })).filter((i: ArchiveItem) => i.label);
     if (adapted.length === 0) {
       console.warn("[Sanity] All archive items filtered out, using static defaults");
