@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { X } from "lucide-react";
 import { syncAllToSanity, uploadImage } from "@/sanity/lib/mutations";
 import type { CaseStudy, CaseStudySection, Outcome, SectionType } from "@/lib/cms";
 import type { ArchiveItem, TimelineItem, Resume } from "@/lib/data";
@@ -89,7 +90,7 @@ export function CmsPanel({
               {saving ? "Saving..." : saved ? "Saved \u2713" : "Save to Sanity"}
             </button>
             <button onClick={onClose} className="text-xs tracking-[0.2em] uppercase text-muted-foreground hover:text-foreground">
-              Close \u2715
+              Close <X className="h-3 w-3" />
             </button>
           </div>
         </div>
@@ -153,7 +154,7 @@ export function CmsPanel({
                       onClick={() => setWorks(works.filter((_, j) => j !== i))}
                       className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500/10 text-[10px] text-red-500 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-500/20"
                     >
-                      \u2715
+                      <X className="h-3 w-3" />
                     </button>
                   </div>
                 ))}
@@ -239,7 +240,7 @@ export function CmsPanel({
                       onClick={() => setTimeline(timeline.filter((_, j) => j !== i))}
                       className="mt-0.5 text-xs text-muted-foreground hover:text-red-500"
                     >
-                      \u2715
+                      <X className="h-3 w-3" />
                     </button>
                   </div>
                 </div>
@@ -554,7 +555,7 @@ function WorkEditor({ work, onChange, onBack }: { work: CaseStudy; onChange: (pa
                 value={o.v}
                 onChange={e => updOutcome(i, o.k, e.target.value)}
               />
-              <button onClick={() => delOutcome(i)} className="text-xs text-muted-foreground hover:text-red-500">\u2715</button>
+              <button onClick={() => delOutcome(i)} className="text-xs text-muted-foreground hover:text-red-500"><X className="h-3 w-3" /></button>
             </div>
           ))}
         </div>
@@ -644,7 +645,7 @@ function SectionEditor({ section, index, onChange, onDelete, onMove, isFirst, is
         <div className="flex items-center gap-1">
           <button onClick={() => onMove(-1)} disabled={isFirst} className="text-xs text-muted-foreground disabled:opacity-30">\u2191</button>
           <button onClick={() => onMove(1)} disabled={isLast} className="text-xs text-muted-foreground disabled:opacity-30">\u2193</button>
-          <button onClick={onDelete} className="ml-2 text-xs text-muted-foreground hover:text-red-500">\u2715</button>
+          <button onClick={onDelete} className="ml-2 text-xs text-muted-foreground hover:text-red-500"><X className="h-3 w-3" /></button>
         </div>
       </div>
 
@@ -701,7 +702,7 @@ function SectionEditor({ section, index, onChange, onDelete, onMove, isFirst, is
                   }}
                   className="text-xs text-muted-foreground hover:text-red-500"
                 >
-                  \u2715
+                  <X className="h-3 w-3" />
                 </button>
               </div>
               <input
