@@ -182,9 +182,9 @@ function CaseStudyContent({ work }: { work: CaseStudy }) {
 function SectionRenderer({ section }: { section: import("@/lib/cms").CaseStudySection }) {
   if (section.type === "image") {
     return (
-      <section className="mb-20 last:mb-0">
+      <section className="mx-auto max-w-[1440px] px-6 py-24 md:px-12 md:py-32">
         {section.images?.map((img, i) => (
-          <figure key={i} className="mx-auto max-w-3xl">
+          <figure key={i} className="last:mb-0">
             <div className="overflow-hidden rounded-lg bg-muted">
               <img src={img.src} alt={img.caption || ""} className="w-full object-cover" />
             </div>
