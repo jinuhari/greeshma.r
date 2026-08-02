@@ -101,13 +101,9 @@ function CaseStudyHero({ work }: { work: CaseStudy }) {
             <p className="eyebrow">
               {work.year} — {work.kicker}
             </p>
-            <h1 className="editorial-h mt-6 text-5xl md:text-7xl lg:text-8xl">
-              {work.title}
-            </h1>
+            <h1 className="editorial-h mt-6 text-5xl md:text-7xl lg:text-8xl">{work.title}</h1>
             <p className="mt-6 text-sm text-muted-foreground">{work.role}</p>
-            <p className="mt-4 max-w-lg text-base leading-relaxed md:text-lg">
-              {work.summary}
-            </p>
+            <p className="mt-4 max-w-lg text-base leading-relaxed md:text-lg">{work.summary}</p>
             <div className="mt-8 flex flex-wrap gap-3">
               {work.client && (
                 <span
@@ -152,11 +148,17 @@ function CaseStudyContent({ work }: { work: CaseStudy }) {
             </div>
           ))}
         </dl>
+      </div>
 
+      {/* Keep the editorial copy easy to read, while letting every visual use the
+          full case-study canvas. */}
+      <div className="case-study-sections">
         {work.sections.map((section, i) => (
           <SectionRenderer key={i} section={section} />
         ))}
+      </div>
 
+      <div className="mx-auto max-w-3xl">
         {work.tools && work.tools.length > 0 && (
           <div className="border-t border-border pt-12">
             <h3 className="text-[10px] tracking-[0.2em] text-muted-foreground uppercase">
@@ -182,14 +184,16 @@ function CaseStudyContent({ work }: { work: CaseStudy }) {
 function SectionRenderer({ section }: { section: import("@/lib/cms").CaseStudySection }) {
   if (section.type === "image") {
     return (
-      <section className="w-full">
+      <section className="case-study-media mb-20 last:mb-0">
         {section.images?.map((img, i) => (
           <figure key={i} className="relative">
             <div className="overflow-hidden rounded-lg bg-muted">
               <img src={img.src} alt={img.caption || ""} className="w-full object-cover" />
             </div>
             {img.caption && (
-              <figcaption className="mt-3 px-6 text-center text-xs text-muted-foreground md:px-12">{img.caption}</figcaption>
+              <figcaption className="mt-3 px-6 text-center text-xs text-muted-foreground md:px-12">
+                {img.caption}
+              </figcaption>
             )}
           </figure>
         ))}
@@ -199,14 +203,16 @@ function SectionRenderer({ section }: { section: import("@/lib/cms").CaseStudySe
 
   if (section.type === "full-bleed") {
     return (
-      <section className="relative mb-20 last:mb-0 mx-auto max-w-[1440px] px-0">
+      <section className="case-study-media mb-20 last:mb-0">
         {section.images?.map((img, i) => (
           <figure key={i} className="relative">
             <div className="overflow-hidden rounded-lg bg-muted">
               <img src={img.src} alt={img.caption || ""} className="w-full object-cover" />
             </div>
             {img.caption && (
-              <figcaption className="mt-3 px-6 text-center text-xs text-muted-foreground md:px-12">{img.caption}</figcaption>
+              <figcaption className="mt-3 px-6 text-center text-xs text-muted-foreground md:px-12">
+                {img.caption}
+              </figcaption>
             )}
           </figure>
         ))}
@@ -217,14 +223,18 @@ function SectionRenderer({ section }: { section: import("@/lib/cms").CaseStudySe
   if (section.type === "image-text") {
     const pos = section.imagePosition || "left";
     return (
-      <section className="mb-20 last:mb-0 mx-auto max-w-5xl">
+      <section className="mb-20 last:mb-0 w-full">
         <div className={`grid items-center gap-10 md:grid-cols-2 ${pos === "right" ? "" : ""}`}>
           {pos === "right" ? (
             <>
               <div>
-                {section.title && <h2 className="font-display text-3xl md:text-4xl">{section.title}</h2>}
+                {section.title && (
+                  <h2 className="font-display text-3xl md:text-4xl">{section.title}</h2>
+                )}
                 {section.title && <div className="mt-4 h-px w-12 bg-accent" />}
-                <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">{section.content}</p>
+                <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
+                  {section.content}
+                </p>
               </div>
               {section.images?.[0] && (
                 <div className="overflow-hidden rounded-lg bg-muted">
@@ -240,9 +250,13 @@ function SectionRenderer({ section }: { section: import("@/lib/cms").CaseStudySe
                 </div>
               )}
               <div>
-                {section.title && <h2 className="font-display text-3xl md:text-4xl">{section.title}</h2>}
+                {section.title && (
+                  <h2 className="font-display text-3xl md:text-4xl">{section.title}</h2>
+                )}
                 {section.title && <div className="mt-4 h-px w-12 bg-accent" />}
-                <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">{section.content}</p>
+                <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
+                  {section.content}
+                </p>
               </div>
             </>
           )}
@@ -256,13 +270,21 @@ function SectionRenderer({ section }: { section: import("@/lib/cms").CaseStudySe
       {section.title && <h2 className="font-display text-3xl md:text-4xl">{section.title}</h2>}
       {section.title && <div className="mt-6 h-px w-12 bg-accent" />}
       {section.content && (
-        <p className="mt-6 text-base leading-relaxed text-muted-foreground md:text-lg">{section.content}</p>
+        <p className="mt-6 text-base leading-relaxed text-muted-foreground md:text-lg">
+          {section.content}
+        </p>
       )}
     </section>
   );
 }
 
-function CaseStudyFooter({ work, allWorks: _allWorks }: { work: CaseStudy; allWorks: CaseStudy[] }) {
+function CaseStudyFooter({
+  work,
+  allWorks: _allWorks,
+}: {
+  work: CaseStudy;
+  allWorks: CaseStudy[];
+}) {
   const allWorks = _allWorks;
   const currentIndex = allWorks.findIndex((w) => w.slug === work.slug);
   const prev = currentIndex > 0 ? allWorks[currentIndex - 1] : allWorks[allWorks.length - 1];
