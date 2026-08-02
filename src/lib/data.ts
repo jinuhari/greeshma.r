@@ -6,7 +6,12 @@ import archive4 from "@/assets/archive-4.jpg";
 import archive5 from "@/assets/archive-5.jpg";
 import archive6 from "@/assets/archive-6.jpg";
 import { client } from "@/sanity/lib/client";
-import { caseStudiesQuery, archiveItemsQuery, timelineItemsQuery, caseStudyBySlugQuery } from "@/sanity/lib/queries";
+import {
+  caseStudiesQuery,
+  archiveItemsQuery,
+  timelineItemsQuery,
+  caseStudyBySlugQuery,
+} from "@/sanity/lib/queries";
 import { urlFor } from "@/sanity/lib/image";
 
 export interface ArchiveItem {
@@ -36,89 +41,250 @@ export function defaultResumes(): Resume[] {
     {
       role: "Visual Design",
       global: true,
-      json: JSON.stringify({
-        name: "Greeshma R",
-        title: "Visual Designer",
-        summary: "Multidisciplinary visual designer with 11+ years of experience across editorial, brand, illustration, and digital product surfaces.",
-        experience: [
-          { company: "Udaan", role: "Associate Manager, Visual Designer — UI", period: "2023 — Present", highlights: ["Brand campaigns", "Visual system design", "Design operations"] },
-          { company: "Suzuki Innovation Centre", role: "Design Consultant", period: "2021 — 2022", highlights: ["Mobility interfaces", "User research", "Prototyping"] },
-        ],
-        education: [
-          { degree: "M.Des Interaction Design", school: "IIT Hyderabad", year: "2020" },
-          { degree: "BFA Applied Arts", school: "Bangalore University", year: "2016" },
-        ],
-        skills: ["Typography", "Layout", "Color Theory", "Iconography", "Illustration", "Brand Identity", "Editorial Design", "Motion Design"],
-      }, null, 2),
+      json: JSON.stringify(
+        {
+          name: "Greeshma R",
+          title: "Visual Designer",
+          summary:
+            "Multidisciplinary visual designer with 11+ years of experience across editorial, brand, illustration, and digital product surfaces.",
+          experience: [
+            {
+              company: "Udaan",
+              role: "Associate Manager, Visual Designer — UI",
+              period: "2023 — Present",
+              highlights: ["Brand campaigns", "Visual system design", "Design operations"],
+            },
+            {
+              company: "Suzuki Innovation Centre",
+              role: "Design Consultant",
+              period: "2021 — 2022",
+              highlights: ["Mobility interfaces", "User research", "Prototyping"],
+            },
+          ],
+          education: [
+            { degree: "M.Des Interaction Design", school: "IIT Hyderabad", year: "2020" },
+            { degree: "BFA Applied Arts", school: "Bangalore University", year: "2016" },
+          ],
+          skills: [
+            "Typography",
+            "Layout",
+            "Color Theory",
+            "Iconography",
+            "Illustration",
+            "Brand Identity",
+            "Editorial Design",
+            "Motion Design",
+          ],
+        },
+        null,
+        2,
+      ),
     },
     {
       role: "UI Design",
-      json: JSON.stringify({
-        name: "Greeshma R",
-        title: "UI / Product Designer",
-        summary: "Product designer focused on mobile and web interfaces with a strong foundation in interaction design, design systems, and user research.",
-        experience: [
-          { company: "Udaan", role: "Associate Manager, Visual Designer — UI", period: "2023 — Present", highlights: ["Mobile app design", "Design system (240+ tokens)", "Campaign systems"] },
-          { company: "Tomodachi", role: "Lead Interaction Designer", period: "2023", highlights: ["Android app", "UX research", "Usability testing"] },
-        ],
-        education: [
-          { degree: "M.Des Interaction Design", school: "IIT Hyderabad", year: "2020" },
-        ],
-        skills: ["UI Design", "Interaction Design", "Prototyping", "Design Systems", "Accessibility", "Figma", "Principle", "Framer"],
-      }, null, 2),
+      json: JSON.stringify(
+        {
+          name: "Greeshma R",
+          title: "UI / Product Designer",
+          summary:
+            "Product designer focused on mobile and web interfaces with a strong foundation in interaction design, design systems, and user research.",
+          experience: [
+            {
+              company: "Udaan",
+              role: "Associate Manager, Visual Designer — UI",
+              period: "2023 — Present",
+              highlights: ["Mobile app design", "Design system (240+ tokens)", "Campaign systems"],
+            },
+            {
+              company: "Tomodachi",
+              role: "Lead Interaction Designer",
+              period: "2023",
+              highlights: ["Android app", "UX research", "Usability testing"],
+            },
+          ],
+          education: [
+            { degree: "M.Des Interaction Design", school: "IIT Hyderabad", year: "2020" },
+          ],
+          skills: [
+            "UI Design",
+            "Interaction Design",
+            "Prototyping",
+            "Design Systems",
+            "Accessibility",
+            "Figma",
+            "Principle",
+            "Framer",
+          ],
+        },
+        null,
+        2,
+      ),
     },
     {
       role: "Product Design",
-      json: JSON.stringify({
-        name: "Greeshma R",
-        title: "Product Designer",
-        summary: "End-to-end product designer with experience across B2B commerce, mobile applications, and design systems at scale.",
-        experience: [
-          { company: "Udaan", role: "Associate Manager, Visual Designer — UI", period: "2023 — Present", highlights: ["B2B commerce platform", "Design system governance", "Cross-functional collaboration"] },
-          { company: "IISc NDIN", role: "Design Researcher", period: "2022", highlights: ["Field research", "Participatory design", "Artefact documentation"] },
-        ],
-        education: [
-          { degree: "M.Des Interaction Design", school: "IIT Hyderabad", year: "2020" },
-        ],
-        skills: ["Product Strategy", "UX Research", "Interaction Design", "Design Systems", "Prototyping", "Visual Design", "Stakeholder Management"],
-      }, null, 2),
+      json: JSON.stringify(
+        {
+          name: "Greeshma R",
+          title: "Product Designer",
+          summary:
+            "End-to-end product designer with experience across B2B commerce, mobile applications, and design systems at scale.",
+          experience: [
+            {
+              company: "Udaan",
+              role: "Associate Manager, Visual Designer — UI",
+              period: "2023 — Present",
+              highlights: [
+                "B2B commerce platform",
+                "Design system governance",
+                "Cross-functional collaboration",
+              ],
+            },
+            {
+              company: "IISc NDIN",
+              role: "Design Researcher",
+              period: "2022",
+              highlights: ["Field research", "Participatory design", "Artefact documentation"],
+            },
+          ],
+          education: [
+            { degree: "M.Des Interaction Design", school: "IIT Hyderabad", year: "2020" },
+          ],
+          skills: [
+            "Product Strategy",
+            "UX Research",
+            "Interaction Design",
+            "Design Systems",
+            "Prototyping",
+            "Visual Design",
+            "Stakeholder Management",
+          ],
+        },
+        null,
+        2,
+      ),
     },
     {
       role: "Creative Associate / Design",
-      json: JSON.stringify({
-        name: "Greeshma R",
-        title: "Creative Associate",
-        summary: "Creative professional bridging design, research, and production — experienced in campaign execution, brand building, and cross-disciplinary collaboration.",
-        experience: [
-          { company: "Udaan", role: "Associate Manager, Visual Designer — UI", period: "2023 — Present", highlights: ["Campaign design & production", "Brand collateral", "Cross-team collaboration"] },
-          { company: "Qualin Wellness", role: "Brand & Visual Designer", period: "2023", highlights: ["Brand identity", "Guidelines (64 pages)", "Packaging design"] },
-        ],
-        education: [
-          { degree: "M.Des Interaction Design", school: "IIT Hyderabad", year: "2020" },
-          { degree: "BFA Applied Arts", school: "Bangalore University", year: "2016" },
-        ],
-        skills: ["Brand Identity", "Campaign Design", "Art Direction", "Illustration", "Typography", "Packaging", "Motion Design", "Team Collaboration"],
-      }, null, 2),
+      json: JSON.stringify(
+        {
+          name: "Greeshma R",
+          title: "Creative Associate",
+          summary:
+            "Creative professional bridging design, research, and production — experienced in campaign execution, brand building, and cross-disciplinary collaboration.",
+          experience: [
+            {
+              company: "Udaan",
+              role: "Associate Manager, Visual Designer — UI",
+              period: "2023 — Present",
+              highlights: [
+                "Campaign design & production",
+                "Brand collateral",
+                "Cross-team collaboration",
+              ],
+            },
+            {
+              company: "Qualin Wellness",
+              role: "Brand & Visual Designer",
+              period: "2023",
+              highlights: ["Brand identity", "Guidelines (64 pages)", "Packaging design"],
+            },
+          ],
+          education: [
+            { degree: "M.Des Interaction Design", school: "IIT Hyderabad", year: "2020" },
+            { degree: "BFA Applied Arts", school: "Bangalore University", year: "2016" },
+          ],
+          skills: [
+            "Brand Identity",
+            "Campaign Design",
+            "Art Direction",
+            "Illustration",
+            "Typography",
+            "Packaging",
+            "Motion Design",
+            "Team Collaboration",
+          ],
+        },
+        null,
+        2,
+      ),
     },
   ];
 }
 
 export const defaultArchive: ArchiveItem[] = [
-  { src: archive1, label: "Kalighat, revisited", cat: "Illustration", year: "2024", medium: "Digital gouache", ratio: "aspect-[3/4]" },
-  { src: archive2, label: "AN/AW", cat: "Typography", year: "2023", medium: "Poster series", ratio: "aspect-[3/4]" },
-  { src: archive3, label: "Rosa damascena", cat: "Fine Art", year: "2024", medium: "Watercolour on paper", ratio: "aspect-[3/4]" },
-  { src: archive4, label: "Artisan Tea", cat: "Packaging", year: "2023", medium: "Kraft & foil print", ratio: "aspect-[1/1]" },
-  { src: archive5, label: "Bengaluru, 07:14", cat: "Photography", year: "2023", medium: "35mm film", ratio: "aspect-[3/4]" },
-  { src: archive6, label: "Kalamkari matrix", cat: "Pattern", year: "2022", medium: "Repeat print", ratio: "aspect-[1/1]" },
+  {
+    src: archive1,
+    label: "Kalighat, revisited",
+    cat: "Illustration",
+    year: "2024",
+    medium: "Digital gouache",
+    ratio: "aspect-[3/4]",
+  },
+  {
+    src: archive2,
+    label: "AN/AW",
+    cat: "Typography",
+    year: "2023",
+    medium: "Poster series",
+    ratio: "aspect-[3/4]",
+  },
+  {
+    src: archive3,
+    label: "Rosa damascena",
+    cat: "Fine Art",
+    year: "2024",
+    medium: "Watercolour on paper",
+    ratio: "aspect-[3/4]",
+  },
+  {
+    src: archive4,
+    label: "Artisan Tea",
+    cat: "Packaging",
+    year: "2023",
+    medium: "Kraft & foil print",
+    ratio: "aspect-[1/1]",
+  },
+  {
+    src: archive5,
+    label: "Bengaluru, 07:14",
+    cat: "Photography",
+    year: "2023",
+    medium: "35mm film",
+    ratio: "aspect-[3/4]",
+  },
+  {
+    src: archive6,
+    label: "Kalamkari matrix",
+    cat: "Pattern",
+    year: "2022",
+    medium: "Repeat print",
+    ratio: "aspect-[1/1]",
+  },
 ];
 
 export const defaultTimeline: TimelineItem[] = [
   { year: "2013", title: "Fine Arts", where: "Where it began — canvas, pigment, patience." },
-  { year: "2016", title: "Graphic Design", where: "Learning to speak in systems, grids and voice." },
+  {
+    year: "2016",
+    title: "Graphic Design",
+    where: "Learning to speak in systems, grids and voice.",
+  },
   { year: "2018", title: "Film Production", where: "Directing frame, light and story." },
-  { year: "2020", title: "M.Des Interaction Design", where: "IIT Hyderabad — from artefact to interface." },
-  { year: "2021", title: "Suzuki Innovation Centre", where: "Designing mobility for the road ahead." },
-  { year: "2022", title: "IISc — National Design Innovation Network", where: "Field research with weaving communities." },
+  {
+    year: "2020",
+    title: "M.Des Interaction Design",
+    where: "IIT Hyderabad — from artefact to interface.",
+  },
+  {
+    year: "2021",
+    title: "Suzuki Innovation Centre",
+    where: "Designing mobility for the road ahead.",
+  },
+  {
+    year: "2022",
+    title: "IISc — National Design Innovation Network",
+    where: "Field research with weaving communities.",
+  },
   { year: "2023", title: "Udaan", where: "Associate Manager, Visual Designer — UI." },
 ];
 
@@ -134,6 +300,7 @@ function adaptSanityCaseStudy(s: any): CaseStudy {
     imgRef: coverRef || undefined,
     role: s.role || "",
     summary: s.summary || "",
+    categories: s.categories || [],
     outcomes: (s.outcomes || []).map((o: any) => ({ k: o.label || "", v: o.value || "" })),
     tone: s.tone || "terracotta",
     client: s.client || "",
@@ -141,15 +308,41 @@ function adaptSanityCaseStudy(s: any): CaseStudy {
     tools: s.tools || [],
     liveUrl: s.liveUrl || "",
     sections: (s.sections || []).map((sec: any) => {
-      if (sec._type === "textSection") return { type: "text" as const, title: sec.title, content: sec.content };
-      if (sec._type === "imageSection") return { type: (sec.fullBleed ? "full-bleed" : "image") as any, images: [{ src: sec.image ? urlFor(sec.image).width(1200).url() : "", caption: sec.caption || "", _ref: sec.image?.asset?._ref || undefined }] };
-      if (sec._type === "imageTextSection") return { type: "image-text" as const, title: sec.title, content: sec.content, images: [{ src: sec.image ? urlFor(sec.image).width(1200).url() : "", _ref: sec.image?.asset?._ref || undefined }], imagePosition: sec.imagePosition || "left" };
+      if (sec._type === "textSection")
+        return { type: "text" as const, title: sec.title, content: sec.content };
+      if (sec._type === "imageSection")
+        return {
+          type: (sec.fullBleed ? "full-bleed" : "image") as any,
+          images: [
+            {
+              src: sec.image ? urlFor(sec.image).width(1200).url() : "",
+              caption: sec.caption || "",
+              _ref: sec.image?.asset?._ref || undefined,
+            },
+          ],
+        };
+      if (sec._type === "imageTextSection")
+        return {
+          type: "image-text" as const,
+          title: sec.title,
+          content: sec.content,
+          images: [
+            {
+              src: sec.image ? urlFor(sec.image).width(1200).url() : "",
+              _ref: sec.image?.asset?._ref || undefined,
+            },
+          ],
+          imagePosition: sec.imagePosition || "left",
+        };
       return { type: "text" as const, content: "" };
     }),
   };
 }
 
-async function fetchFromSanity<T>(query: string, params?: Record<string, unknown>): Promise<T | null> {
+async function fetchFromSanity<T>(
+  query: string,
+  params?: Record<string, unknown>,
+): Promise<T | null> {
   try {
     const result: T = await client.fetch(query, params || {});
     return result ?? null;
@@ -204,15 +397,17 @@ export async function loadArchiveFromSanity(): Promise<ArchiveItem[]> {
       console.warn("[Sanity] No archive items found, using static defaults");
       return loadArchive();
     }
-    const adapted = result.map((item: any) => ({
-      src: item.image ? urlFor(item.image).width(600).url() : "",
-      label: item.label || "",
-      cat: item.category || "",
-      year: item.year || "",
-      medium: item.medium || "",
-      ratio: item.aspectRatio || "aspect-[3/4]",
-      imageRef: item.image?.asset?._ref || undefined,
-    })).filter((i: ArchiveItem) => i.label);
+    const adapted = result
+      .map((item: any) => ({
+        src: item.image ? urlFor(item.image).width(600).url() : "",
+        label: item.label || "",
+        cat: item.category || "",
+        year: item.year || "",
+        medium: item.medium || "",
+        ratio: item.aspectRatio || "aspect-[3/4]",
+        imageRef: item.image?.asset?._ref || undefined,
+      }))
+      .filter((i: ArchiveItem) => i.label);
     if (adapted.length === 0) {
       console.warn("[Sanity] All archive items filtered out, using static defaults");
       return loadArchive();
@@ -233,11 +428,13 @@ export async function loadTimelineFromSanity(): Promise<TimelineItem[]> {
   try {
     const result = await fetchFromSanity<any[]>(timelineItemsQuery);
     if (!result || result.length === 0) return loadTimeline();
-    const adapted = result.map((item: any) => ({
-      year: item.year || "",
-      title: item.title || "",
-      where: item.where || "",
-    })).filter((i: TimelineItem) => i.title);
+    const adapted = result
+      .map((item: any) => ({
+        year: item.year || "",
+        title: item.title || "",
+        where: item.where || "",
+      }))
+      .filter((i: TimelineItem) => i.title);
     return adapted.length > 0 ? adapted : loadTimeline();
   } catch (err) {
     console.error("[Sanity] Failed to load timeline:", err);

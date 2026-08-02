@@ -10,7 +10,12 @@ export async function uploadImage(file: File): Promise<{ url: string; _ref: stri
 }
 
 function sanitizeId(str: string): string {
-  return str.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "") || "untitled";
+  return (
+    str
+      .toLowerCase()
+      .replace(/[^a-z0-9-]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "untitled"
+  );
 }
 
 const SANITY_CDN_RE = new RegExp(
@@ -30,7 +35,10 @@ function urlToAssetRef(url: string): { _type: "image"; asset: { _ref: string } }
   return { _type: "image", asset: { _ref: ref } };
 }
 
-function resolveImage(value: string | { url: string; _ref?: string } | undefined, existing: any): any {
+function resolveImage(
+  value: string | { url: string; _ref?: string } | undefined,
+  existing: any,
+): any {
   if (!value) return existing || undefined;
   if (typeof value === "object" && value._ref) {
     return { _type: "image", asset: { _ref: value._ref } };
@@ -42,13 +50,19 @@ function resolveImage(value: string | { url: string; _ref?: string } | undefined
   return existing || undefined;
 }
 
-export async function syncAllToSanity(works: CaseStudy[], archive: ArchiveItem[], timeline: TimelineItem[], resumes?: Resume[]) {
-  const [existingCaseStudies, existingArchive, existingTimeline, existingResumes] = await Promise.all([
-    client.fetch(caseStudiesQuery).catch(() => []),
-    client.fetch(archiveItemsQuery).catch(() => []),
-    client.fetch(timelineItemsQuery).catch(() => []),
-    resumes ? client.fetch(resumesQuery).catch(() => []) : [],
-  ]);
+export async function syncAllToSanity(
+  works: CaseStudy[],
+  archive: ArchiveItem[],
+  timeline: TimelineItem[],
+  resumes?: Resume[],
+) {
+  const [existingCaseStudies, existingArchive, existingTimeline, existingResumes] =
+    await Promise.all([
+      client.fetch(caseStudiesQuery).catch(() => []),
+      client.fetch(archiveItemsQuery).catch(() => []),
+      client.fetch(timelineItemsQuery).catch(() => []),
+      resumes ? client.fetch(resumesQuery).catch(() => []) : [],
+    ]);
 
   const csMap = new Map<string, any>((existingCaseStudies || []).map((c: any) => [c._id, c]));
   const archMap = new Map<string, any>((existingArchive || []).map((a: any) => [a._id, a]));
@@ -65,13 +79,21 @@ export async function syncAllToSanity(works: CaseStudy[], archive: ArchiveItem[]
 
     const sections = work.sections.map((s: CaseStudySection, i: number) => {
       if (s.type === "text") {
-        return { _type: "textSection", title: s.title, content: s.content, _key: existingSections[i]?._key };
+        return {
+          _type: "textSection",
+          title: s.title,
+          content: s.content,
+          _key: existingSections[i]?._key,
+        };
       }
       if (s.type === "image" || s.type === "full-bleed") {
         const imgItem = s.images?.[0];
         return {
           _type: "imageSection",
-          image: resolveImage(imgItem?._ref ? { url: imgItem.src, _ref: imgItem._ref } : imgItem?.src, existingSections[i]?.image),
+          image: resolveImage(
+            imgItem?._ref ? { url: imgItem.src, _ref: imgItem._ref } : imgItem?.src,
+            existingSections[i]?.image,
+          ),
           caption: imgItem?.caption,
           fullBleed: s.type === "full-bleed",
           _key: existingSections[i]?._key,
@@ -83,7 +105,10 @@ export async function syncAllToSanity(works: CaseStudy[], archive: ArchiveItem[]
           _type: "imageTextSection",
           title: s.title,
           content: s.content,
-          image: resolveImage(imgItem?._ref ? { url: imgItem.src, _ref: imgItem._ref } : imgItem?.src, existingSections[i]?.image),
+          image: resolveImage(
+            imgItem?._ref ? { url: imgItem.src, _ref: imgItem._ref } : imgItem?.src,
+            existingSections[i]?.image,
+          ),
           imagePosition: s.imagePosition || "left",
           _key: existingSections[i]?._key,
         };
@@ -98,9 +123,13 @@ export async function syncAllToSanity(works: CaseStudy[], archive: ArchiveItem[]
       number: parseInt(work.n) || 0,
       year: work.year,
       kicker: work.kicker,
-      coverImage: resolveImage(work.imgRef ? { url: work.img, _ref: work.imgRef } : work.img, existing?.coverImage),
+      coverImage: resolveImage(
+        work.imgRef ? { url: work.img, _ref: work.imgRef } : work.img,
+        existing?.coverImage,
+      ),
       role: work.role,
       summary: work.summary,
+      categories: work.categories,
       outcomes: work.outcomes.map((o) => ({ label: o.k, value: o.v })),
       tone: work.tone,
       client: work.client,
@@ -126,7 +155,10 @@ export async function syncAllToSanity(works: CaseStudy[], archive: ArchiveItem[]
       year: item.year,
       medium: item.medium,
       aspectRatio: item.ratio,
-      image: resolveImage(item.imageRef ? { url: item.src, _ref: item.imageRef } : item.src, existing?.image),
+      image: resolveImage(
+        item.imageRef ? { url: item.src, _ref: item.imageRef } : item.src,
+        existing?.image,
+      ),
       orderRank: i,
     });
   }
@@ -162,13 +194,21 @@ export async function syncAllToSanity(works: CaseStudy[], archive: ArchiveItem[]
         orderRank: i,
       });
     }
-    for (const [id] of resumeMap) { if (!savedResumeIds.has(id)) tx.delete(id); }
+    for (const [id] of resumeMap) {
+      if (!savedResumeIds.has(id)) tx.delete(id);
+    }
   }
 
   // Delete items that were removed from the lists
-  for (const [id] of csMap) { if (!savedCsIds.has(id)) tx.delete(id); }
-  for (const [id] of archMap) { if (!savedArchIds.has(id)) tx.delete(id); }
-  for (const [id] of tlMap) { if (!savedTlIds.has(id)) tx.delete(id); }
+  for (const [id] of csMap) {
+    if (!savedCsIds.has(id)) tx.delete(id);
+  }
+  for (const [id] of archMap) {
+    if (!savedArchIds.has(id)) tx.delete(id);
+  }
+  for (const [id] of tlMap) {
+    if (!savedTlIds.has(id)) tx.delete(id);
+  }
 
   await tx.commit();
 }

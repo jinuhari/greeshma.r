@@ -34,6 +34,8 @@ export interface CaseStudy {
   imgRef?: string;
   role: string;
   summary: string;
+  /** Flexible taxonomy used to group work on the home page and in Sanity. */
+  categories: string[];
   outcomes: Outcome[];
   tone: string;
   sections: CaseStudySection[];
@@ -54,6 +56,7 @@ export const works: CaseStudy[] = [
     role: "Associate Manager, Visual Designer — UI",
     summary:
       "Reshaping India's largest B2B commerce app: a mobile experience, brand campaigns and a scalable visual system used across product surfaces.",
+    categories: ["UI/UX", "Visual Design"],
     outcomes: [
       { k: "Retail partners", v: "3M+" },
       { k: "Design system tokens", v: "240+" },
@@ -106,6 +109,7 @@ export const works: CaseStudy[] = [
     role: "Lead Interaction Designer",
     summary:
       "A companion app that teaches Japanese through daily rituals — grounded in ethnographic interviews and a soft, warm visual language.",
+    categories: ["UI/UX", "UX Research"],
     outcomes: [
       { k: "Study cohort", v: "42 learners" },
       { k: "Retention lift", v: "+38%" },
@@ -158,6 +162,7 @@ export const works: CaseStudy[] = [
     role: "Brand & Visual Designer",
     summary:
       "A quiet, considered identity for a wellness house — from wordmark to editorial guidelines to a full typographic system.",
+    categories: ["Graphic Design", "Visual Design", "Branding"],
     outcomes: [
       { k: "Wordmarks explored", v: "27" },
       { k: "Type pairings", v: "9" },
@@ -210,6 +215,7 @@ export const works: CaseStudy[] = [
     role: "Design Researcher, IISc NDIN",
     summary:
       "A participatory study with weaving communities in rural Karnataka — documenting practice, ritual and the everyday tools of a craft in transition.",
+    categories: ["UX Research", "Visual Design"],
     outcomes: [
       { k: "Field visits", v: "6 villages" },
       { k: "Interviews", v: "31" },
@@ -228,7 +234,9 @@ export const works: CaseStudy[] = [
       },
       {
         type: "full-bleed",
-        images: [{ src: workResearch, caption: "Field documentation — Karnataka weaving communities" }],
+        images: [
+          { src: workResearch, caption: "Field documentation — Karnataka weaving communities" },
+        ],
       },
       {
         type: "image-text",

@@ -23,11 +23,10 @@ function adaptSanityCaseStudy(sanityCaseStudy: any): CaseStudy | null {
     year: sanityCaseStudy.year || "",
     title: sanityCaseStudy.title || "",
     kicker: sanityCaseStudy.kicker || "",
-    img: sanityCaseStudy.coverImage
-      ? urlFor(sanityCaseStudy.coverImage).width(1200).url()
-      : "",
+    img: sanityCaseStudy.coverImage ? urlFor(sanityCaseStudy.coverImage).width(1200).url() : "",
     role: sanityCaseStudy.role || "",
     summary: sanityCaseStudy.summary || "",
+    categories: sanityCaseStudy.categories || [],
     outcomes: (sanityCaseStudy.outcomes || []).map((o: any) => ({
       k: o.label || "",
       v: o.value || "",

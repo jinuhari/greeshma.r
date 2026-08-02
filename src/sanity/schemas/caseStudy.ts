@@ -50,6 +50,15 @@ export const caseStudy = defineType({
       rows: 3,
     }),
     defineField({
+      name: "categories",
+      title: "Categories",
+      description:
+        "Use one or more categories to group this case study on the home page (for example UI/UX, Graphic Design, Visual Design, UX Research, Branding, Illustration, or Motion).",
+      type: "array",
+      of: [{ type: "string" }],
+      options: { layout: "tags" },
+    }),
+    defineField({
       name: "outcomes",
       title: "Outcomes",
       type: "array",

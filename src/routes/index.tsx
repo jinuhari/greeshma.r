@@ -3,7 +3,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useReveal, useTheme, toggleTheme } from "@/hooks/use-reveal";
 import { AppShell } from "@/components/app/app-shell";
 import { type CaseStudy } from "@/lib/cms";
-import { loadWorks, loadWorksFromSanity, loadArchive, loadArchiveFromSanity, loadTimeline, loadTimelineFromSanity, defaultResumes } from "@/lib/data";
+import {
+  loadWorks,
+  loadWorksFromSanity,
+  loadArchive,
+  loadArchiveFromSanity,
+  loadTimeline,
+  loadTimelineFromSanity,
+  defaultResumes,
+} from "@/lib/data";
 import type { Resume } from "@/lib/data";
 import { CmsPanel } from "@/components/app/cms-panel";
 
@@ -73,8 +81,10 @@ function Home() {
     if (lightbox === null) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setLightbox(null);
-      if (e.key === "ArrowRight") setLightbox((i) => (i === null ? 0 : (i + 1) % cmsArchive.length));
-      if (e.key === "ArrowLeft") setLightbox((i) => (i === null ? 0 : (i - 1 + cmsArchive.length) % cmsArchive.length));
+      if (e.key === "ArrowRight")
+        setLightbox((i) => (i === null ? 0 : (i + 1) % cmsArchive.length));
+      if (e.key === "ArrowLeft")
+        setLightbox((i) => (i === null ? 0 : (i - 1 + cmsArchive.length) % cmsArchive.length));
     };
     document.body.style.overflow = "hidden";
     window.addEventListener("keydown", onKey);
@@ -96,7 +106,14 @@ function Home() {
       <About />
       <Contact resumes={cmsResumes} />
       <Footer />
-      {lightbox !== null && <Lightbox archive={cmsArchive} index={lightbox} onClose={() => setLightbox(null)} onNav={setLightbox} />}
+      {lightbox !== null && (
+        <Lightbox
+          archive={cmsArchive}
+          index={lightbox}
+          onClose={() => setLightbox(null)}
+          onNav={setLightbox}
+        />
+      )}
       {cmsOpen && (
         <CmsPanel
           works={cmsWorks}
@@ -169,9 +186,15 @@ function Nav({ scrolled, onCmsOpen }: { scrolled: boolean; onCmsOpen: () => void
           onClick={() => setMenuOpen(!menuOpen)}
           className="relative z-50 flex h-6 w-6 flex-col items-center justify-center md:hidden"
         >
-          <span className={`h-px w-5 bg-foreground transition-all ${menuOpen ? 'translate-y-[4px] rotate-45' : ''}`} />
-          <span className={`h-px w-5 bg-foreground transition-all ${menuOpen ? 'opacity-0' : ''}`} />
-          <span className={`h-px w-5 bg-foreground transition-all ${menuOpen ? '-translate-y-[4px] -rotate-45' : ''}`} />
+          <span
+            className={`h-px w-5 bg-foreground transition-all ${menuOpen ? "translate-y-[4px] rotate-45" : ""}`}
+          />
+          <span
+            className={`h-px w-5 bg-foreground transition-all ${menuOpen ? "opacity-0" : ""}`}
+          />
+          <span
+            className={`h-px w-5 bg-foreground transition-all ${menuOpen ? "-translate-y-[4px] -rotate-45" : ""}`}
+          />
         </button>
       </div>
       {menuOpen && (
@@ -205,7 +228,7 @@ function Hero() {
         />
       </div>
       <div className="mx-auto max-w-[1440px] px-6 md:px-12">
-        <p className="eyebrow reveal">A digital exhibition · 2013 — Present</p>
+        <p className="eyebrow reveal">A multidisciplinary design practice · 2013 — Present</p>
         <h1 className="editorial-h reveal mt-8 text-[13vw] leading-[0.9] md:text-[9vw] lg:text-[8rem]">
           Designing
           <br />
@@ -220,9 +243,9 @@ function Hero() {
 
         <div className="reveal mt-16 grid gap-10 md:grid-cols-[1fr_auto] md:items-end">
           <p className="max-w-md text-sm leading-relaxed text-muted-foreground md:text-base">
-            Greeshma R. is a multidisciplinary designer working at the seam of
-            product, brand, illustration and research — an artist first,
-            trained through fine arts, film and interaction design.
+            Greeshma R. is a multidisciplinary designer working at the seam of product, brand,
+            illustration and research — an artist first, trained through fine arts, film and
+            interaction design.
           </p>
           <div className="flex flex-wrap items-center gap-6">
             <a
@@ -275,11 +298,9 @@ function Marquee() {
     <div className="mt-28 overflow-hidden border-y border-border py-8">
       <div className="marquee flex w-max gap-16 whitespace-nowrap">
         {row.map((t, i) => (
-
           <span key={i} className="font-display text-4xl md:text-6xl">
             {t} <span className="text-accent">✦</span>
           </span>
-
         ))}
       </div>
     </div>
@@ -287,23 +308,57 @@ function Marquee() {
 }
 
 function SelectedWork({ works: worksProp }: { works: CaseStudy[] }) {
+  const [activeCategory, setActiveCategory] = useState("All work");
+  const categories = Array.from(
+    new Set(worksProp.flatMap((work) => work.categories?.filter(Boolean) || [])),
+  );
+  const shownWorks = worksProp.filter(
+    (work) =>
+      activeCategory === "All work" ||
+      (activeCategory === "Other" && (!work.categories || work.categories.length === 0)) ||
+      work.categories?.includes(activeCategory),
+  );
+  const filters = ["All work", ...categories];
+  if (worksProp.some((work) => !work.categories || work.categories.length === 0))
+    filters.push("Other");
+
   return (
     <section id="work" className="mx-auto max-w-[1440px] px-6 py-32 md:px-12 md:py-48">
       <div className="reveal grid grid-cols-1 items-end gap-8 md:grid-cols-[1fr_auto]">
         <div>
           <p className="eyebrow">Selected Work · 2020 — 2024</p>
           <h2 className="editorial-h mt-6 text-5xl md:text-7xl">
-            {worksProp.length === 4 ? "Four exhibits" : `${worksProp.length} exhibits`}
+            Browse by
+            <br />
+            <span className="italic text-accent">category.</span>
           </h2>
         </div>
         <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
-          Each piece here is a study in restraint — a product, an identity, a
-          field study — presented as it was made, not as a card in a grid.
+          Explore case studies across UI/UX, graphic design, visual design and the wider range of
+          the practice.
         </p>
       </div>
 
-      <div className="mt-24 space-y-40">
-        {worksProp.map((w, i) => (
+      <div className="mt-16 flex flex-wrap gap-2 border-y border-border py-5">
+        {filters.map((category) => (
+          <button
+            key={category}
+            type="button"
+            aria-pressed={activeCategory === category}
+            onClick={() => setActiveCategory(category)}
+            className={`rounded-full border px-4 py-2 text-xs tracking-wide transition-colors ${
+              activeCategory === category
+                ? "border-foreground bg-foreground text-background"
+                : "border-border hover:border-accent hover:text-accent"
+            }`}
+          >
+            {category}
+          </button>
+        ))}
+      </div>
+
+      <div className="mt-20 space-y-40">
+        {shownWorks.map((w, i) => (
           <article
             key={w.slug}
             className={`reveal grid grid-cols-1 items-center gap-12 md:grid-cols-12 ${
@@ -320,10 +375,8 @@ function SelectedWork({ works: worksProp }: { works: CaseStudy[] }) {
                   height={1100}
                   className="w-full object-cover"
                 />
-                <span
-                  className="absolute -top-4 -left-2 font-mono text-xs tracking-[0.2em] text-muted-foreground md:-left-8"
-                >
-                    {w.n} / {String(worksProp.length).padStart(2, "0")}
+                <span className="absolute -top-4 -left-2 font-mono text-xs tracking-[0.2em] text-muted-foreground md:-left-8">
+                  {w.n} / {String(shownWorks.length).padStart(2, "0")}
                 </span>
               </div>
             </div>
@@ -334,6 +387,19 @@ function SelectedWork({ works: worksProp }: { works: CaseStudy[] }) {
               <h3 className="editorial-h mt-4 text-4xl md:text-6xl">{w.title}</h3>
               <p className="mt-6 text-sm text-muted-foreground">{w.role}</p>
               <p className="mt-6 text-base leading-relaxed md:text-lg">{w.summary}</p>
+
+              {w.categories?.length > 0 && (
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {w.categories.map((category) => (
+                    <span
+                      key={category}
+                      className="rounded-full border border-border px-2.5 py-1 text-[10px] tracking-[0.12em] text-muted-foreground uppercase"
+                    >
+                      {category}
+                    </span>
+                  ))}
+                </div>
+              )}
 
               <dl className="mt-10 grid grid-cols-3 gap-4 border-t border-border pt-6">
                 {w.outcomes.map((o) => (
@@ -357,12 +423,23 @@ function SelectedWork({ works: worksProp }: { works: CaseStudy[] }) {
             </div>
           </article>
         ))}
+        {shownWorks.length === 0 && (
+          <p className="py-16 text-center text-sm text-muted-foreground">
+            No case studies in this category yet.
+          </p>
+        )}
       </div>
     </section>
   );
 }
 
-function Archive({ archive: archiveProp, onOpen }: { archive: import("@/lib/data").ArchiveItem[]; onOpen: (i: number) => void }) {
+function Archive({
+  archive: archiveProp,
+  onOpen,
+}: {
+  archive: import("@/lib/data").ArchiveItem[];
+  onOpen: (i: number) => void;
+}) {
   const [filter, setFilter] = useState<string>("All");
   const cats = ["All", ...Array.from(new Set(archiveProp.map((a) => a.cat)))];
   const shown = archiveProp
@@ -483,7 +560,9 @@ function Lightbox({
       >
         <img src={a.src} alt={a.label} className="max-h-[70vh] w-auto object-contain" />
         <div className="w-full max-w-2xl text-center">
-          <p className="eyebrow">{a.cat} · {a.year}</p>
+          <p className="eyebrow">
+            {a.cat} · {a.year}
+          </p>
           <h3 className="font-display mt-3 text-3xl">{a.label}</h3>
           <p className="mt-2 text-sm text-muted-foreground">{a.medium}</p>
         </div>
@@ -540,9 +619,7 @@ function Skills() {
     <section className="bg-warm-gray py-32 md:py-48">
       <div className="mx-auto max-w-[1440px] px-6 md:px-12">
         <div className="reveal max-w-2xl">
-          <h2 className="editorial-h text-5xl md:text-7xl">
-            Tools of the trade.
-          </h2>
+          <h2 className="editorial-h text-5xl md:text-7xl">Tools of the trade.</h2>
         </div>
         <div className="mt-20 grid gap-x-16 gap-y-12 md:grid-cols-2 lg:grid-cols-4">
           {Object.entries(skills).map(([group, items]) => (
@@ -552,7 +629,9 @@ function Skills() {
                 className="flex w-full items-center justify-between gap-3 text-left font-display text-xl transition-colors hover:text-accent"
               >
                 {group}
-                <span className={`text-xs text-muted-foreground transition-transform duration-300 ${expanded.has(group) ? 'rotate-180' : ''}`}>
+                <span
+                  className={`text-xs text-muted-foreground transition-transform duration-300 ${expanded.has(group) ? "rotate-180" : ""}`}
+                >
                   ▼
                 </span>
               </button>
@@ -590,9 +669,7 @@ function About() {
               className="h-full w-full object-cover"
             />
           </div>
-          <p className="mt-4 text-xs text-muted-foreground">
-            Studio, Bengaluru — 2024
-          </p>
+          <p className="mt-4 text-xs text-muted-foreground">Studio, Bengaluru — 2024</p>
         </div>
         <div className="reveal md:col-span-7 md:pt-16">
           <h2 className="editorial-h mt-6 text-4xl md:text-6xl">
@@ -602,20 +679,19 @@ function About() {
           </h2>
           <div className="mt-10 space-y-6 text-base leading-relaxed text-muted-foreground md:text-lg">
             <p>
-              My hands learned pigment before pixels. Fine arts gave me the
-              discipline of the long look; visual communication taught me to
-              hold an audience; film production taught me to hold a frame.
+              My hands learned pigment before pixels. Fine arts gave me the discipline of the long
+              look; visual communication taught me to hold an audience; film production taught me to
+              hold a frame.
             </p>
             <p>
-              Interaction design at IIT Hyderabad — followed by residencies at
-              Suzuki Innovation Centre and the IISc National Design Innovation
-              Network — gave me the vocabulary to bring all of it to digital
-              products.
+              Interaction design at IIT Hyderabad — followed by residencies at Suzuki Innovation
+              Centre and the IISc National Design Innovation Network — gave me the vocabulary to
+              bring all of it to digital products.
             </p>
             <p className="text-foreground">
-              Today, at Udaan, I design mobile experiences, campaigns and the
-              visual systems that hold them together — trying to keep the
-              craft of the studio inside the discipline of the product.
+              Today, at Udaan, I design mobile experiences, campaigns and the visual systems that
+              hold them together — trying to keep the craft of the studio inside the discipline of
+              the product.
             </p>
           </div>
         </div>
@@ -626,7 +702,7 @@ function About() {
 
 function Contact({ resumes }: { resumes?: Resume[] }) {
   const rs = resumes || defaultResumes();
-  const global = rs.find(r => r.global) || rs[0];
+  const global = rs.find((r) => r.global) || rs[0];
   const items: { k: string; v: string; href: string }[] = [
     { k: "Email", v: "greeshma@studio.in", href: "mailto:greeshma@studio.in" },
     { k: "LinkedIn", v: "/in/greeshma-r", href: "https://linkedin.com" },
@@ -654,17 +730,13 @@ function Contact({ resumes }: { resumes?: Resume[] }) {
 
         <div className="reveal mt-24 grid gap-12 border-t border-border pt-12 md:grid-cols-4">
           {items.map((c) => (
-            <a
-              key={c.k}
-              href={c.href}
-              target="_blank"
-              className="group block"
-            >
-              <p className="text-[10px] tracking-[0.25em] uppercase text-muted-foreground">
-                {c.k}
-              </p>
+            <a key={c.k} href={c.href} target="_blank" className="group block">
+              <p className="text-[10px] tracking-[0.25em] uppercase text-muted-foreground">{c.k}</p>
               <p className="font-display mt-3 text-2xl transition-colors group-hover:text-accent">
-                {c.v} <span className="inline-block transition-transform group-hover:translate-x-1">→</span>
+                {c.v}{" "}
+                <span className="inline-block transition-transform group-hover:translate-x-1">
+                  →
+                </span>
               </p>
             </a>
           ))}
@@ -673,8 +745,6 @@ function Contact({ resumes }: { resumes?: Resume[] }) {
     </section>
   );
 }
-
-
 
 function Footer() {
   return (

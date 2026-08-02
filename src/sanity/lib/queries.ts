@@ -89,6 +89,7 @@ export const caseStudiesQuery = `*[_type == "caseStudy"] | order(orderRank asc){
   coverImage,
   role,
   summary,
+  categories,
   outcomes[]{
     label,
     value
@@ -130,6 +131,7 @@ export const caseStudyBySlugQuery = `*[_type == "caseStudy" && slug.current == $
   coverImage,
   role,
   summary,
+  categories,
   outcomes[]{
     label,
     value

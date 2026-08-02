@@ -58,7 +58,10 @@ export function CmsPanel({
   };
 
   return (
-    <div className="cms-panel fixed inset-0 z-[80] flex bg-background/80 backdrop-blur-sm" onClick={onClose}>
+    <div
+      className="cms-panel fixed inset-0 z-[80] flex bg-background/80 backdrop-blur-sm"
+      onClick={onClose}
+    >
       <div
         className="mx-auto flex w-full max-w-5xl flex-col overflow-hidden rounded-xl border border-border bg-background shadow-2xl"
         style={{ margin: "4vh auto", maxHeight: "92vh" }}
@@ -71,12 +74,21 @@ export function CmsPanel({
               {(["works", "archive", "experience", "resumes"] as const).map((t) => (
                 <button
                   key={t}
-                  onClick={() => { setTab(t); setEditing(null); }}
+                  onClick={() => {
+                    setTab(t);
+                    setEditing(null);
+                  }}
                   className={`rounded-full px-4 py-1 text-xs tracking-wide transition-all ${
                     tab === t ? "bg-foreground text-background" : "hover:bg-muted"
                   }`}
                 >
-                  {t === "works" ? "Case Studies" : t === "archive" ? "Archive" : t === "experience" ? "Experience" : "Resumes"}
+                  {t === "works"
+                    ? "Case Studies"
+                    : t === "archive"
+                      ? "Archive"
+                      : t === "experience"
+                        ? "Experience"
+                        : "Resumes"}
                 </button>
               ))}
             </div>
@@ -89,7 +101,11 @@ export function CmsPanel({
             >
               {saving ? "Saving..." : saved ? "Saved \u2713" : "Save to Sanity"}
             </button>
-            <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Close">
+            <button
+              onClick={onClose}
+              className="text-muted-foreground hover:text-foreground"
+              aria-label="Close"
+            >
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -102,12 +118,16 @@ export function CmsPanel({
         )}
 
         <div className="flex-1 overflow-y-auto p-6">
-          {tab === "works" && (
-            editing ? (
-              <WorkEditor work={editing} onChange={(p) => {
-                const idx = works.findIndex(w => w.slug === editing.slug);
-                if (idx !== -1) updateWork(idx, p);
-              }} onBack={() => setEditing(null)} />
+          {tab === "works" &&
+            (editing ? (
+              <WorkEditor
+                work={editing}
+                onChange={(p) => {
+                  const idx = works.findIndex((w) => w.slug === editing.slug);
+                  if (idx !== -1) updateWork(idx, p);
+                }}
+                onBack={() => setEditing(null)}
+              />
             ) : (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -115,7 +135,21 @@ export function CmsPanel({
                   <button
                     onClick={() => {
                       const n = String(works.length + 1).padStart(2, "0");
-                      const cs: CaseStudy = { slug: `case-${Date.now()}`, n, year: "", title: "New Case Study", kicker: "", img: "", role: "", summary: "", outcomes: [], tone: "terracotta", sections: [], tools: [] };
+                      const cs: CaseStudy = {
+                        slug: `case-${Date.now()}`,
+                        n,
+                        year: "",
+                        title: "New Case Study",
+                        kicker: "",
+                        img: "",
+                        role: "",
+                        summary: "",
+                        categories: [],
+                        outcomes: [],
+                        tone: "terracotta",
+                        sections: [],
+                        tools: [],
+                      };
                       setWorks([...works, cs]);
                       setEditing(cs);
                     }}
@@ -124,13 +158,15 @@ export function CmsPanel({
                     + New
                   </button>
                 </div>
-                {works.length === 0 && <p className="text-sm text-muted-foreground">No case studies yet.</p>}
+                {works.length === 0 && (
+                  <p className="text-sm text-muted-foreground">No case studies yet.</p>
+                )}
                 {works.map((w: any, i) => (
-                  <div key={w._id || i} className="group relative rounded-lg border border-border transition-colors hover:bg-muted/50">
-                    <button
-                      onClick={() => setEditing(works[i])}
-                      className="w-full p-4 text-left"
-                    >
+                  <div
+                    key={w._id || i}
+                    className="group relative rounded-lg border border-border transition-colors hover:bg-muted/50"
+                  >
+                    <button onClick={() => setEditing(works[i])} className="w-full p-4 text-left">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-3">
@@ -141,12 +177,21 @@ export function CmsPanel({
                           <p className="mt-2 text-sm line-clamp-2">{w.summary}</p>
                         </div>
                         {w.img && (
-                          <img src={w.img} alt="" className="h-14 w-20 flex-shrink-0 rounded-md object-cover" />
+                          <img
+                            src={w.img}
+                            alt=""
+                            className="h-14 w-20 flex-shrink-0 rounded-md object-cover"
+                          />
                         )}
                       </div>
                       <div className="mt-2 flex flex-wrap gap-1.5">
                         {(w.tools || []).map((t: string, j: number) => (
-                          <span key={j} className="rounded-full bg-muted px-2 py-px text-[10px] tracking-wide">{t}</span>
+                          <span
+                            key={j}
+                            className="rounded-full bg-muted px-2 py-px text-[10px] tracking-wide"
+                          >
+                            {t}
+                          </span>
                         ))}
                       </div>
                     </button>
@@ -159,12 +204,13 @@ export function CmsPanel({
                   </div>
                 ))}
               </div>
-            )
-          )}
+            ))}
 
           {tab === "archive" && (
             <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-              {archive.length === 0 && <p className="col-span-full text-sm text-muted-foreground">No archive items yet.</p>}
+              {archive.length === 0 && (
+                <p className="col-span-full text-sm text-muted-foreground">No archive items yet.</p>
+              )}
               {archive.map((item: any, i) => (
                 <div key={item._id || i} className="rounded-lg border border-border p-3">
                   <div className="flex items-start justify-between">
@@ -211,11 +257,15 @@ export function CmsPanel({
 
           {tab === "experience" && (
             <div className="space-y-3">
-              {timeline.length === 0 && <p className="text-sm text-muted-foreground">No timeline items yet.</p>}
+              {timeline.length === 0 && (
+                <p className="text-sm text-muted-foreground">No timeline items yet.</p>
+              )}
               {timeline.map((item: any, i) => (
                 <div key={item._id || i} className="rounded-lg border border-border p-4">
                   <div className="flex gap-4">
-                    <span className="mt-0.5 font-mono text-xs text-muted-foreground">{item.year}</span>
+                    <span className="mt-0.5 font-mono text-xs text-muted-foreground">
+                      {item.year}
+                    </span>
                     <div className="flex-1 space-y-1">
                       <input
                         className="w-full bg-transparent font-medium outline-none"
@@ -248,9 +298,7 @@ export function CmsPanel({
             </div>
           )}
 
-          {tab === "resumes" && (
-            <ResumesEditor resumes={resumes} setResumes={setResumes} />
-          )}
+          {tab === "resumes" && <ResumesEditor resumes={resumes} setResumes={setResumes} />}
         </div>
 
         <div className="border-t border-border px-6 py-3 text-center text-[10px] text-muted-foreground">
@@ -261,7 +309,13 @@ export function CmsPanel({
   );
 }
 
-function ResumesEditor({ resumes, setResumes }: { resumes: Resume[]; setResumes: (r: Resume[]) => void }) {
+function ResumesEditor({
+  resumes,
+  setResumes,
+}: {
+  resumes: Resume[];
+  setResumes: (r: Resume[]) => void;
+}) {
   const [activeIdx, setActiveIdx] = useState(0);
   const [jsonInput, setJsonInput] = useState(resumes[0]?.json || "{}");
   const [parseError, setParseError] = useState("");
@@ -307,10 +361,13 @@ function ResumesEditor({ resumes, setResumes }: { resumes: Resume[]; setResumes:
               setParseError("");
             }}
             className={`rounded-full px-4 py-1.5 text-xs tracking-wide transition-all ${
-              i === activeIdx ? "bg-foreground text-background" : "border border-border hover:bg-muted"
+              i === activeIdx
+                ? "bg-foreground text-background"
+                : "border border-border hover:bg-muted"
             }`}
           >
-            {r.global ? "\u2605 " : ""}{r.role}
+            {r.global ? "\u2605 " : ""}
+            {r.role}
           </button>
         ))}
       </div>
@@ -343,7 +400,9 @@ function ResumesEditor({ resumes, setResumes }: { resumes: Resume[]; setResumes:
       <div className="grid flex-1 grid-cols-2 gap-4 overflow-hidden">
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground">JSON Editor</span>
+            <span className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
+              JSON Editor
+            </span>
             <button
               onClick={saveJson}
               className="rounded-md bg-foreground px-3 py-1 text-[10px] text-background transition-opacity hover:opacity-80"
@@ -357,13 +416,13 @@ function ResumesEditor({ resumes, setResumes }: { resumes: Resume[]; setResumes:
             onChange={(e) => updateJson(e.target.value)}
             spellCheck={false}
           />
-          {parseError && (
-            <p className="text-xs text-red-500">{parseError}</p>
-          )}
+          {parseError && <p className="text-xs text-red-500">{parseError}</p>}
         </div>
 
         <div className="flex flex-col gap-2 overflow-hidden">
-          <span className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground">Preview</span>
+          <span className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
+            Preview
+          </span>
           <div className="flex-1 overflow-y-auto rounded-md border border-border bg-muted/30 p-4">
             <ResumePreview json={jsonInput} />
           </div>
@@ -378,7 +437,9 @@ function ResumePreview({ json }: { json: string }) {
   try {
     data = JSON.parse(json);
   } catch {
-    return <p className="text-xs text-muted-foreground">Invalid JSON — fix errors to see preview</p>;
+    return (
+      <p className="text-xs text-muted-foreground">Invalid JSON — fix errors to see preview</p>
+    );
   }
 
   return (
@@ -404,7 +465,9 @@ function renderValue(value: any): React.ReactNode {
               <div className="rounded-md border border-border p-2">
                 {Object.entries(item).map(([k, v]) => (
                   <div key={k} className="flex items-baseline gap-2">
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground min-w-16">{k}</span>
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground min-w-16">
+                      {k}
+                    </span>
                     <span className="text-foreground">{String(v ?? "")}</span>
                   </div>
                 ))}
@@ -423,7 +486,9 @@ function renderValue(value: any): React.ReactNode {
       <div className="rounded-md border border-border p-2 space-y-1">
         {Object.entries(value).map(([k, v]) => (
           <div key={k} className="flex items-baseline gap-2">
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground min-w-16">{k}</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground min-w-16">
+              {k}
+            </span>
             <span className="text-foreground">{String(v ?? "")}</span>
           </div>
         ))}
@@ -431,16 +496,29 @@ function renderValue(value: any): React.ReactNode {
     );
   }
 
-  if (typeof value === "string" && !value) return <p className="text-muted-foreground italic">(empty)</p>;
+  if (typeof value === "string" && !value)
+    return <p className="text-muted-foreground italic">(empty)</p>;
 
   return <p className="text-foreground">{String(value)}</p>;
 }
 
 function SectionLabel({ children }: { children: string }) {
-  return <div className="mb-1 text-[10px] tracking-[0.2em] uppercase text-muted-foreground">{children}</div>;
+  return (
+    <div className="mb-1 text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
+      {children}
+    </div>
+  );
 }
 
-function WorkEditor({ work, onChange, onBack }: { work: CaseStudy; onChange: (patch: Partial<CaseStudy>) => void; onBack: () => void }) {
+function WorkEditor({
+  work,
+  onChange,
+  onBack,
+}: {
+  work: CaseStudy;
+  onChange: (patch: Partial<CaseStudy>) => void;
+  onBack: () => void;
+}) {
   const set = (patch: Partial<CaseStudy>) => onChange(patch);
 
   const addOutcome = () => set({ outcomes: [...work.outcomes, { k: "", v: "" }] });
@@ -472,25 +550,28 @@ function WorkEditor({ work, onChange, onBack }: { work: CaseStudy; onChange: (pa
 
   return (
     <div className="max-w-3xl space-y-6">
-      <button onClick={onBack} className="text-xs tracking-[0.2em] uppercase text-muted-foreground hover:text-foreground">
+      <button
+        onClick={onBack}
+        className="text-xs tracking-[0.2em] uppercase text-muted-foreground hover:text-foreground"
+      >
         \u2190 Back to list
       </button>
 
       <div className="grid grid-cols-2 gap-4">
         <Field label="Title">
-          <input value={work.title} onChange={e => set({ title: e.target.value })} />
+          <input value={work.title} onChange={(e) => set({ title: e.target.value })} />
         </Field>
         <Field label="Slug">
           <input value={work.slug} className="bg-muted/50" readOnly />
         </Field>
         <Field label="Year">
-          <input value={work.year} onChange={e => set({ year: e.target.value })} />
+          <input value={work.year} onChange={(e) => set({ year: e.target.value })} />
         </Field>
         <Field label="Number">
-          <input value={work.n} onChange={e => set({ n: e.target.value })} />
+          <input value={work.n} onChange={(e) => set({ n: e.target.value })} />
         </Field>
         <Field label="Kicker" className="col-span-2">
-          <input value={work.kicker} onChange={e => set({ kicker: e.target.value })} />
+          <input value={work.kicker} onChange={(e) => set({ kicker: e.target.value })} />
         </Field>
       </div>
 
@@ -499,46 +580,93 @@ function WorkEditor({ work, onChange, onBack }: { work: CaseStudy; onChange: (pa
           placeholder="Paste image URL"
           className="mb-2"
           value={work.img}
-          onChange={e => set({ img: e.target.value })}
+          onChange={(e) => set({ img: e.target.value })}
         />
-        <ImageUploader value={work.img} onUpload={(url, _ref) => set({ img: url, imgRef: _ref || undefined })} label="Upload cover image" />
+        <ImageUploader
+          value={work.img}
+          onUpload={(url, _ref) => set({ img: url, imgRef: _ref || undefined })}
+          label="Upload cover image"
+        />
       </Field>
 
       <Field label="Role">
-        <input value={work.role} onChange={e => set({ role: e.target.value })} />
+        <input value={work.role} onChange={(e) => set({ role: e.target.value })} />
       </Field>
       <Field label="Summary">
-        <textarea rows={3} value={work.summary} onChange={e => set({ summary: e.target.value })} />
+        <textarea
+          rows={3}
+          value={work.summary}
+          onChange={(e) => set({ summary: e.target.value })}
+        />
+      </Field>
+
+      <Field label="Categories (comma-separated)">
+        <input
+          placeholder="e.g. UI/UX, Visual Design"
+          value={(work.categories || []).join(", ")}
+          onChange={(e) =>
+            set({
+              categories: e.target.value
+                .split(",")
+                .map((category) => category.trim())
+                .filter(Boolean),
+            })
+          }
+        />
+        <p className="mt-1 text-[10px] text-muted-foreground">
+          Categories create the groups and filters shown in Selected Work.
+        </p>
       </Field>
 
       <div className="grid grid-cols-3 gap-4">
         <Field label="Client">
-          <input value={work.client || ""} onChange={e => set({ client: e.target.value })} />
+          <input value={work.client || ""} onChange={(e) => set({ client: e.target.value })} />
         </Field>
         <Field label="Timeline">
-          <input value={work.timeline || ""} onChange={e => set({ timeline: e.target.value })} />
+          <input value={work.timeline || ""} onChange={(e) => set({ timeline: e.target.value })} />
         </Field>
         <Field label="Tone">
-          <select value={work.tone} onChange={e => set({ tone: e.target.value })} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none">
-            {["terracotta", "coral", "forest", "indigo", "warm"].map(t => (
-              <option key={t} value={t}>{t}</option>
+          <select
+            value={work.tone}
+            onChange={(e) => set({ tone: e.target.value })}
+            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none"
+          >
+            {["terracotta", "coral", "forest", "indigo", "warm"].map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
             ))}
           </select>
         </Field>
       </div>
 
       <Field label="Tools (comma-separated)">
-        <input value={(work.tools || []).join(", ")} onChange={e => set({ tools: e.target.value.split(",").map(s => s.trim()).filter(Boolean) })} />
+        <input
+          value={(work.tools || []).join(", ")}
+          onChange={(e) =>
+            set({
+              tools: e.target.value
+                .split(",")
+                .map((s) => s.trim())
+                .filter(Boolean),
+            })
+          }
+        />
       </Field>
 
       <Field label="Live URL">
-        <input value={work.liveUrl || ""} onChange={e => set({ liveUrl: e.target.value })} />
+        <input value={work.liveUrl || ""} onChange={(e) => set({ liveUrl: e.target.value })} />
       </Field>
 
       <div>
         <div className="flex items-center justify-between">
           <Label>Outcomes</Label>
-          <button onClick={addOutcome} className="rounded-md bg-muted px-3 py-1 text-[10px] tracking-wide hover:bg-muted/70">+ Add</button>
+          <button
+            onClick={addOutcome}
+            className="rounded-md bg-muted px-3 py-1 text-[10px] tracking-wide hover:bg-muted/70"
+          >
+            + Add
+          </button>
         </div>
         <div className="mt-2 space-y-2">
           {work.outcomes.map((o, i) => (
@@ -547,15 +675,20 @@ function WorkEditor({ work, onChange, onBack }: { work: CaseStudy; onChange: (pa
                 placeholder="Label"
                 className="w-1/3"
                 value={o.k}
-                onChange={e => updOutcome(i, e.target.value, o.v)}
+                onChange={(e) => updOutcome(i, e.target.value, o.v)}
               />
               <input
                 placeholder="Value"
                 className="flex-1"
                 value={o.v}
-                onChange={e => updOutcome(i, o.k, e.target.value)}
+                onChange={(e) => updOutcome(i, o.k, e.target.value)}
               />
-              <button onClick={() => delOutcome(i)} className="text-xs text-muted-foreground hover:text-red-500"><X className="h-3 w-3" /></button>
+              <button
+                onClick={() => delOutcome(i)}
+                className="text-xs text-muted-foreground hover:text-red-500"
+              >
+                <X className="h-3 w-3" />
+              </button>
             </div>
           ))}
         </div>
@@ -565,8 +698,12 @@ function WorkEditor({ work, onChange, onBack }: { work: CaseStudy; onChange: (pa
         <div className="flex items-center justify-between">
           <Label>Sections</Label>
           <div className="flex gap-1">
-            {(["text", "image", "image-text", "full-bleed"] as SectionType[]).map(t => (
-              <button key={t} onClick={() => addSection(t)} className="rounded-md bg-muted px-2 py-1 text-[10px] tracking-wide hover:bg-muted/70">
+            {(["text", "image", "image-text", "full-bleed"] as SectionType[]).map((t) => (
+              <button
+                key={t}
+                onClick={() => addSection(t)}
+                className="rounded-md bg-muted px-2 py-1 text-[10px] tracking-wide hover:bg-muted/70"
+              >
                 + {t}
               </button>
             ))}
@@ -574,16 +711,35 @@ function WorkEditor({ work, onChange, onBack }: { work: CaseStudy; onChange: (pa
         </div>
         <div className="mt-2 space-y-4">
           {work.sections.map((s, i) => (
-            <SectionEditor key={i} section={s} index={i} onChange={p => updSection(i, p)} onDelete={() => delSection(i)} onMove={d => moveSection(i, d)} isFirst={i === 0} isLast={i === work.sections.length - 1} />
+            <SectionEditor
+              key={i}
+              section={s}
+              index={i}
+              onChange={(p) => updSection(i, p)}
+              onDelete={() => delSection(i)}
+              onMove={(d) => moveSection(i, d)}
+              isFirst={i === 0}
+              isLast={i === work.sections.length - 1}
+            />
           ))}
-          {work.sections.length === 0 && <p className="text-xs text-muted-foreground">No sections yet.</p>}
+          {work.sections.length === 0 && (
+            <p className="text-xs text-muted-foreground">No sections yet.</p>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-function ImageUploader({ value, onUpload, label }: { value?: string; onUpload: (url: string, _ref?: string) => void; label?: string }) {
+function ImageUploader({
+  value,
+  onUpload,
+  label,
+}: {
+  value?: string;
+  onUpload: (url: string, _ref?: string) => void;
+  label?: string;
+}) {
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -629,7 +785,15 @@ function ImageUploader({ value, onUpload, label }: { value?: string; onUpload: (
   );
 }
 
-function SectionEditor({ section, index, onChange, onDelete, onMove, isFirst, isLast }: {
+function SectionEditor({
+  section,
+  index,
+  onChange,
+  onDelete,
+  onMove,
+  isFirst,
+  isLast,
+}: {
   section: CaseStudySection;
   index: number;
   onChange: (patch: Partial<CaseStudySection>) => void;
@@ -641,17 +805,41 @@ function SectionEditor({ section, index, onChange, onDelete, onMove, isFirst, is
   return (
     <div className="rounded-lg border border-border p-4">
       <div className="mb-2 flex items-center justify-between">
-        <span className="font-mono text-[10px] tracking-wide text-muted-foreground">Section {index + 1} \u00b7 {section.type}</span>
+        <span className="font-mono text-[10px] tracking-wide text-muted-foreground">
+          Section {index + 1} \u00b7 {section.type}
+        </span>
         <div className="flex items-center gap-1">
-          <button onClick={() => onMove(-1)} disabled={isFirst} className="text-xs text-muted-foreground disabled:opacity-30">\u2191</button>
-          <button onClick={() => onMove(1)} disabled={isLast} className="text-xs text-muted-foreground disabled:opacity-30">\u2193</button>
-          <button onClick={onDelete} className="ml-2 text-xs text-muted-foreground hover:text-red-500"><X className="h-3 w-3" /></button>
+          <button
+            onClick={() => onMove(-1)}
+            disabled={isFirst}
+            className="text-xs text-muted-foreground disabled:opacity-30"
+          >
+            \u2191
+          </button>
+          <button
+            onClick={() => onMove(1)}
+            disabled={isLast}
+            className="text-xs text-muted-foreground disabled:opacity-30"
+          >
+            \u2193
+          </button>
+          <button
+            onClick={onDelete}
+            className="ml-2 text-xs text-muted-foreground hover:text-red-500"
+          >
+            <X className="h-3 w-3" />
+          </button>
         </div>
       </div>
 
       <select
         value={section.type}
-        onChange={e => onChange({ type: e.target.value as SectionType, images: e.target.value === "text" ? undefined : section.images })}
+        onChange={(e) =>
+          onChange({
+            type: e.target.value as SectionType,
+            images: e.target.value === "text" ? undefined : section.images,
+          })
+        }
         className="mb-2 w-full rounded-md border border-border bg-background px-2 py-1 text-xs outline-none"
       >
         <option value="text">Text</option>
@@ -666,13 +854,13 @@ function SectionEditor({ section, index, onChange, onDelete, onMove, isFirst, is
             placeholder="Section title (optional)"
             className="mb-2"
             value={section.title || ""}
-            onChange={e => onChange({ title: e.target.value })}
+            onChange={(e) => onChange({ title: e.target.value })}
           />
           <textarea
             placeholder="Content"
             rows={4}
             value={section.content || ""}
-            onChange={e => onChange({ content: e.target.value })}
+            onChange={(e) => onChange({ content: e.target.value })}
           />
         </>
       )}
@@ -680,7 +868,7 @@ function SectionEditor({ section, index, onChange, onDelete, onMove, isFirst, is
       {section.type === "image-text" && (
         <select
           value={section.imagePosition || "left"}
-          onChange={e => onChange({ imagePosition: e.target.value as "left" | "right" })}
+          onChange={(e) => onChange({ imagePosition: e.target.value as "left" | "right" })}
           className="mt-2 w-full rounded-md border border-border bg-background px-2 py-1 text-xs outline-none"
         >
           <option value="left">Image left</option>
@@ -688,7 +876,9 @@ function SectionEditor({ section, index, onChange, onDelete, onMove, isFirst, is
         </select>
       )}
 
-      {(section.type === "image" || section.type === "full-bleed" || section.type === "image-text") && (
+      {(section.type === "image" ||
+        section.type === "full-bleed" ||
+        section.type === "image-text") && (
         <div className="mt-2 space-y-2">
           {(section.images || []).map((img, j) => (
             <div key={j} className="rounded-md border border-border p-2">
@@ -709,28 +899,28 @@ function SectionEditor({ section, index, onChange, onDelete, onMove, isFirst, is
                 placeholder="Image URL"
                 className="mt-1 text-xs"
                 value={img.src}
-                onChange={e => {
+                onChange={(e) => {
                   const next = [...(section.images || [])];
                   next[j] = { ...next[j], src: e.target.value };
                   onChange({ images: next });
                 }}
               />
               <div className="mt-1">
-              <ImageUploader
-                value={img.src}
-                onUpload={(url, _ref) => {
-                  const next = [...(section.images || [])];
-                  next[j] = { ...next[j], src: url, _ref: _ref || undefined };
-                  onChange({ images: next });
-                }}
-                label="Upload"
-              />
+                <ImageUploader
+                  value={img.src}
+                  onUpload={(url, _ref) => {
+                    const next = [...(section.images || [])];
+                    next[j] = { ...next[j], src: url, _ref: _ref || undefined };
+                    onChange({ images: next });
+                  }}
+                  label="Upload"
+                />
               </div>
               <input
                 placeholder="Caption (optional)"
                 className="mt-1 text-xs"
                 value={img.caption || ""}
-                onChange={e => {
+                onChange={(e) => {
                   const next = [...(section.images || [])];
                   next[j] = { ...next[j], caption: e.target.value };
                   onChange({ images: next });
@@ -740,7 +930,9 @@ function SectionEditor({ section, index, onChange, onDelete, onMove, isFirst, is
           ))}
           <button
             type="button"
-            onClick={() => onChange({ images: [...(section.images || []), { src: "", caption: "" }] })}
+            onClick={() =>
+              onChange({ images: [...(section.images || []), { src: "", caption: "" }] })
+            }
             className="w-full rounded-md border border-dashed border-border px-3 py-2 text-[10px] tracking-wide text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
           >
             + Add image
@@ -750,7 +942,9 @@ function SectionEditor({ section, index, onChange, onDelete, onMove, isFirst, is
               <p className="mb-2 text-[10px] text-muted-foreground">No images yet</p>
               <ImageUploader
                 value=""
-                onUpload={(url, _ref) => onChange({ images: [{ src: url, caption: "", _ref: _ref || undefined }] })}
+                onUpload={(url, _ref) =>
+                  onChange({ images: [{ src: url, caption: "", _ref: _ref || undefined }] })
+                }
                 label="Upload from device"
               />
             </div>
@@ -761,7 +955,15 @@ function SectionEditor({ section, index, onChange, onDelete, onMove, isFirst, is
   );
 }
 
-function Field({ label, children, className = "" }: { label: string; children: React.ReactNode; className?: string }) {
+function Field({
+  label,
+  children,
+  className = "",
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <div className={className}>
       <Label>{label}</Label>
@@ -771,5 +973,9 @@ function Field({ label, children, className = "" }: { label: string; children: R
 }
 
 function Label({ children }: { children: React.ReactNode }) {
-  return <div className="mb-1 text-[10px] tracking-[0.2em] uppercase text-muted-foreground">{children}</div>;
+  return (
+    <div className="mb-1 text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
+      {children}
+    </div>
+  );
 }
