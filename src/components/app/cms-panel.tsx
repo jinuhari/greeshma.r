@@ -89,8 +89,8 @@ export function CmsPanel({
             >
               {saving ? "Saving..." : saved ? "Saved \u2713" : "Save to Sanity"}
             </button>
-            <button onClick={onClose} className="text-xs tracking-[0.2em] uppercase text-muted-foreground hover:text-foreground">
-              Close <X className="h-3 w-3" />
+            <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Close">
+              <X className="h-4 w-4" />
             </button>
           </div>
         </div>

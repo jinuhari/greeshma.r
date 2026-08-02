@@ -184,7 +184,7 @@ function SectionRenderer({ section }: { section: import("@/lib/cms").CaseStudySe
     return (
       <section className="mb-20 last:mb-0">
         {section.images?.map((img, i) => (
-          <figure key={i} className="mx-auto max-w-4xl">
+          <figure key={i} className="mx-auto max-w-3xl">
             <div className="overflow-hidden rounded-lg bg-muted">
               <img src={img.src} alt={img.caption || ""} className="w-full object-cover" />
             </div>
