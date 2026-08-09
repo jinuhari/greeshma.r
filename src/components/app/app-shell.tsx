@@ -215,7 +215,6 @@ function StatusBar({
   onToggleSketch: () => void;
 }) {
   const time = useClock();
-  const label = SECTIONS.find((s) => s.id === active)?.label ?? "Intro";
   const p = useScrollProgress();
 
   return (
@@ -226,11 +225,6 @@ function StatusBar({
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60" />
             <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
           </span>
-          <span className="font-mono tracking-[0.18em] uppercase text-muted-foreground">
-            Now
-          </span>
-          <span className="font-mono tracking-wide">{label}</span>
-          <span className="text-muted-foreground">·</span>
           <span className="font-mono text-muted-foreground">{Math.round(p * 100)}%</span>
         </span>
         <span className="hidden h-4 w-px bg-border sm:block" />

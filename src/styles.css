@@ -471,6 +471,71 @@ footer { padding-bottom: 5rem; }
   margin-top: 1.75rem;
 }
 
+.carousel-controls {
+  margin-top: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.carousel-btn {
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-foreground);
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+.carousel-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: color-mix(in oklab, var(--color-accent) 8%, transparent);
+}
+
+.carousel-counter {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+  color: var(--color-muted-foreground);
+  text-transform: uppercase;
+}
+
+.timeline-list {
+  margin-top: 2rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.timeline-item {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.timeline-item .year {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-muted-foreground);
+}
+
+.timeline-item h3 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.timeline-item p {
+  margin-top: 0.45rem;
+  color: var(--color-muted-foreground);
+  font-size: 0.92rem;
+}
+
 .redesign-detail-hero {
   padding-top: 5.5rem;
 }
@@ -583,6 +648,11 @@ footer { padding-bottom: 5rem; }
   .work-card {
     grid-template-columns: 1fr;
     gap: 1.5rem;
+  }
+
+  .timeline-item {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
   }
 
   .redesign-detail-content {

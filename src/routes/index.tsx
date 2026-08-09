@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { AppShell } from "@/components/app/app-shell";
 import { CmsPanel } from "@/components/app/cms-panel";
 import heroArt from "@/assets/hero-artwork.jpg";
 import workImage from "@/assets/portrait.jpg";
+import { useTheme } from "@/hooks/use-reveal";
 import { type CaseStudy } from "@/lib/cms";
 import {
   defaultResumes,
@@ -26,7 +26,9 @@ function getWorkCategories(work: CaseStudy): string[] {
 }
 
 function Home() {
+  useTheme();
   const [activeCategory, setActiveCategory] = useState("All work");
+  const [workCursor, setWorkCursor] = useState(0);
   const [cmsWorks, setCmsWorks] = useState(() => loadWorks());
   const [cmsArchive, setCmsArchive] = useState(() => loadArchive());
   const [cmsTimeline, setCmsTimeline] = useState(() => loadTimeline());
@@ -48,15 +50,6 @@ function Home() {
   useEffect(() => {
     refreshAll();
   }, [refreshAll]);
-
-  useEffect(() => {
-    const html = document.documentElement;
-    if (cmsOpen) {
-      html.classList.remove("has-custom-cursor");
-    } else if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-      html.classList.add("has-custom-cursor");
-    }
-  }, [cmsOpen]);
 
   const categoryLabel = useMemo(() => {
     if (activeCategory === "All work") return "Selected Work";
@@ -83,12 +76,26 @@ function Home() {
   );
 
   useEffect(() => {
+    setWorkCursor(0);
+  }, [activeCategory]);
+
+  useEffect(() => {
+    if (shownWorks.length === 0) {
+      setWorkCursor(0);
+      return;
+    }
+    if (workCursor > shownWorks.length - 1) {
+      setWorkCursor(shownWorks.length - 1);
+    }
+  }, [shownWorks, workCursor]);
+
+  useEffect(() => {
     if (!workCategories.includes(activeCategory)) {
       setActiveCategory("All work");
     }
   }, [activeCategory, workCategories]);
 
-  const featuredWork: CaseStudy | undefined = shownWorks[0] || cmsWorks[0];
+  const featuredWork: CaseStudy | undefined = shownWorks[workCursor] || shownWorks[0] || cmsWorks[0];
   const featuredImage = featuredWork?.img || workImage;
   const featuredYear = featuredWork?.year || "2023";
   const featuredKicker = featuredWork?.kicker || "Mobile commerce";
@@ -100,11 +107,11 @@ function Home() {
   const featuredTags =
     (featuredWork ? getWorkCategories(featuredWork).slice(0, 2) : null) ||
     ["UI Design", "Design Systems"];
+  const shownTotal = shownWorks.length || (featuredWork ? 1 : 0);
+  const shownIndex = shownWorks.length > 0 ? workCursor + 1 : featuredWork ? 1 : 0;
 
   return (
     <div className="redesign-page">
-      <div className="redesign-callout">Static preview of the redesigned UI - now applied to the live app</div>
-
       <header className="redesign-header">
         <div className="redesign-logo">
           <span
@@ -157,24 +164,6 @@ function Home() {
               Download Resume
             </a>
           </div>
-          <div className="redesign-stats">
-            <div>
-              <div className="k">11</div>
-              <div className="v">years of practice</div>
-            </div>
-            <div>
-              <div className="k">40+</div>
-              <div className="v">projects shipped</div>
-            </div>
-            <div>
-              <div className="k">3</div>
-              <div className="v">research residencies</div>
-            </div>
-            <div>
-              <div className="k">1</div>
-              <div className="v">very long conversation with craft</div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -201,7 +190,9 @@ function Home() {
 
           <article className="work-card" id="archive">
             <div>
-              <span className="idx">01 / 04</span>
+              <span className="idx">
+                {String(shownIndex).padStart(2, "0")} / {String(shownTotal).padStart(2, "0")}
+              </span>
               <img src={featuredImage} alt={`${featuredTitle} case study`} width={1500} height={1000} />
             </div>
             <div>
@@ -219,29 +210,91 @@ function Home() {
                 ))}
               </div>
               <div className="work-link-wrap">
-                <a href="#" className="link-underline">
+                <a href={featuredWork ? `/work/${featuredWork.slug}` : "#"} className="link-underline">
                   Read the case study -&gt;
                 </a>
               </div>
+              {shownWorks.length > 1 && (
+                <div className="carousel-controls" aria-label="Case study carousel controls">
+                  <button
+                    type="button"
+                    className="carousel-btn"
+                    onClick={() =>
+                      setWorkCursor((prev) =>
+                        shownWorks.length === 0 ? 0 : (prev - 1 + shownWorks.length) % shownWorks.length,
+                      )
+                    }
+                    aria-label="Previous case study"
+                  >
+                    ←
+                  </button>
+                  <span className="carousel-counter">
+                    {shownIndex} / {shownTotal}
+                  </span>
+                  <button
+                    type="button"
+                    className="carousel-btn"
+                    onClick={() =>
+                      setWorkCursor((prev) =>
+                        shownWorks.length === 0 ? 0 : (prev + 1) % shownWorks.length,
+                      )
+                    }
+                    aria-label="Next case study"
+                  >
+                    →
+                  </button>
+                </div>
+              )}
             </div>
           </article>
         </div>
       </section>
 
-      <footer className="dock-wrap" id="contact">
-        <div className="dock">
-          <span className="dot" />
-          <span className="now">Now</span>
-          <span>Selected Work</span>
-          <span className="percent">- 24%</span>
-          <span className="divider" />
-          <button type="button">Search <kbd>Cmd+K</kbd></button>
-          <button type="button">Sketch</button>
-          <button type="button" aria-label="Toggle view">
-            O
-          </button>
+      <section className="redesign-block" id="experience">
+        <div className="redesign-wrap">
+          <p className="eyebrow">Experience</p>
+          <h2 className="editorial-h category-heading">Selected timeline.</h2>
+          <div className="timeline-list">
+            {cmsTimeline.map((item, i) => (
+              <article key={`${item.year}-${i}`} className="timeline-item">
+                <p className="year">{item.year}</p>
+                <div>
+                  <h3>{item.title}</h3>
+                  <p>{item.where}</p>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
-      </footer>
+      </section>
+
+      <section className="redesign-block" id="about">
+        <div className="redesign-wrap">
+          <p className="eyebrow">About</p>
+          <h2 className="editorial-h category-heading">A multidisciplinary design practice.</h2>
+          <p className="work-copy max-w-3xl">
+            Greeshma works across product, brand, illustration, and research with a craft-first
+            approach to digital experiences. Her practice bridges systems thinking with editorial
+            sensitivity, turning insights into tangible products and visual narratives.
+          </p>
+        </div>
+      </section>
+
+      <section className="redesign-block" id="contact">
+        <div className="redesign-wrap">
+          <p className="eyebrow">Contact</p>
+          <h2 className="editorial-h category-heading">Let us work together.</h2>
+          <p className="work-copy max-w-2xl">For collaborations, product work, and design consulting.</p>
+          <div className="cta-row">
+            <a className="notch-btn" href="mailto:hello@greeshma.design">
+              hello@greeshma.design
+            </a>
+            <a className="link-underline" href="/print-resume?role=Product%20Design" target="_blank" rel="noreferrer">
+              Open Resume
+            </a>
+          </div>
+        </div>
+      </section>
 
       {cmsOpen && (
         <CmsPanel
@@ -260,8 +313,6 @@ function Home() {
           }}
         />
       )}
-
-      <AppShell />
     </div>
   );
 }
