@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { syncAllToSanity, uploadImage } from "@/sanity/lib/mutations";
 import type { CaseStudy, CaseStudySection, Outcome, SectionType } from "@/lib/cms";
@@ -34,6 +34,86 @@ export function CmsPanel({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+  const [newBucketName, setNewBucketName] = useState("");
+  const [dragSlug, setDragSlug] = useState<string | null>(null);
+  const [dragOverBucket, setDragOverBucket] = useState<string | null>(null);
+  const [customBuckets, setCustomBuckets] = useState<string[]>([]);
+
+  const availableCategories = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          works.flatMap((work) =>
+            (work.categories || []).map((category) => category.trim()).filter(Boolean),
+          ),
+        ),
+      ).sort((a, b) => a.localeCompare(b)),
+    [works],
+  );
+
+  const allCategories = useMemo(
+    () => Array.from(new Set([...availableCategories, ...customBuckets])).sort((a, b) => a.localeCompare(b)),
+    [availableCategories, customBuckets],
+  );
+
+  const getPrimaryCategory = (work: CaseStudy) =>
+    (work.categories || []).map((category) => category.trim()).filter(Boolean)[0] || "";
+
+  const worksByBucket = useMemo(() => {
+    const grouped: Record<string, CaseStudy[]> = { Uncategorized: [] };
+    allCategories.forEach((category) => {
+      grouped[category] = [];
+    });
+
+    works.forEach((work) => {
+      const primary = getPrimaryCategory(work);
+      if (!primary) {
+        grouped.Uncategorized.push(work);
+        return;
+      }
+      if (!grouped[primary]) grouped[primary] = [];
+      grouped[primary].push(work);
+    });
+
+    return grouped;
+  }, [allCategories, works]);
+
+  const assignToBucket = (slug: string, bucket: string | null) => {
+    setWorks(
+      works.map((work) =>
+        work.slug === slug
+          ? {
+              ...work,
+              categories: bucket ? [bucket] : [],
+            }
+          : work,
+      ),
+    );
+    if (editing?.slug === slug) {
+      setEditing((prev) => (prev ? { ...prev, categories: bucket ? [bucket] : [] } : prev));
+    }
+  };
+
+  const addBucket = () => {
+    const name = newBucketName.trim();
+    if (!name) return;
+    if (allCategories.includes(name)) {
+      setNewBucketName("");
+      return;
+    }
+    setCustomBuckets((prev) => [...prev, name]);
+    setNewBucketName("");
+  };
+
+  const removeBucket = (bucket: string) => {
+    setWorks(
+      works.map((work) => {
+        if (!work.categories?.includes(bucket)) return work;
+        return { ...work, categories: work.categories.filter((category) => category !== bucket) };
+      }),
+    );
+    setCustomBuckets((prev) => prev.filter((category) => category !== bucket));
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -122,6 +202,7 @@ export function CmsPanel({
             (editing ? (
               <WorkEditor
                 work={editing}
+                availableCategories={allCategories}
                 onChange={(p) => {
                   const idx = works.findIndex((w) => w.slug === editing.slug);
                   if (idx !== -1) updateWork(idx, p);
@@ -130,79 +211,146 @@ export function CmsPanel({
               />
             ) : (
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-xs text-muted-foreground">{works.length} case studies</p>
-                  <button
-                    onClick={() => {
-                      const n = String(works.length + 1).padStart(2, "0");
-                      const cs: CaseStudy = {
-                        slug: `case-${Date.now()}`,
-                        n,
-                        year: "",
-                        title: "New Case Study",
-                        kicker: "",
-                        img: "",
-                        role: "",
-                        summary: "",
-                        categories: [],
-                        outcomes: [],
-                        tone: "terracotta",
-                        sections: [],
-                        tools: [],
-                      };
-                      setWorks([...works, cs]);
-                      setEditing(cs);
-                    }}
-                    className="rounded-md bg-foreground px-3 py-1 text-[10px] tracking-wide text-background"
-                  >
-                    + New
-                  </button>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-xs text-muted-foreground">
+                    {works.length} case studies · {allCategories.length} categories
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <input
+                      value={newBucketName}
+                      onChange={(e) => setNewBucketName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          addBucket();
+                        }
+                      }}
+                      placeholder="New category bucket"
+                      className="w-40"
+                    />
+                    <button
+                      onClick={addBucket}
+                      className="rounded-md border border-border px-3 py-1 text-[10px] tracking-wide hover:bg-muted"
+                    >
+                      + Category
+                    </button>
+                    <button
+                      onClick={() => {
+                        const n = String(works.length + 1).padStart(2, "0");
+                        const cs: CaseStudy = {
+                          slug: `case-${Date.now()}`,
+                          n,
+                          year: "",
+                          title: "New Case Study",
+                          kicker: "",
+                          img: "",
+                          role: "",
+                          summary: "",
+                          categories: [],
+                          outcomes: [],
+                          tone: "terracotta",
+                          sections: [],
+                          tools: [],
+                        };
+                        setWorks([...works, cs]);
+                        setEditing(cs);
+                      }}
+                      className="rounded-md bg-foreground px-3 py-1 text-[10px] tracking-wide text-background"
+                    >
+                      + New
+                    </button>
+                  </div>
                 </div>
                 {works.length === 0 && (
                   <p className="text-sm text-muted-foreground">No case studies yet.</p>
                 )}
-                {works.map((w: any, i) => (
-                  <div
-                    key={w._id || i}
-                    className="group relative rounded-lg border border-border transition-colors hover:bg-muted/50"
-                  >
-                    <button onClick={() => setEditing(works[i])} className="w-full p-4 text-left">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3">
-                            <span className="font-display text-lg">{w.title || "Untitled"}</span>
-                            <span className="text-xs text-muted-foreground">{w.year}</span>
+
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  {["Uncategorized", ...allCategories].map((bucket) => {
+                    const bucketWorks = worksByBucket[bucket] || [];
+                    const bucketKey = bucket === "Uncategorized" ? "__none__" : bucket;
+                    const isDropActive = dragOverBucket === bucketKey;
+
+                    return (
+                      <div
+                        key={bucketKey}
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          setDragOverBucket(bucketKey);
+                        }}
+                        onDragLeave={() => setDragOverBucket((prev) => (prev === bucketKey ? null : prev))}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          const slug = e.dataTransfer.getData("text/plain") || dragSlug;
+                          if (!slug) return;
+                          assignToBucket(slug, bucket === "Uncategorized" ? null : bucket);
+                          setDragSlug(null);
+                          setDragOverBucket(null);
+                        }}
+                        className={`rounded-lg border p-3 transition-colors ${
+                          isDropActive ? "border-accent bg-accent/5" : "border-border"
+                        }`}
+                      >
+                        <div className="mb-3 flex items-center justify-between gap-2">
+                          <div>
+                            <p className="font-mono text-[10px] tracking-[0.2em] text-muted-foreground uppercase">
+                              {bucket}
+                            </p>
+                            <p className="text-xs text-muted-foreground">{bucketWorks.length} projects</p>
                           </div>
-                          <p className="mt-1 text-xs text-muted-foreground">{w.kicker}</p>
-                          <p className="mt-2 text-sm line-clamp-2">{w.summary}</p>
+                          {bucket !== "Uncategorized" && (
+                            <button
+                              type="button"
+                              onClick={() => removeBucket(bucket)}
+                              className="rounded-md border border-red-500/30 px-2 py-1 text-[10px] text-red-500 hover:bg-red-500/10"
+                              title="Delete bucket"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          )}
                         </div>
-                        {w.img && (
-                          <img
-                            src={w.img}
-                            alt=""
-                            className="h-14 w-20 flex-shrink-0 rounded-md object-cover"
-                          />
-                        )}
+
+                        <div className="space-y-2">
+                          {bucketWorks.length === 0 && (
+                            <div className="rounded-md border border-dashed border-border p-2 text-center text-[10px] text-muted-foreground">
+                              Drop case studies here
+                            </div>
+                          )}
+
+                          {bucketWorks.map((w) => (
+                            <div
+                              key={w.slug}
+                              draggable
+                              onDragStart={(e) => {
+                                e.dataTransfer.setData("text/plain", w.slug);
+                                setDragSlug(w.slug);
+                              }}
+                              onDragEnd={() => {
+                                setDragSlug(null);
+                                setDragOverBucket(null);
+                              }}
+                              className="group rounded-md border border-border bg-background p-2"
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="min-w-0 flex-1">
+                                  <p className="truncate font-display text-sm">{w.title || "Untitled"}</p>
+                                  <p className="truncate text-[10px] text-muted-foreground">{w.year} · {w.kicker}</p>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => setEditing(w)}
+                                  className="rounded border border-border px-1.5 py-0.5 text-[10px] hover:bg-muted"
+                                >
+                                  Edit
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                      <div className="mt-2 flex flex-wrap gap-1.5">
-                        {(w.tools || []).map((t: string, j: number) => (
-                          <span
-                            key={j}
-                            className="rounded-full bg-muted px-2 py-px text-[10px] tracking-wide"
-                          >
-                            {t}
-                          </span>
-                        ))}
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => setWorks(works.filter((_, j) => j !== i))}
-                      className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500/10 text-[10px] text-red-500 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-500/20"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ))}
+                    );
+                  })}
+                </div>
               </div>
             ))}
 
@@ -512,13 +660,16 @@ function SectionLabel({ children }: { children: string }) {
 
 function WorkEditor({
   work,
+  availableCategories,
   onChange,
   onBack,
 }: {
   work: CaseStudy;
+  availableCategories: string[];
   onChange: (patch: Partial<CaseStudy>) => void;
   onBack: () => void;
 }) {
+  const [newCategory, setNewCategory] = useState("");
   const set = (patch: Partial<CaseStudy>) => onChange(patch);
 
   const addOutcome = () => set({ outcomes: [...work.outcomes, { k: "", v: "" }] });
@@ -546,6 +697,29 @@ function WorkEditor({
     const next = [...work.sections];
     [next[i], next[j]] = [next[j], next[i]];
     set({ sections: next });
+  };
+
+  const workCategories = (work.categories || []).map((category) => category.trim()).filter(Boolean);
+
+  const setCategories = (nextCategories: string[]) => {
+    set({
+      categories: Array.from(new Set(nextCategories.map((category) => category.trim()).filter(Boolean))),
+    });
+  };
+
+  const toggleCategory = (category: string) => {
+    if (workCategories.includes(category)) {
+      setCategories(workCategories.filter((c) => c !== category));
+      return;
+    }
+    setCategories([...workCategories, category]);
+  };
+
+  const addNewCategory = () => {
+    const category = newCategory.trim();
+    if (!category) return;
+    setCategories([...workCategories, category]);
+    setNewCategory("");
   };
 
   return (
@@ -600,19 +774,73 @@ function WorkEditor({
         />
       </Field>
 
-      <Field label="Categories (comma-separated)">
-        <input
-          placeholder="e.g. UI/UX, Visual Design"
-          value={(work.categories || []).join(", ")}
-          onChange={(e) =>
-            set({
-              categories: e.target.value
-                .split(",")
-                .map((category) => category.trim())
-                .filter(Boolean),
-            })
-          }
-        />
+      <Field label="Categories">
+        <div className="space-y-2 rounded-md border border-border p-3">
+          <div className="flex flex-wrap gap-1.5">
+            {workCategories.length === 0 && (
+              <span className="text-xs text-muted-foreground">No categories assigned</span>
+            )}
+            {workCategories.map((category) => (
+              <button
+                key={category}
+                type="button"
+                onClick={() => toggleCategory(category)}
+                className="inline-flex items-center gap-1 rounded-full bg-foreground px-2.5 py-1 text-[10px] tracking-wide text-background"
+                title="Remove category"
+              >
+                {category}
+                <X className="h-3 w-3" />
+              </button>
+            ))}
+          </div>
+
+          {availableCategories.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {availableCategories.map((category) => (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() => toggleCategory(category)}
+                  className={`rounded-full border px-2.5 py-1 text-[10px] tracking-wide transition-colors ${
+                    workCategories.includes(category)
+                      ? "border-foreground bg-foreground text-background"
+                      : "border-border hover:border-foreground"
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="flex gap-2">
+            <input
+              placeholder="Add new category"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addNewCategory();
+                }
+              }}
+            />
+            <button
+              type="button"
+              onClick={addNewCategory}
+              className="rounded-md border border-border px-3 py-1 text-[10px] tracking-wide hover:bg-muted"
+            >
+              Add
+            </button>
+            <button
+              type="button"
+              onClick={() => setCategories([])}
+              className="rounded-md border border-red-500/30 px-3 py-1 text-[10px] tracking-wide text-red-500 hover:bg-red-500/10"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
         <p className="mt-1 text-[10px] text-muted-foreground">
           Categories create the groups and filters shown in Selected Work.
         </p>

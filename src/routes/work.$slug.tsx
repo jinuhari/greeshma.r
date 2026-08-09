@@ -47,7 +47,8 @@ function CaseStudyPage() {
   if (!work) throw notFound();
 
   return (
-    <div className="bg-background text-foreground">
+    <div className="redesign-page">
+      <div className="redesign-callout">Case study view - editorial redesign</div>
       <CaseStudyNav work={work} allWorks={allWorks} />
       <CaseStudyHero work={work} />
       <CaseStudyContent work={work} />
@@ -59,8 +60,8 @@ function CaseStudyPage() {
 
 function CaseStudyNav({ work, allWorks }: { work: CaseStudy; allWorks: CaseStudy[] }) {
   return (
-    <header className="fixed inset-x-0 top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 py-5 md:px-12">
+    <header className="redesign-header">
+      <div className="redesign-wrap flex items-center justify-between gap-4">
         <Link to="/" className="flex items-center gap-2 text-sm hover:text-accent">
           <span>←</span>
           <span className="font-mono text-xs tracking-[0.2em] uppercase">Back</span>
@@ -92,9 +93,9 @@ function CaseStudyHero({ work }: { work: CaseStudy }) {
   };
 
   return (
-    <section className="pt-28 md:pt-36">
+    <section className="redesign-detail-hero">
       <div
-        className={`${toneMap[work.tone] || "bg-muted"} mx-auto max-w-[1440px] px-6 py-16 md:px-12 md:py-24`}
+        className={`${toneMap[work.tone] || "bg-muted"} redesign-wrap redesign-detail-panel`}
       >
         <div className="grid items-center gap-12 md:grid-cols-2">
           <div>
@@ -136,7 +137,7 @@ function CaseStudyHero({ work }: { work: CaseStudy }) {
 
 function CaseStudyContent({ work }: { work: CaseStudy }) {
   return (
-    <article className="mx-auto max-w-[1440px] px-6 py-24 md:px-12 md:py-32">
+    <article className="redesign-wrap redesign-detail-content">
       <div className="mx-auto max-w-3xl">
         <dl className="mb-20 grid grid-cols-2 gap-8 border-b border-border pb-12 md:grid-cols-4">
           {work.outcomes.map((o) => (
@@ -292,12 +293,12 @@ function CaseStudyFooter({
 
   return (
     <section className="border-t border-border py-20">
-      <div className="mx-auto max-w-[1440px] px-6 md:px-12">
+      <div className="redesign-wrap">
         <div className="grid gap-12 md:grid-cols-2">
           <Link
             to="/work/$slug"
             params={{ slug: prev.slug }}
-            className="group flex flex-col gap-2 border-r border-border pr-8"
+            className="group flex flex-col gap-2 border-r border-border pr-8 redesign-detail-link"
           >
             <span className="font-mono text-[10px] tracking-[0.2em] text-muted-foreground uppercase">
               ← Previous
@@ -311,7 +312,7 @@ function CaseStudyFooter({
           <Link
             to="/work/$slug"
             params={{ slug: next.slug }}
-            className="group flex flex-col items-end gap-2 pl-8 text-right"
+            className="group flex flex-col items-end gap-2 pl-8 text-right redesign-detail-link"
           >
             <span className="font-mono text-[10px] tracking-[0.2em] text-muted-foreground uppercase">
               Next →
