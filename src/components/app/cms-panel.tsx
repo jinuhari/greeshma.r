@@ -38,6 +38,8 @@ export function CmsPanel({
   const [dragSlug, setDragSlug] = useState<string | null>(null);
   const [dragOverBucket, setDragOverBucket] = useState<string | null>(null);
   const [customBuckets, setCustomBuckets] = useState<string[]>([]);
+  const [renamingBucket, setRenamingBucket] = useState<string | null>(null);
+  const [renameBucketName, setRenameBucketName] = useState("");
 
   const availableCategories = useMemo(
     () =>
@@ -113,6 +115,41 @@ export function CmsPanel({
       }),
     );
     setCustomBuckets((prev) => prev.filter((category) => category !== bucket));
+  };
+
+  const startBucketRename = (bucket: string) => {
+    if (bucket === "Uncategorized") return;
+    setRenamingBucket(bucket);
+    setRenameBucketName(bucket);
+  };
+
+  const commitBucketRename = () => {
+    if (!renamingBucket) return;
+    const nextName = renameBucketName.trim();
+
+    if (!nextName || nextName === renamingBucket) {
+      setRenamingBucket(null);
+      setRenameBucketName("");
+      return;
+    }
+
+    if (allCategories.includes(nextName)) {
+      setRenamingBucket(null);
+      setRenameBucketName("");
+      return;
+    }
+
+    setWorks(
+      works.map((work) => ({
+        ...work,
+        categories: (work.categories || []).map((category) =>
+          category === renamingBucket ? nextName : category,
+        ),
+      })),
+    );
+    setCustomBuckets((prev) => prev.map((category) => (category === renamingBucket ? nextName : category)));
+    setRenamingBucket(null);
+    setRenameBucketName("");
   };
 
   const handleSave = async () => {
@@ -293,9 +330,33 @@ export function CmsPanel({
                       >
                         <div className="mb-3 flex items-center justify-between gap-2">
                           <div>
-                            <p className="font-mono text-[10px] tracking-[0.2em] text-muted-foreground uppercase">
-                              {bucket}
-                            </p>
+                            {renamingBucket === bucket ? (
+                              <input
+                                autoFocus
+                                value={renameBucketName}
+                                onChange={(e) => setRenameBucketName(e.target.value)}
+                                onBlur={commitBucketRename}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    commitBucketRename();
+                                  }
+                                  if (e.key === "Escape") {
+                                    setRenamingBucket(null);
+                                    setRenameBucketName("");
+                                  }
+                                }}
+                                className="h-6 w-36 font-mono text-[10px] tracking-[0.2em] uppercase"
+                              />
+                            ) : (
+                              <p
+                                className="font-mono text-[10px] tracking-[0.2em] text-muted-foreground uppercase"
+                                onDoubleClick={() => startBucketRename(bucket)}
+                                title={bucket === "Uncategorized" ? undefined : "Double-click to rename category"}
+                              >
+                                {bucket}
+                              </p>
+                            )}
                             <p className="text-xs text-muted-foreground">{bucketWorks.length} projects</p>
                           </div>
                           {bucket !== "Uncategorized" && (

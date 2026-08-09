@@ -132,19 +132,20 @@ function Cursor() {
         className="pointer-events-none fixed inset-0 z-[5] hidden md:block"
         style={{
           background:
-            "radial-gradient(280px circle at var(--x, -200px) var(--y, -200px), color-mix(in oklab, var(--color-accent) 12%, transparent), transparent 60%)",
-          mixBlendMode: "multiply",
+            "radial-gradient(260px circle at var(--x, -200px) var(--y, -200px), color-mix(in oklab, var(--color-accent) 10%, transparent), transparent 62%), radial-gradient(140px circle at calc(var(--x, -200px) + 72px) calc(var(--y, -200px) - 44px), color-mix(in oklab, white 5%, transparent), transparent 64%), conic-gradient(from 220deg at var(--x, -200px) var(--y, -200px), transparent 0deg, color-mix(in oklab, var(--color-accent) 4%, transparent) 70deg, transparent 145deg, color-mix(in oklab, var(--color-foreground) 3%, transparent) 220deg, transparent 320deg, transparent 360deg)",
+          mixBlendMode: "screen",
+          opacity: 0.55,
         }}
       />
       <div
         ref={ring}
         aria-hidden
-        className="pointer-events-none fixed left-0 top-0 z-[60] hidden h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full border border-foreground/70 transition-[background,border-color,opacity] duration-200 md:block data-[hover='1']:bg-accent/15 data-[hover='1']:border-accent"
+        className="pointer-events-none fixed left-0 top-0 z-[110] hidden h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full border border-foreground/70 transition-[background,border-color,opacity] duration-200 md:block data-[hover='1']:bg-accent/15 data-[hover='1']:border-accent"
       />
       <div
         ref={dot}
         aria-hidden
-        className="pointer-events-none fixed left-0 top-0 z-[60] hidden h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent md:block"
+        className="pointer-events-none fixed left-0 top-0 z-[110] hidden h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent md:block"
       />
     </>
   );
@@ -566,6 +567,10 @@ function SketchOverlay({ on, onClear }: { on: boolean; onClear: () => void }) {
 }
 
 /* ---------------- Composed shell ---------------- */
+export function CustomCursorPointer() {
+  return <Cursor />;
+}
+
 export function AppShell() {
   const active = useActiveSection();
   const [cmdOpen, setCmdOpen] = useState(false);

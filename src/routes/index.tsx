@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { CustomCursorPointer } from "@/components/app/app-shell";
 import { CmsPanel } from "@/components/app/cms-panel";
 import heroArt from "@/assets/hero-artwork.jpg";
-import workImage from "@/assets/portrait.jpg";
+import workImage from "@/assets/greeshma bgremoved.png";
 import { useTheme } from "@/hooks/use-reveal";
 import { type CaseStudy } from "@/lib/cms";
 import {
@@ -109,7 +110,7 @@ function Home() {
     ["UI Design", "Design Systems"];
   const shownTotal = shownWorks.length || (featuredWork ? 1 : 0);
   const shownIndex = shownWorks.length > 0 ? workCursor + 1 : featuredWork ? 1 : 0;
-
+  const featuredHref = featuredWork ? `/work/${featuredWork.slug}` : "#";
   return (
     <div className="redesign-page">
       <header className="redesign-header">
@@ -130,7 +131,6 @@ function Home() {
         </div>
         <nav>
           <a href="#work">Work</a>
-          <a href="#archive">Archive</a>
           <a href="#experience">Experience</a>
           <a href="#about">About</a>
           <a href="#contact">Contact</a>
@@ -141,39 +141,53 @@ function Home() {
         <div className="redesign-hero-bg">
           <img src={heroArt} alt="" width={1800} height={1200} />
         </div>
+        <div className="redesign-wrap redesign-hero-grid">
+          <div className="hero-copy">
+            <p className="hero-intro">Design practice 2013 - present</p>
+            <h1 className="headline editorial-h">
+              Product interfaces shaped with an illustrator's eye and a research-led process.
+            </h1>
+            <p className="sub">
+              Greeshma R. designs digital products, visual systems, and brand-sensitive surfaces
+              with a focus on clarity, rhythm, and finish.
+            </p>
+            <div className="cta-row">
+              <a href="#work" className="notch-btn">
+                View selected work
+              </a>
+              <a
+                href="/print-resume?role=Product%20Design"
+                className="link-underline"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Open resume
+              </a>
+            </div>
+          </div>
+          <figure className="hero-portrait-frame">
+            <div className="hero-portrait">
+              <img src={workImage} alt="Portrait of Greeshma R." width={1200} height={1500} />
+            </div>
+          </figure>
+        </div>
+      </section>
+
+      <section className="redesign-block work-section" id="work">
         <div className="redesign-wrap">
-          <p className="eyebrow">A multidisciplinary design practice - 2013 - Present</p>
-          <h1 className="headline editorial-h">
-            Designing
-            <br />
-            <span className="italic text-accent">thoughtful</span> digital
-            <br />
-            products through
-            <br />
-            research &amp; craft.
-          </h1>
-          <p className="sub">
-            Greeshma R. is a multidisciplinary designer working at the seam of product, brand,
-            illustration and research.
-          </p>
-          <div className="cta-row">
-            <a href="#work" className="notch-btn">
-              View Selected Work <span aria-hidden="true">-&gt;</span>
-            </a>
-            <a href="#contact" className="link-underline">
-              Download Resume
-            </a>
+          <div className="section-heading-row">
+            <div>
+              <p className="section-kicker">{categoryLabel}</p>
+              <h2 className="editorial-h category-heading">
+                Case studies arranged through category, not a gallery grid.
+              </h2>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="redesign-block" id="work">
+      <section className="redesign-block work-curation">
         <div className="redesign-wrap">
-          <p className="eyebrow">{categoryLabel} - 2020 - 2024</p>
-          <h2 className="editorial-h category-heading">
-            Browse by <span className="italic text-accent">category.</span>
-          </h2>
-
           <div className="filters">
             {workCategories.map((category) => (
               <button
@@ -188,79 +202,98 @@ function Home() {
             ))}
           </div>
 
-          <article className="work-card" id="archive">
-            <div>
-              <span className="idx">
-                {String(shownIndex).padStart(2, "0")} / {String(shownTotal).padStart(2, "0")}
-              </span>
-              <img src={featuredImage} alt={`${featuredTitle} case study`} width={1500} height={1000} />
-            </div>
-            <div>
-              <p className="eyebrow">
-                {featuredYear} - {featuredKicker}
-              </p>
-              <h3 className="editorial-h">{featuredTitle}</h3>
-              <p className="role">{featuredRole}</p>
-              <p className="work-copy">{featuredSummary}</p>
-              <div className="tags">
-                {featuredTags.map((tag) => (
-                  <span className="notch-tag" key={tag}>
-                    {tag}
-                  </span>
-                ))}
+          <div className="work-card-shell">
+            {shownWorks.length > 1 && (
+              <button
+                type="button"
+                className="carousel-btn carousel-btn-side carousel-btn-left"
+                onClick={() =>
+                  setWorkCursor((prev) =>
+                    shownWorks.length === 0 ? 0 : (prev - 1 + shownWorks.length) % shownWorks.length,
+                  )
+                }
+                aria-label="Previous case study"
+              >
+                ←
+              </button>
+            )}
+
+            <article className="work-card" id="archive">
+              <div className="work-visual">
+                <span className="idx">
+                  {String(shownIndex).padStart(2, "0")} / {String(shownTotal).padStart(2, "0")}
+                </span>
+                <img src={featuredImage} alt={`${featuredTitle} case study`} width={1500} height={1000} />
               </div>
-              <div className="work-link-wrap">
-                <a href={featuredWork ? `/work/${featuredWork.slug}` : "#"} className="link-underline">
-                  Read the case study -&gt;
-                </a>
-              </div>
-              {shownWorks.length > 1 && (
-                <div className="carousel-controls" aria-label="Case study carousel controls">
-                  <button
-                    type="button"
-                    className="carousel-btn"
-                    onClick={() =>
-                      setWorkCursor((prev) =>
-                        shownWorks.length === 0 ? 0 : (prev - 1 + shownWorks.length) % shownWorks.length,
-                      )
-                    }
-                    aria-label="Previous case study"
-                  >
-                    ←
-                  </button>
-                  <span className="carousel-counter">
-                    {shownIndex} / {shownTotal}
-                  </span>
-                  <button
-                    type="button"
-                    className="carousel-btn"
-                    onClick={() =>
-                      setWorkCursor((prev) =>
-                        shownWorks.length === 0 ? 0 : (prev + 1) % shownWorks.length,
-                      )
-                    }
-                    aria-label="Next case study"
-                  >
-                    →
-                  </button>
+              <div className="work-content">
+                <p className="work-meta">
+                  {featuredYear} - {featuredKicker}
+                </p>
+                <h3 className="editorial-h">{featuredTitle}</h3>
+                <p className="role">{featuredRole}</p>
+                <p className="work-copy">{featuredSummary}</p>
+                <div className="tags">
+                  {featuredTags.map((tag) => (
+                    <span className="notch-tag" key={tag}>
+                      {tag}
+                    </span>
+                  ))}
                 </div>
-              )}
+                <div className="work-actions">
+                  <a href={featuredHref} className="notch-btn">
+                    Read case study <span aria-hidden="true">-&gt;</span>
+                  </a>
+                </div>
+              </div>
+            </article>
+
+            {shownWorks.length > 1 && (
+              <button
+                type="button"
+                className="carousel-btn carousel-btn-side carousel-btn-right"
+                onClick={() =>
+                  setWorkCursor((prev) =>
+                    shownWorks.length === 0 ? 0 : (prev + 1) % shownWorks.length,
+                  )
+                }
+                aria-label="Next case study"
+              >
+                →
+              </button>
+            )}
+          </div>
+
+          {shownWorks.length > 1 && (
+            <div className="carousel-controls" aria-label="Case study carousel controls">
+              <span className="carousel-counter">
+                {shownIndex} / {shownTotal}
+              </span>
             </div>
-          </article>
+          )}
         </div>
       </section>
 
-      <section className="redesign-block" id="experience">
+      <section className="redesign-block timeline-section" id="experience">
         <div className="redesign-wrap">
-          <p className="eyebrow">Experience</p>
-          <h2 className="editorial-h category-heading">Selected timeline.</h2>
+          <div className="section-heading-row section-heading-compact">
+            <div>
+              <p className="section-kicker">Experience</p>
+              <h2 className="editorial-h category-heading">A timeline of practice, not a CV dump.</h2>
+            </div>
+          </div>
           <div className="timeline-list">
             {cmsTimeline.map((item, i) => (
               <article key={`${item.year}-${i}`} className="timeline-item">
+                <div className="timeline-rail" aria-hidden="true">
+                  <span className="timeline-node" />
+                </div>
                 <p className="year">{item.year}</p>
-                <div>
-                  <h3>{item.title}</h3>
-                  <p>{item.where}</p>
+                <div className="timeline-body">
+                  <div className="timeline-topline">
+                    <span className="timeline-step">{String(i + 1).padStart(2, "0")}</span>
+                    <h3>{item.title}</h3>
+                  </div>
+                  <p className="timeline-copy">{item.where}</p>
                 </div>
               </article>
             ))}
@@ -268,30 +301,40 @@ function Home() {
         </div>
       </section>
 
-      <section className="redesign-block" id="about">
+      <section className="redesign-block about-section" id="about">
         <div className="redesign-wrap">
-          <p className="eyebrow">About</p>
-          <h2 className="editorial-h category-heading">A multidisciplinary design practice.</h2>
-          <p className="work-copy max-w-3xl">
-            Greeshma works across product, brand, illustration, and research with a craft-first
-            approach to digital experiences. Her practice bridges systems thinking with editorial
-            sensitivity, turning insights into tangible products and visual narratives.
-          </p>
+          <div className="about-grid">
+            <div>
+              <p className="section-kicker">About</p>
+              <h2 className="editorial-h category-heading">A multidisciplinary practice with a fine-arts backbone.</h2>
+            </div>
+            <div />
+          </div>
         </div>
       </section>
 
-      <section className="redesign-block" id="contact">
+      <section className="redesign-block contact-section" id="contact">
         <div className="redesign-wrap">
-          <p className="eyebrow">Contact</p>
-          <h2 className="editorial-h category-heading">Let us work together.</h2>
-          <p className="work-copy max-w-2xl">For collaborations, product work, and design consulting.</p>
-          <div className="cta-row">
-            <a className="notch-btn" href="mailto:hello@greeshma.design">
-              hello@greeshma.design
-            </a>
-            <a className="link-underline" href="/print-resume?role=Product%20Design" target="_blank" rel="noreferrer">
-              Open Resume
-            </a>
+          <div className="contact-panel">
+            <div>
+              <p className="section-kicker">Contact</p>
+              <h2 className="editorial-h category-heading">For product roles, commissioned work, and thoughtful collaborations.</h2>
+            </div>
+            <div>
+              <div className="cta-row contact-actions">
+                <a className="notch-btn" href="mailto:hello@greeshma.design">
+                  hello@greeshma.design
+                </a>
+                <a
+                  className="link-underline"
+                  href="/print-resume?role=Product%20Design"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open resume
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -313,6 +356,8 @@ function Home() {
           }}
         />
       )}
+
+      <CustomCursorPointer />
     </div>
   );
 }
