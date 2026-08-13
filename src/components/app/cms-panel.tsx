@@ -811,12 +811,6 @@ function WorkEditor({
       </div>
 
       <Field label="Cover Image">
-        <input
-          placeholder="Paste image URL"
-          className="mb-2"
-          value={work.img}
-          onChange={(e) => set({ img: e.target.value })}
-        />
         <ImageUploader
           value={work.img}
           onUpload={(url, _ref) => set({ img: url, imgRef: _ref || undefined })}
@@ -1030,17 +1024,20 @@ function ImageUploader({
   label?: string;
 }) {
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
+    setError("");
     try {
       const result = await uploadImage(file);
       onUpload(result.url, result._ref);
     } catch (err) {
       console.error("Upload failed", err);
+      setError(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -1048,28 +1045,31 @@ function ImageUploader({
   };
 
   return (
-    <div className="flex items-center gap-3">
-      {value && (
-        <img src={value} alt="" className="h-14 w-20 flex-shrink-0 rounded-md object-cover" />
-      )}
-      <input ref={inputRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
-      <button
-        type="button"
-        onClick={() => inputRef.current?.click()}
-        disabled={uploading}
-        className="rounded-md bg-muted px-3 py-1.5 text-[10px] tracking-wide transition-colors hover:bg-muted/70 disabled:opacity-50"
-      >
-        {uploading ? "Uploading..." : label || "Upload from device"}
-      </button>
-      {value && (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center gap-3">
+        {value && (
+          <img src={value} alt="" className="h-14 w-20 flex-shrink-0 rounded-md object-cover" />
+        )}
+        <input ref={inputRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
         <button
           type="button"
-          onClick={() => onUpload("")}
-          className="rounded-md bg-red-500/10 px-2 py-1 text-[10px] text-red-500 hover:bg-red-500/20"
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+          className="rounded-md bg-muted px-3 py-1.5 text-[10px] tracking-wide transition-colors hover:bg-muted/70 disabled:opacity-50"
         >
-          Remove
+          {uploading ? "Uploading..." : label || "Upload from device"}
         </button>
-      )}
+        {value && (
+          <button
+            type="button"
+            onClick={() => onUpload("")}
+            className="rounded-md bg-red-500/10 px-2 py-1 text-[10px] text-red-500 hover:bg-red-500/20"
+          >
+            Remove
+          </button>
+        )}
+      </div>
+      {error && <p className="text-[10px] text-red-500">{error}</p>}
     </div>
   );
 }
@@ -1184,16 +1184,6 @@ function SectionEditor({
                   <X className="h-3 w-3" />
                 </button>
               </div>
-              <input
-                placeholder="Image URL"
-                className="mt-1 text-xs"
-                value={img.src}
-                onChange={(e) => {
-                  const next = [...(section.images || [])];
-                  next[j] = { ...next[j], src: e.target.value };
-                  onChange({ images: next });
-                }}
-              />
               <div className="mt-1">
                 <ImageUploader
                   value={img.src}
