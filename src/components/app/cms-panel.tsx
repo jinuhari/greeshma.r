@@ -1,20 +1,31 @@
-import { useMemo, useRef, useState } from "react";
-import { X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Redo2, Undo2, X } from "lucide-react";
 import { syncAllToSanity, uploadImage } from "@/sanity/lib/mutations";
 import type { CaseStudy, CaseStudySection, Outcome, SectionType } from "@/lib/cms";
 import type { ArchiveItem, TimelineItem, Resume } from "@/lib/data";
 
 type Tab = "works" | "archive" | "experience" | "resumes";
 
+type CmsSnapshot = {
+  works: CaseStudy[];
+  archive: ArchiveItem[];
+  timeline: TimelineItem[];
+  resumes: Resume[];
+};
+
+// Rapid successive edits (e.g. keystrokes) within this window collapse into one undo step.
+const HISTORY_GROUP_MS = 700;
+const HISTORY_LIMIT = 50;
+
 export function CmsPanel({
   works,
-  setWorks,
+  setWorks: setWorksProp,
   archive,
-  setArchive,
+  setArchive: setArchiveProp,
   timeline,
-  setTimeline,
+  setTimeline: setTimelineProp,
   resumes,
-  setResumes,
+  setResumes: setResumesProp,
   onRefresh,
   onClose,
 }: {
@@ -40,6 +51,90 @@ export function CmsPanel({
   const [customBuckets, setCustomBuckets] = useState<string[]>([]);
   const [renamingBucket, setRenamingBucket] = useState<string | null>(null);
   const [renameBucketName, setRenameBucketName] = useState("");
+
+  const undoStack = useRef<CmsSnapshot[]>([]);
+  const redoStack = useRef<CmsSnapshot[]>([]);
+  const lastChangeAt = useRef(0);
+  const [historyTick, setHistoryTick] = useState(0);
+
+  const snapshot = (): CmsSnapshot => ({ works, archive, timeline, resumes });
+
+  const applySnapshot = (s: CmsSnapshot) => {
+    setWorksProp(s.works);
+    setArchiveProp(s.archive);
+    setTimelineProp(s.timeline);
+    setResumesProp(s.resumes);
+    setEditing((prev) => (prev ? s.works.find((w) => w.slug === prev.slug) || null : null));
+  };
+
+  const recordHistory = () => {
+    const now = Date.now();
+    if (now - lastChangeAt.current > HISTORY_GROUP_MS) {
+      undoStack.current.push(snapshot());
+      if (undoStack.current.length > HISTORY_LIMIT) undoStack.current.shift();
+    }
+    lastChangeAt.current = now;
+    redoStack.current = [];
+    setHistoryTick((t) => t + 1);
+  };
+
+  const setWorks = (w: CaseStudy[]) => {
+    recordHistory();
+    setWorksProp(w);
+  };
+  const setArchive = (a: ArchiveItem[]) => {
+    recordHistory();
+    setArchiveProp(a);
+  };
+  const setTimeline = (t: TimelineItem[]) => {
+    recordHistory();
+    setTimelineProp(t);
+  };
+  const setResumes = (r: Resume[]) => {
+    recordHistory();
+    setResumesProp(r);
+  };
+
+  const canUndo = undoStack.current.length > 0;
+  const canRedo = redoStack.current.length > 0;
+
+  const undo = () => {
+    const prev = undoStack.current.pop();
+    if (!prev) return;
+    redoStack.current.push(snapshot());
+    lastChangeAt.current = 0;
+    applySnapshot(prev);
+    setHistoryTick((t) => t + 1);
+  };
+
+  const redo = () => {
+    const next = redoStack.current.pop();
+    if (!next) return;
+    undoStack.current.push(snapshot());
+    lastChangeAt.current = 0;
+    applySnapshot(next);
+    setHistoryTick((t) => t + 1);
+  };
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const meta = e.metaKey || e.ctrlKey;
+      if (!meta) return;
+      const key = e.key.toLowerCase();
+      if (key === "z" && e.shiftKey) {
+        e.preventDefault();
+        redo();
+      } else if (key === "z") {
+        e.preventDefault();
+        undo();
+      } else if (key === "y") {
+        e.preventDefault();
+        redo();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  });
 
   const availableCategories = useMemo(
     () =>
@@ -211,6 +306,26 @@ export function CmsPanel({
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 rounded-full border border-border p-0.5">
+              <button
+                onClick={undo}
+                disabled={!canUndo}
+                title="Undo (Cmd/Ctrl+Z)"
+                aria-label="Undo"
+                className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent"
+              >
+                <Undo2 className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={redo}
+                disabled={!canRedo}
+                title="Redo (Cmd/Ctrl+Shift+Z)"
+                aria-label="Redo"
+                className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent"
+              >
+                <Redo2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
             <button
               onClick={handleSave}
               disabled={saving}
