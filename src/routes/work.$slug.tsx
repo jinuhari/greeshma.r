@@ -222,45 +222,21 @@ function SectionRenderer({ section }: { section: import("@/lib/cms").CaseStudySe
   }
 
   if (section.type === "image-text") {
-    const pos = section.imagePosition || "left";
     return (
       <section className="mb-20 last:mb-0 w-full">
-        <div className={`grid items-center gap-10 md:grid-cols-2 ${pos === "right" ? "" : ""}`}>
-          {pos === "right" ? (
-            <>
-              <div>
-                {section.title && (
-                  <h2 className="font-display text-3xl md:text-4xl">{section.title}</h2>
-                )}
-                {section.title && <div className="mt-4 h-px w-12 bg-accent" />}
-                <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
-                  {section.content}
-                </p>
-              </div>
-              {section.images?.[0] && (
-                <div className="overflow-hidden rounded-lg bg-muted">
-                  <img src={section.images[0].src} alt="" className="w-full object-cover" />
-                </div>
-              )}
-            </>
-          ) : (
-            <>
-              {section.images?.[0] && (
-                <div className="overflow-hidden rounded-lg bg-muted">
-                  <img src={section.images[0].src} alt="" className="w-full object-cover" />
-                </div>
-              )}
-              <div>
-                {section.title && (
-                  <h2 className="font-display text-3xl md:text-4xl">{section.title}</h2>
-                )}
-                {section.title && <div className="mt-4 h-px w-12 bg-accent" />}
-                <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
-                  {section.content}
-                </p>
-              </div>
-            </>
+        {section.images?.[0] && (
+          <div className="case-study-media mx-auto mb-10 overflow-hidden rounded-lg bg-muted">
+            <img src={section.images[0].src} alt="" className="w-full object-cover" />
+          </div>
+        )}
+        <div className="mx-auto max-w-3xl">
+          {section.title && (
+            <h2 className="font-display text-3xl md:text-4xl">{section.title}</h2>
           )}
+          {section.title && <div className="mt-4 h-px w-12 bg-accent" />}
+          <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
+            {section.content}
+          </p>
         </div>
       </section>
     );

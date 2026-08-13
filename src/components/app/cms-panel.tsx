@@ -858,7 +858,6 @@ function WorkEditor({
 
   const addSection = (type: SectionType) => {
     const base: CaseStudySection = { type, title: "", content: "", images: [] };
-    if (type === "image-text") base.imagePosition = "left";
     set({ sections: [...work.sections, base] });
   };
   const updSection = (i: number, patch: Partial<CaseStudySection>) => {
@@ -1267,17 +1266,6 @@ function SectionEditor({
             onChange={(e) => onChange({ content: e.target.value })}
           />
         </>
-      )}
-
-      {section.type === "image-text" && (
-        <select
-          value={section.imagePosition || "left"}
-          onChange={(e) => onChange({ imagePosition: e.target.value as "left" | "right" })}
-          className="mt-2 w-full rounded-md border border-border bg-background px-2 py-1 text-xs outline-none"
-        >
-          <option value="left">Image left</option>
-          <option value="right">Image right</option>
-        </select>
       )}
 
       {(section.type === "image" ||
