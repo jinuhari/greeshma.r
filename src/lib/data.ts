@@ -296,7 +296,7 @@ function adaptSanityCaseStudy(s: any): CaseStudy {
     year: s.year || "",
     title: s.title || "",
     kicker: s.kicker || "",
-    img: s.coverImage ? urlFor(s.coverImage).width(1200).url() : "",
+    img: s.coverImage ? urlFor(s.coverImage).url() : "",
     imgRef: coverRef || undefined,
     role: s.role || "",
     summary: s.summary || "",
@@ -315,7 +315,7 @@ function adaptSanityCaseStudy(s: any): CaseStudy {
           type: (sec.fullBleed ? "full-bleed" : "image") as any,
           images: [
             {
-              src: sec.image ? urlFor(sec.image).width(1200).url() : "",
+              src: sec.image ? urlFor(sec.image).url() : "",
               caption: sec.caption || "",
               _ref: sec.image?.asset?._ref || undefined,
             },
@@ -328,7 +328,7 @@ function adaptSanityCaseStudy(s: any): CaseStudy {
           content: sec.content,
           images: [
             {
-              src: sec.image ? urlFor(sec.image).width(1200).url() : "",
+              src: sec.image ? urlFor(sec.image).url() : "",
               _ref: sec.image?.asset?._ref || undefined,
             },
           ],
@@ -399,7 +399,7 @@ export async function loadArchiveFromSanity(): Promise<ArchiveItem[]> {
     }
     const adapted = result
       .map((item: any) => ({
-        src: item.image ? urlFor(item.image).width(600).url() : "",
+        src: item.image ? urlFor(item.image).url() : "",
         label: item.label || "",
         cat: item.category || "",
         year: item.year || "",

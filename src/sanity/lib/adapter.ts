@@ -23,7 +23,7 @@ function adaptSanityCaseStudy(sanityCaseStudy: any): CaseStudy | null {
     year: sanityCaseStudy.year || "",
     title: sanityCaseStudy.title || "",
     kicker: sanityCaseStudy.kicker || "",
-    img: sanityCaseStudy.coverImage ? urlFor(sanityCaseStudy.coverImage).width(1200).url() : "",
+    img: sanityCaseStudy.coverImage ? urlFor(sanityCaseStudy.coverImage).url() : "",
     role: sanityCaseStudy.role || "",
     summary: sanityCaseStudy.summary || "",
     categories: sanityCaseStudy.categories || [],
@@ -45,7 +45,7 @@ function adaptSanityCaseStudy(sanityCaseStudy: any): CaseStudy | null {
           type: s.fullBleed ? "full-bleed" : "image",
           images: [
             {
-              src: s.image ? urlFor(s.image).width(1200).url() : "",
+              src: s.image ? urlFor(s.image).url() : "",
               caption: s.caption || "",
             },
           ],
@@ -56,7 +56,7 @@ function adaptSanityCaseStudy(sanityCaseStudy: any): CaseStudy | null {
           type: "image-text",
           title: s.title || "",
           content: s.content || "",
-          images: [{ src: s.image ? urlFor(s.image).width(800).url() : "" }],
+          images: [{ src: s.image ? urlFor(s.image).url() : "" }],
           imagePosition: s.imagePosition || "left",
         };
       }
@@ -68,7 +68,7 @@ function adaptSanityCaseStudy(sanityCaseStudy: any): CaseStudy | null {
 function adaptSanityArchiveItem(item: any): ArchiveItem | null {
   if (!item) return null;
   return {
-    src: item.image ? urlFor(item.image).width(600).url() : "",
+    src: item.image ? urlFor(item.image).url() : "",
     label: item.label || "",
     cat: item.category || "",
     year: item.year || "",
