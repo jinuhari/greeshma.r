@@ -1,15 +1,19 @@
 import { useEffect, useRef } from "react";
 
 const GAP = 34; // px between dots
-const BASE_RADIUS = 1.3;
-const MAX_RADIUS = 3.6;
-const RIPPLE_RADIUS = 170;
-const BASE_ALPHA = 0.16;
-const MAX_ALPHA = 0.7;
+const DOT_RADIUS = 1.6;
+const DOT_ALPHA = 0.24;
+const RIPPLE_RADIUS = 130; // how far the pointer's push reaches
+const PUSH_STRENGTH = 2.4; // force applied to dots caught in the ripple
+const SPRING = 0.055; // how eagerly a dot returns to its resting spot
+const DAMPING = 0.88; // friction that settles the motion, like water calming down
+
+type DotState = { ox: number; oy: number; vx: number; vy: number };
 
 /**
- * Canvas-based grid of dots that drifts in a slow wave and ripples
- * outward from the pointer. Purely decorative — sits behind the hero copy.
+ * Canvas-based grid of dots that drifts in a slow wave and gives way to the
+ * pointer like water — dots get pushed aside and spring back to rest, rather
+ * than changing size. Purely decorative — sits behind the hero copy.
  */
 export function DotMatrixHero() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -26,9 +30,12 @@ export function DotMatrixHero() {
 
     let width = 0;
     let height = 0;
+    let cols = 0;
+    let rows = 0;
     let raf = 0;
     let t = 0;
     let dotColor = "#1c1c1a";
+    let dots: DotState[] = [];
 
     const pointer = { x: -9999, y: -9999, active: false };
 
@@ -46,6 +53,9 @@ export function DotMatrixHero() {
       canvas.width = width * dpr;
       canvas.height = height * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cols = Math.ceil(width / GAP) + 1;
+      rows = Math.ceil(height / GAP) + 1;
+      dots = Array.from({ length: cols * rows }, () => ({ ox: 0, oy: 0, vx: 0, vy: 0 }));
     };
     resize();
 
@@ -61,34 +71,38 @@ export function DotMatrixHero() {
 
     const draw = () => {
       ctx.clearRect(0, 0, width, height);
-      const cols = Math.ceil(width / GAP) + 1;
-      const rows = Math.ceil(height / GAP) + 1;
 
       for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
-          const baseX = col * GAP;
-          const baseY = row * GAP;
-          const wave = Math.sin(t + col * 0.35 + row * 0.22) * 5;
-          const x = baseX;
-          const y = baseY + wave;
-
-          let radius = BASE_RADIUS;
-          let alpha = BASE_ALPHA;
+          const index = row * cols + col;
+          const dot = dots[index];
+          const restX = col * GAP;
+          const restY = row * GAP + Math.sin(t + col * 0.35 + row * 0.22) * 5;
+          const x = restX + dot.ox;
+          const y = restY + dot.oy;
 
           if (pointer.active) {
             const dx = x - pointer.x;
             const dy = y - pointer.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < RIPPLE_RADIUS) {
-              const proximity = 1 - dist / RIPPLE_RADIUS;
-              radius = BASE_RADIUS + (MAX_RADIUS - BASE_RADIUS) * proximity;
-              alpha = BASE_ALPHA + (MAX_ALPHA - BASE_ALPHA) * proximity;
+            if (dist < RIPPLE_RADIUS && dist > 0.01) {
+              const push = (1 - dist / RIPPLE_RADIUS) * PUSH_STRENGTH;
+              dot.vx += (dx / dist) * push;
+              dot.vy += (dy / dist) * push;
             }
           }
 
+          // Spring back toward the resting position, damped like settling water.
+          dot.vx += -dot.ox * SPRING;
+          dot.vy += -dot.oy * SPRING;
+          dot.vx *= DAMPING;
+          dot.vy *= DAMPING;
+          dot.ox += dot.vx;
+          dot.oy += dot.vy;
+
           ctx.beginPath();
-          ctx.arc(x, y, radius, 0, Math.PI * 2);
-          ctx.globalAlpha = alpha;
+          ctx.arc(x, y, DOT_RADIUS, 0, Math.PI * 2);
+          ctx.globalAlpha = DOT_ALPHA;
           ctx.fillStyle = dotColor;
           ctx.fill();
         }
