@@ -13,7 +13,6 @@ import {
   loadArchiveFromSanity,
   loadTimeline,
   loadTimelineFromSanity,
-  loadWorks,
   loadWorksFromSanity,
 } from "@/lib/data";
 import type { Resume } from "@/lib/data";
@@ -26,26 +25,34 @@ function getWorkCategories(work: CaseStudy): string[] {
   return (work.categories || []).map((category) => category.trim()).filter(Boolean);
 }
 
+const WORKS_PAGE_SIZE = 4;
+
 function Home() {
   useTheme();
   const [activeCategory, setActiveCategory] = useState("All work");
-  const [workCursor, setWorkCursor] = useState(0);
-  const [cmsWorks, setCmsWorks] = useState(() => loadWorks());
+  const [showAllWorks, setShowAllWorks] = useState(false);
+  const [cmsWorks, setCmsWorks] = useState<CaseStudy[]>([]);
+  const [worksLoading, setWorksLoading] = useState(true);
   const [cmsArchive, setCmsArchive] = useState(() => loadArchive());
   const [cmsTimeline, setCmsTimeline] = useState(() => loadTimeline());
   const [cmsResumes, setCmsResumes] = useState<Resume[]>(() => defaultResumes());
   const [cmsOpen, setCmsOpen] = useState(false);
   const cmsClicks = useRef(0);
+  // Guards against out-of-order responses so a slow, stale fetch can never clobber a newer one.
+  const refreshToken = useRef(0);
 
   const refreshAll = useCallback(async () => {
+    const token = ++refreshToken.current;
     const [w, a, t] = await Promise.all([
       loadWorksFromSanity(),
       loadArchiveFromSanity(),
       loadTimelineFromSanity(),
     ]);
+    if (token !== refreshToken.current) return;
     if (w.length) setCmsWorks(w);
     if (a.length) setCmsArchive(a);
     if (t.length) setCmsTimeline(t);
+    setWorksLoading(false);
   }, []);
 
   useEffect(() => {
@@ -77,40 +84,17 @@ function Home() {
   );
 
   useEffect(() => {
-    setWorkCursor(0);
-  }, [activeCategory]);
-
-  useEffect(() => {
-    if (shownWorks.length === 0) {
-      setWorkCursor(0);
-      return;
-    }
-    if (workCursor > shownWorks.length - 1) {
-      setWorkCursor(shownWorks.length - 1);
-    }
-  }, [shownWorks, workCursor]);
-
-  useEffect(() => {
     if (!workCategories.includes(activeCategory)) {
       setActiveCategory("All work");
     }
   }, [activeCategory, workCategories]);
 
-  const featuredWork: CaseStudy | undefined = shownWorks[workCursor] || shownWorks[0] || cmsWorks[0];
-  const featuredImage = featuredWork?.img || workImage;
-  const featuredYear = featuredWork?.year || "2023";
-  const featuredKicker = featuredWork?.kicker || "Mobile commerce";
-  const featuredTitle = featuredWork?.title || "Udaan";
-  const featuredRole = featuredWork?.role || "Lead Product Designer";
-  const featuredSummary =
-    featuredWork?.summary ||
-    "Designing mobile experiences and the visual systems that hold campaigns together for 3M+ retail partners.";
-  const featuredTags =
-    (featuredWork ? getWorkCategories(featuredWork).slice(0, 2) : null) ||
-    ["UI Design", "Design Systems"];
-  const shownTotal = shownWorks.length || (featuredWork ? 1 : 0);
-  const shownIndex = shownWorks.length > 0 ? workCursor + 1 : featuredWork ? 1 : 0;
-  const featuredHref = featuredWork ? `/work/${featuredWork.slug}` : "#";
+  useEffect(() => {
+    setShowAllWorks(false);
+  }, [activeCategory]);
+
+  const visibleWorks = showAllWorks ? shownWorks : shownWorks.slice(0, WORKS_PAGE_SIZE);
+
   return (
     <div className="redesign-page">
       <header className="redesign-header">
@@ -188,87 +172,80 @@ function Home() {
 
       <section className="redesign-block work-curation">
         <div className="redesign-wrap">
-          <div className="filters">
-            {workCategories.map((category) => (
-              <button
-                key={category}
-                type="button"
-                className={`notch-tag ${activeCategory === category ? "active" : ""}`}
-                onClick={() => setActiveCategory(category)}
-                aria-pressed={activeCategory === category}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-
-          <div className="work-card-shell">
-            {shownWorks.length > 1 && (
-              <button
-                type="button"
-                className="carousel-btn carousel-btn-side carousel-btn-left"
-                onClick={() =>
-                  setWorkCursor((prev) =>
-                    shownWorks.length === 0 ? 0 : (prev - 1 + shownWorks.length) % shownWorks.length,
-                  )
-                }
-                aria-label="Previous case study"
-              >
-                ←
-              </button>
-            )}
-
-            <article className="work-card" id="archive">
-              <div className="work-visual">
-                <span className="idx">
-                  {String(shownIndex).padStart(2, "0")} / {String(shownTotal).padStart(2, "0")}
-                </span>
-                <img src={featuredImage} alt={`${featuredTitle} case study`} width={1500} height={1000} />
-              </div>
-              <div className="work-content">
-                <p className="work-meta">
-                  {featuredYear} - {featuredKicker}
-                </p>
-                <h3 className="editorial-h">{featuredTitle}</h3>
-                <p className="role">{featuredRole}</p>
-                <p className="work-copy">{featuredSummary}</p>
-                <div className="tags">
-                  {featuredTags.map((tag) => (
-                    <span className="notch-tag" key={tag}>
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                <div className="work-actions">
-                  <a href={featuredHref} className="notch-btn">
-                    Read case study <span aria-hidden="true">-&gt;</span>
-                  </a>
-                </div>
-              </div>
-            </article>
-
-            {shownWorks.length > 1 && (
-              <button
-                type="button"
-                className="carousel-btn carousel-btn-side carousel-btn-right"
-                onClick={() =>
-                  setWorkCursor((prev) =>
-                    shownWorks.length === 0 ? 0 : (prev + 1) % shownWorks.length,
-                  )
-                }
-                aria-label="Next case study"
-              >
-                →
-              </button>
-            )}
-          </div>
-
-          {shownWorks.length > 1 && (
-            <div className="carousel-controls" aria-label="Case study carousel controls">
-              <span className="carousel-counter">
-                {shownIndex} / {shownTotal}
-              </span>
+          {worksLoading ? (
+            <div className="work-grid work-grid-loading" aria-hidden="true">
+              <div className="work-card-skeleton" />
+              <div className="work-card-skeleton" />
             </div>
+          ) : (
+            <>
+              <div className="filters">
+                {workCategories.map((category) => (
+                  <button
+                    key={category}
+                    type="button"
+                    className={`notch-tag ${activeCategory === category ? "active" : ""}`}
+                    onClick={() => setActiveCategory(category)}
+                    aria-pressed={activeCategory === category}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+
+              <div className="work-grid">
+                {visibleWorks.map((work) => (
+                  <article className="work-card" key={work.slug}>
+                    <a href={`/work/${work.slug}`} className="work-thumb">
+                      <span className="idx">
+                        {String(shownWorks.indexOf(work) + 1).padStart(2, "0")} /{" "}
+                        {String(shownWorks.length).padStart(2, "0")}
+                      </span>
+                      <img
+                        src={work.img || workImage}
+                        alt={`${work.title} case study`}
+                        width={1200}
+                        height={900}
+                        loading="lazy"
+                      />
+                    </a>
+                    <div className="work-content">
+                      <p className="work-meta">
+                        {work.year} - {work.kicker}
+                      </p>
+                      <h3 className="editorial-h">{work.title}</h3>
+                      <p className="role">{work.role}</p>
+                      <p className="work-copy">{work.summary}</p>
+                      <div className="tags">
+                        {getWorkCategories(work)
+                          .slice(0, 2)
+                          .map((tag) => (
+                            <span className="notch-tag" key={tag}>
+                              {tag}
+                            </span>
+                          ))}
+                      </div>
+                      <div className="work-actions">
+                        <a href={`/work/${work.slug}`} className="notch-btn">
+                          Read case study <span aria-hidden="true">-&gt;</span>
+                        </a>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+                {shownWorks.length === 0 && (
+                  <p className="work-empty">No case studies in this category yet.</p>
+                )}
+              </div>
+
+              {!showAllWorks && shownWorks.length > WORKS_PAGE_SIZE && (
+                <div className="work-more">
+                  <button type="button" className="notch-btn" onClick={() => setShowAllWorks(true)}>
+                    See more work
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
