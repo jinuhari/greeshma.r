@@ -3,10 +3,11 @@ import { useEffect, useRef } from "react";
 const GAP = 34; // px between dots
 const DOT_RADIUS = 1.6;
 const DOT_ALPHA = 0.24;
-const RIPPLE_RADIUS = 130; // how far the pointer's push reaches
-const PUSH_STRENGTH = 2.4; // force applied to dots caught in the ripple
-const SPRING = 0.055; // how eagerly a dot returns to its resting spot
-const DAMPING = 0.88; // friction that settles the motion, like water calming down
+const RIPPLE_RADIUS = 110; // how far the pointer's push reaches
+const PUSH_STRENGTH = 1.1; // force applied to dots caught in the ripple
+const SPRING = 0.08; // how eagerly a dot returns to its resting spot
+const DAMPING = 0.85; // friction that settles the motion, like water calming down
+const MAX_OFFSET = GAP * 0.55; // caps travel so neighbouring dots never crowd/overlap
 
 type DotState = { ox: number; oy: number; vx: number; vy: number };
 
@@ -99,6 +100,14 @@ export function DotMatrixHero() {
           dot.vy *= DAMPING;
           dot.ox += dot.vx;
           dot.oy += dot.vy;
+
+          // Clamp travel distance so pushed dots never crowd into their neighbours.
+          const offsetDist = Math.sqrt(dot.ox * dot.ox + dot.oy * dot.oy);
+          if (offsetDist > MAX_OFFSET) {
+            const scale = MAX_OFFSET / offsetDist;
+            dot.ox *= scale;
+            dot.oy *= scale;
+          }
 
           ctx.beginPath();
           ctx.arc(x, y, DOT_RADIUS, 0, Math.PI * 2);

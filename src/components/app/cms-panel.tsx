@@ -1046,28 +1046,6 @@ function WorkEditor({
         </p>
       </Field>
 
-      <div className="grid grid-cols-3 gap-4">
-        <Field label="Client">
-          <input value={work.client || ""} onChange={(e) => set({ client: e.target.value })} />
-        </Field>
-        <Field label="Timeline">
-          <input value={work.timeline || ""} onChange={(e) => set({ timeline: e.target.value })} />
-        </Field>
-        <Field label="Tone">
-          <select
-            value={work.tone}
-            onChange={(e) => set({ tone: e.target.value })}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none"
-          >
-            {["terracotta", "coral", "forest", "indigo", "warm"].map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-        </Field>
-      </div>
-
       <Field label="Tools (comma-separated)">
         <input
           value={(work.tools || []).join(", ")}

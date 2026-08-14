@@ -2,7 +2,7 @@ import { Link, createFileRoute, notFound } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useTheme } from "@/hooks/use-reveal";
 import { type CaseStudy } from "@/lib/cms";
-import { loadWorks, loadCaseStudyFromSanity } from "@/lib/data";
+import { loadCaseStudyFromSanity, loadWorksFromSanity } from "@/lib/data";
 import { AppShell } from "@/components/app/app-shell";
 
 export const Route = createFileRoute("/work/$slug")({
@@ -29,20 +29,30 @@ export const Route = createFileRoute("/work/$slug")({
 function CaseStudyPage() {
   useTheme();
   const { slug } = Route.useParams();
-  const [work, setWork] = useState<CaseStudy | undefined>(() =>
-    loadWorks().find((w) => w.slug === slug),
-  );
-  const [allWorks, setAllWorks] = useState(() => loadWorks());
+  const [work, setWork] = useState<CaseStudy | undefined>(undefined);
+  const [loaded, setLoaded] = useState(false);
+  const [allWorks, setAllWorks] = useState<CaseStudy[]>([]);
 
   useEffect(() => {
+    let cancelled = false;
+    setLoaded(false);
     loadCaseStudyFromSanity(slug).then((result) => {
-      if (result) setWork(result);
+      if (cancelled) return;
+      setWork(result);
+      setLoaded(true);
     });
+    return () => {
+      cancelled = true;
+    };
   }, [slug]);
 
   useEffect(() => {
-    import("@/lib/data").then((m) => m.loadWorksFromSanity().then(setAllWorks));
+    loadWorksFromSanity().then(setAllWorks);
   }, []);
+
+  if (!loaded) {
+    return <CaseStudyLoading />;
+  }
 
   if (!work) throw notFound();
 
@@ -54,6 +64,20 @@ function CaseStudyPage() {
       <CaseStudyContent work={work} />
       <CaseStudyFooter work={work} allWorks={allWorks} />
       <AppShell />
+    </div>
+  );
+}
+
+function CaseStudyLoading() {
+  return (
+    <div className="redesign-page">
+      <div className="case-study-skeleton" aria-hidden="true">
+        <div className="redesign-wrap">
+          <div className="case-study-skeleton-line case-study-skeleton-eyebrow" />
+          <div className="case-study-skeleton-line case-study-skeleton-title" />
+          <div className="case-study-skeleton-hero" />
+        </div>
+      </div>
     </div>
   );
 }
@@ -85,13 +109,6 @@ function CaseStudyHero({ work }: { work: CaseStudy }) {
     indigo: "bg-indigo/10",
   };
 
-  const badgeMap: Record<string, string> = {
-    terracotta: "bg-terracotta/15 text-terracotta border-terracotta/30",
-    coral: "bg-coral/15 text-coral border-coral/30",
-    forest: "bg-forest/15 text-forest border-forest/30",
-    indigo: "bg-indigo/15 text-indigo border-indigo/30",
-  };
-
   return (
     <section className="redesign-detail-hero">
       <div
@@ -105,20 +122,6 @@ function CaseStudyHero({ work }: { work: CaseStudy }) {
             <h1 className="editorial-h mt-6 text-5xl md:text-7xl lg:text-8xl">{work.title}</h1>
             <p className="mt-6 text-sm text-muted-foreground">{work.role}</p>
             <p className="mt-4 max-w-lg text-base leading-relaxed md:text-lg">{work.summary}</p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              {work.client && (
-                <span
-                  className={`rounded-full border px-3 py-1.5 text-xs tracking-wide ${badgeMap[work.tone] || "border-border text-muted-foreground"}`}
-                >
-                  {work.client}
-                </span>
-              )}
-              {work.timeline && (
-                <span className="rounded-full border border-border px-3 py-1.5 text-xs tracking-wide text-muted-foreground">
-                  {work.timeline}
-                </span>
-              )}
-            </div>
           </div>
           <div className="hover-zoom rounded-lg">
             <img

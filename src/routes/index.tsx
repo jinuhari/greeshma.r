@@ -262,17 +262,16 @@ function Home() {
           </div>
           <div className="timeline-list">
             {cmsTimeline.map((item, i) => (
-              <article key={`${item.year}-${i}`} className="timeline-item">
-                <div className="timeline-rail" aria-hidden="true">
-                  <span className="timeline-node" />
-                </div>
-                <p className="year">{item.year}</p>
-                <div className="timeline-body">
-                  <div className="timeline-topline">
-                    <span className="timeline-step">{String(i + 1).padStart(2, "0")}</span>
-                    <h3>{item.title}</h3>
-                  </div>
-                  <p className="timeline-copy">{item.where}</p>
+              <article
+                key={`${item.year}-${i}`}
+                className={`timeline-entry ${i % 2 === 0 ? "is-left" : "is-right"}`}
+              >
+                <span className="timeline-entry-node" aria-hidden="true" />
+                <div className="timeline-entry-card">
+                  <span className="timeline-entry-step">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="timeline-entry-year editorial-h">{item.year}</span>
+                  <h3 className="font-display">{item.title}</h3>
+                  <p>{item.where}</p>
                 </div>
               </article>
             ))}
