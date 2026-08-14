@@ -212,6 +212,14 @@ export function CmsPanel({
     setCustomBuckets((prev) => prev.filter((category) => category !== bucket));
   };
 
+  const removeWork = (slug: string) => {
+    const work = works.find((w) => w.slug === slug);
+    if (!window.confirm(`Delete "${work?.title || "this case study"}"? This removes it from Sanity next time you save.`))
+      return;
+    setWorks(works.filter((w) => w.slug !== slug));
+    setEditing((prev) => (prev?.slug === slug ? null : prev));
+  };
+
   const startBucketRename = (bucket: string) => {
     if (bucket === "Uncategorized") return;
     setRenamingBucket(bucket);
@@ -360,6 +368,7 @@ export function CmsPanel({
                   if (idx !== -1) updateWork(idx, p);
                 }}
                 onBack={() => setEditing(null)}
+                onDelete={() => removeWork(editing.slug)}
               />
             ) : (
               <div className="space-y-3">
@@ -512,13 +521,24 @@ export function CmsPanel({
                                   <p className="truncate font-display text-sm">{w.title || "Untitled"}</p>
                                   <p className="truncate text-[10px] text-muted-foreground">{w.year} · {w.kicker}</p>
                                 </div>
-                                <button
-                                  type="button"
-                                  onClick={() => setEditing(w)}
-                                  className="rounded border border-border px-1.5 py-0.5 text-[10px] hover:bg-muted"
-                                >
-                                  Edit
-                                </button>
+                                <div className="flex flex-shrink-0 items-center gap-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => setEditing(w)}
+                                    className="rounded border border-border px-1.5 py-0.5 text-[10px] hover:bg-muted"
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => removeWork(w.slug)}
+                                    className="rounded border border-red-500/30 p-1 text-red-500 hover:bg-red-500/10"
+                                    title="Delete case study"
+                                    aria-label="Delete case study"
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           ))}
@@ -839,11 +859,13 @@ function WorkEditor({
   availableCategories,
   onChange,
   onBack,
+  onDelete,
 }: {
   work: CaseStudy;
   availableCategories: string[];
   onChange: (patch: Partial<CaseStudy>) => void;
   onBack: () => void;
+  onDelete: () => void;
 }) {
   const [newCategory, setNewCategory] = useState("");
   const set = (patch: Partial<CaseStudy>) => onChange(patch);
@@ -899,12 +921,21 @@ function WorkEditor({
 
   return (
     <div className="max-w-3xl space-y-6">
-      <button
-        onClick={onBack}
-        className="text-xs tracking-[0.2em] uppercase text-muted-foreground hover:text-foreground"
-      >
-        \u2190 Back to list
-      </button>
+      <div className="flex items-center justify-between">
+        <button
+          onClick={onBack}
+          className="text-xs tracking-[0.2em] uppercase text-muted-foreground hover:text-foreground"
+        >
+          ← Back to list
+        </button>
+        <button
+          type="button"
+          onClick={onDelete}
+          className="rounded-md border border-red-500/30 px-2.5 py-1 text-[10px] text-red-500 hover:bg-red-500/10"
+        >
+          Delete case study
+        </button>
+      </div>
 
       <div className="grid grid-cols-2 gap-4">
         <Field label="Title">
