@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { CustomCursorPointer } from "@/components/app/app-shell";
 import { CmsPanel } from "@/components/app/cms-panel";
+import { DotMatrixHero } from "@/components/app/dot-matrix-hero";
 import heroArt from "@/assets/hero-artwork.jpg";
 import workImage from "@/assets/greeshma bgremoved.png";
 import { useTheme } from "@/hooks/use-reveal";
@@ -125,6 +126,7 @@ function Home() {
         <div className="redesign-hero-bg">
           <img src={heroArt} alt="" width={1800} height={1200} />
         </div>
+        <DotMatrixHero />
         <div className="redesign-wrap redesign-hero-grid">
           <div className="hero-copy">
             <p className="hero-intro">Design practice 2013 - present</p>

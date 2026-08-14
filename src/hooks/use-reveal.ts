@@ -32,12 +32,12 @@ export function useTheme() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const saved = localStorage.getItem("gr-theme");
-    if (saved === "light") {
-      document.documentElement.classList.remove("dark");
+    if (saved === "dark") {
+      document.documentElement.classList.add("dark");
       return;
     }
-    // Default to dark mode when there is no explicit preference.
-    document.documentElement.classList.add("dark");
+    // Default to light mode when there is no explicit preference.
+    document.documentElement.classList.remove("dark");
   }, []);
 }
 
