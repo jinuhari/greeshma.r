@@ -64,5 +64,10 @@ export const heroSection = defineType({
       title: "Background Image",
       type: "image",
     }),
+    defineField({
+      name: "portraitImage",
+      title: "Hero Image",
+      type: "image",
+    }),
   ],
 });

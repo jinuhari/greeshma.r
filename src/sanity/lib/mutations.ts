@@ -1,11 +1,16 @@
 import { client } from "./client";
-import { caseStudiesQuery, archiveItemsQuery, timelineItemsQuery, resumesQuery } from "./queries";
+import { caseStudiesQuery, archiveItemsQuery, timelineItemsQuery, resumesQuery, contactSectionQuery, heroSectionQuery } from "./queries";
 import { projectId, dataset } from "@/sanity/env";
 import type { CaseStudy, CaseStudySection } from "@/lib/cms";
-import type { ArchiveItem, TimelineItem, Resume } from "@/lib/data";
+import type { ArchiveItem, TimelineItem, Resume, ContactSection, HeroSection } from "@/lib/data";
 
 export async function uploadImage(file: File): Promise<{ url: string; _ref: string }> {
   const asset = await client.assets.upload("image", file);
+  return { url: asset.url, _ref: asset._id };
+}
+
+export async function uploadFile(file: File): Promise<{ url: string; _ref: string }> {
+  const asset = await client.assets.upload("file", file, { filename: file.name });
   return { url: asset.url, _ref: asset._id };
 }
 
@@ -50,18 +55,33 @@ function resolveImage(
   return existing || undefined;
 }
 
+function resolveFile(
+  value: string | { url: string; _ref?: string } | undefined,
+  existing: any,
+): any {
+  if (!value) return existing || undefined;
+  if (typeof value === "object" && value._ref) {
+    return { _type: "file", asset: { _ref: value._ref } };
+  }
+  return existing || undefined;
+}
+
 export async function syncAllToSanity(
   works: CaseStudy[],
   archive: ArchiveItem[],
   timeline: TimelineItem[],
   resumes?: Resume[],
+  contact?: ContactSection,
+  hero?: HeroSection,
 ) {
-  const [existingCaseStudies, existingArchive, existingTimeline, existingResumes] =
+  const [existingCaseStudies, existingArchive, existingTimeline, existingResumes, existingContact, existingHero] =
     await Promise.all([
       client.fetch(caseStudiesQuery).catch(() => []),
       client.fetch(archiveItemsQuery).catch(() => []),
       client.fetch(timelineItemsQuery).catch(() => []),
       resumes ? client.fetch(resumesQuery).catch(() => []) : [],
+      contact ? client.fetch(contactSectionQuery).catch(() => null) : null,
+      hero ? client.fetch(heroSectionQuery).catch(() => null) : null,
     ]);
 
   const csMap = new Map<string, any>((existingCaseStudies || []).map((c: any) => [c._id, c]));
@@ -189,7 +209,11 @@ export async function syncAllToSanity(
         _id: id,
         _type: "resume",
         role: r.role,
-        json: r.json,
+        json: r.json || "",
+        pdf: resolveFile(
+          r.pdfRef ? { url: r.pdfUrl || "", _ref: r.pdfRef } : r.pdfUrl,
+          resumeMap.get(id)?.pdf,
+        ),
         global: r.global || false,
         orderRank: i,
       });
@@ -197,6 +221,45 @@ export async function syncAllToSanity(
     for (const [id] of resumeMap) {
       if (!savedResumeIds.has(id)) tx.delete(id);
     }
+  }
+
+  if (contact) {
+    tx.createOrReplace({
+      _id: existingContact?._id || "contactSection",
+      _type: "contactSection",
+      heading: contact.heading,
+      items: contact.items.map((item, index) => ({
+        _key: existingContact?.items?.[index]?._key,
+        label: item.label,
+        value: item.value,
+        url: item.url,
+        type: item.type,
+      })),
+    });
+  }
+
+  if (hero) {
+    tx.createOrReplace({
+      _id: existingHero?._id || "heroSection",
+      _type: "heroSection",
+      eyebrow: hero.eyebrow,
+      heading: hero.heading,
+      description: hero.description,
+      ctaLabel: hero.ctaLabel,
+      ctaHref: hero.ctaHref,
+      backgroundImage: resolveImage(
+        hero.backgroundImageRef
+          ? { url: hero.backgroundImageUrl, _ref: hero.backgroundImageRef }
+          : hero.backgroundImageUrl,
+        existingHero?.backgroundImage,
+      ),
+      portraitImage: resolveImage(
+        hero.portraitImageRef
+          ? { url: hero.portraitImageUrl, _ref: hero.portraitImageRef }
+          : hero.portraitImageUrl,
+        existingHero?.portraitImage,
+      ),
+    });
   }
 
   // Delete items that were removed from the lists

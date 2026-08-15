@@ -1,16 +1,25 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Redo2, Undo2, X } from "lucide-react";
-import { syncAllToSanity, uploadImage } from "@/sanity/lib/mutations";
+import { syncAllToSanity, uploadFile, uploadImage } from "@/sanity/lib/mutations";
 import type { CaseStudy, CaseStudySection, Outcome, SectionType } from "@/lib/cms";
-import type { ArchiveItem, TimelineItem, Resume } from "@/lib/data";
+import type {
+  ArchiveItem,
+  TimelineItem,
+  Resume,
+  ContactSection,
+  ContactItemType,
+  HeroSection,
+} from "@/lib/data";
 
-type Tab = "works" | "archive" | "experience" | "resumes";
+type Tab = "hero" | "works" | "archive" | "experience" | "resumes" | "contact";
 
 type CmsSnapshot = {
+  hero: HeroSection;
   works: CaseStudy[];
   archive: ArchiveItem[];
   timeline: TimelineItem[];
   resumes: Resume[];
+  contact: ContactSection;
 };
 
 // Rapid successive edits (e.g. keystrokes) within this window collapse into one undo step.
@@ -18,6 +27,8 @@ const HISTORY_GROUP_MS = 700;
 const HISTORY_LIMIT = 50;
 
 export function CmsPanel({
+  hero,
+  setHero: setHeroProp,
   works,
   setWorks: setWorksProp,
   archive,
@@ -26,9 +37,13 @@ export function CmsPanel({
   setTimeline: setTimelineProp,
   resumes,
   setResumes: setResumesProp,
+  contact,
+  setContact: setContactProp,
   onRefresh,
   onClose,
 }: {
+  hero: HeroSection;
+  setHero: (h: HeroSection) => void;
   works: CaseStudy[];
   setWorks: (w: CaseStudy[]) => void;
   archive: ArchiveItem[];
@@ -37,6 +52,8 @@ export function CmsPanel({
   setTimeline: (t: TimelineItem[]) => void;
   resumes: Resume[];
   setResumes: (r: Resume[]) => void;
+  contact: ContactSection;
+  setContact: (c: ContactSection) => void;
   onRefresh?: () => void;
   onClose: () => void;
 }) {
@@ -57,13 +74,15 @@ export function CmsPanel({
   const lastChangeAt = useRef(0);
   const [historyTick, setHistoryTick] = useState(0);
 
-  const snapshot = (): CmsSnapshot => ({ works, archive, timeline, resumes });
+  const snapshot = (): CmsSnapshot => ({ hero, works, archive, timeline, resumes, contact });
 
   const applySnapshot = (s: CmsSnapshot) => {
+    setHeroProp(s.hero);
     setWorksProp(s.works);
     setArchiveProp(s.archive);
     setTimelineProp(s.timeline);
     setResumesProp(s.resumes);
+    setContactProp(s.contact);
     setEditing((prev) => (prev ? s.works.find((w) => w.slug === prev.slug) || null : null));
   };
 
@@ -93,6 +112,14 @@ export function CmsPanel({
   const setResumes = (r: Resume[]) => {
     recordHistory();
     setResumesProp(r);
+  };
+  const setHero = (h: HeroSection) => {
+    recordHistory();
+    setHeroProp(h);
+  };
+  const setContact = (c: ContactSection) => {
+    recordHistory();
+    setContactProp(c);
   };
 
   const canUndo = undoStack.current.length > 0;
@@ -259,7 +286,7 @@ export function CmsPanel({
     setSaving(true);
     setError("");
     try {
-      await syncAllToSanity(works, archive, timeline, resumes);
+      await syncAllToSanity(works, archive, timeline, resumes, contact, hero);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
       onRefresh?.();
@@ -291,7 +318,7 @@ export function CmsPanel({
           <div className="flex items-center gap-4">
             <h2 className="font-display text-xl">CMS</h2>
             <div className="flex gap-1 rounded-full border border-border p-0.5">
-              {(["works", "archive", "experience", "resumes"] as const).map((t) => (
+              {(["hero", "works", "archive", "experience", "resumes", "contact"] as const).map((t) => (
                 <button
                   key={t}
                   onClick={() => {
@@ -302,13 +329,17 @@ export function CmsPanel({
                     tab === t ? "bg-foreground text-background" : "hover:bg-muted"
                   }`}
                 >
-                  {t === "works"
+                  {t === "hero"
+                    ? "Hero"
+                    : t === "works"
                     ? "Case Studies"
                     : t === "archive"
-                      ? "Archive"
+                      ? "Artwork"
                       : t === "experience"
                         ? "Experience"
-                        : "Resumes"}
+                        : t === "resumes"
+                          ? "Resumes"
+                          : "Contact"}
                 </button>
               ))}
             </div>
@@ -358,6 +389,8 @@ export function CmsPanel({
         )}
 
         <div className="flex-1 overflow-y-auto p-6">
+          {tab === "hero" && <HeroEditor hero={hero} setHero={setHero} />}
+
           {tab === "works" &&
             (editing ? (
               <WorkEditor
@@ -551,51 +584,101 @@ export function CmsPanel({
             ))}
 
           {tab === "archive" && (
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs text-muted-foreground">
+                  Artwork items appear in the home page Art / Other Work collage.
+                </p>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setArchive([
+                      ...archive,
+                      {
+                        src: "",
+                        label: "New Artwork",
+                        cat: "Artwork",
+                        year: "",
+                        medium: "",
+                        ratio: "aspect-[4/5]",
+                      },
+                    ])
+                  }
+                  className="rounded-md bg-foreground px-3 py-1 text-[10px] tracking-wide text-background"
+                >
+                  + Artwork
+                </button>
+              </div>
+
               {archive.length === 0 && (
-                <p className="col-span-full text-sm text-muted-foreground">No archive items yet.</p>
+                <p className="text-sm text-muted-foreground">No artwork items yet.</p>
               )}
-              {archive.map((item: any, i) => (
-                <div key={item._id || i} className="rounded-lg border border-border p-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <input
-                        className="w-full bg-transparent text-sm font-medium outline-none"
-                        value={item.label || ""}
-                        onChange={(e) => {
-                          const next = [...archive];
-                          next[i] = { ...next[i], label: e.target.value };
-                          setArchive(next);
-                        }}
-                      />
-                      <input
-                        className="mt-1 w-full bg-transparent text-[10px] text-muted-foreground outline-none"
-                        value={item.category || ""}
-                        onChange={(e) => {
-                          const next = [...archive];
-                          next[i] = { ...next[i], cat: e.target.value };
-                          setArchive(next);
-                        }}
-                      />
+
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+                {archive.map((item: any, i) => (
+                  <div key={item._id || i} className="rounded-lg border border-border p-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 space-y-1">
+                        <input
+                          className="w-full bg-transparent text-sm font-medium outline-none"
+                          value={item.label || ""}
+                          onChange={(e) => {
+                            const next = [...archive];
+                            next[i] = { ...next[i], label: e.target.value };
+                            setArchive(next);
+                          }}
+                          placeholder="Artwork title"
+                        />
+                        <input
+                          className="w-full bg-transparent text-[10px] text-muted-foreground outline-none"
+                          value={item.cat || ""}
+                          onChange={(e) => {
+                            const next = [...archive];
+                            next[i] = { ...next[i], cat: e.target.value };
+                            setArchive(next);
+                          }}
+                          placeholder="Category"
+                        />
+                        <input
+                          className="w-full bg-transparent text-[10px] text-muted-foreground outline-none"
+                          value={item.year || ""}
+                          onChange={(e) => {
+                            const next = [...archive];
+                            next[i] = { ...next[i], year: e.target.value };
+                            setArchive(next);
+                          }}
+                          placeholder="Year"
+                        />
+                        <input
+                          className="w-full bg-transparent text-[10px] text-muted-foreground outline-none"
+                          value={item.medium || ""}
+                          onChange={(e) => {
+                            const next = [...archive];
+                            next[i] = { ...next[i], medium: e.target.value };
+                            setArchive(next);
+                          }}
+                          placeholder="Medium"
+                        />
+                      </div>
+                      <button
+                        onClick={() => setArchive(archive.filter((_, j) => j !== i))}
+                        className="ml-2 text-xs text-muted-foreground hover:text-red-500"
+                      >
+                        ✕
+                      </button>
                     </div>
-                    <button
-                      onClick={() => setArchive(archive.filter((_, j) => j !== i))}
-                      className="ml-2 text-xs text-muted-foreground hover:text-red-500"
-                    >
-                      ✕
-                    </button>
+                    <ImageUploader
+                      value={item.src}
+                      onUpload={(url, _ref) => {
+                        const next = [...archive];
+                        next[i] = { ...next[i], src: url, imageRef: _ref || undefined };
+                        setArchive(next);
+                      }}
+                      label="Upload artwork"
+                    />
                   </div>
-                  <ImageUploader
-                    value={item.src}
-                    onUpload={(url, _ref) => {
-                      const next = [...archive];
-                      next[i] = { ...next[i], src: url, imageRef: _ref || undefined };
-                      setArchive(next);
-                    }}
-                    label="Upload image"
-                  />
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
 
@@ -643,11 +726,161 @@ export function CmsPanel({
           )}
 
           {tab === "resumes" && <ResumesEditor resumes={resumes} setResumes={setResumes} />}
+
+          {tab === "contact" && <ContactEditor contact={contact} setContact={setContact} />}
         </div>
 
         <div className="border-t border-border px-6 py-3 text-center text-[10px] text-muted-foreground">
           Edits are saved directly to Sanity. Changes reflect globally within seconds.
         </div>
+      </div>
+    </div>
+  );
+}
+
+function HeroEditor({
+  hero,
+  setHero,
+}: {
+  hero: HeroSection;
+  setHero: (h: HeroSection) => void;
+}) {
+  const updateHero = (patch: Partial<HeroSection>) => setHero({ ...hero, ...patch });
+
+  return (
+    <div className="space-y-4">
+      <p className="text-xs text-muted-foreground">
+        These fields control the home page hero title, text, CTA, and images.
+      </p>
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-3 rounded-lg border border-border p-4">
+          <input
+            value={hero.eyebrow}
+            onChange={(e) => updateHero({ eyebrow: e.target.value })}
+            placeholder="Intro text"
+          />
+          <textarea
+            value={hero.heading}
+            onChange={(e) => updateHero({ heading: e.target.value })}
+            placeholder="Hero title"
+            rows={3}
+          />
+          <textarea
+            value={hero.description}
+            onChange={(e) => updateHero({ description: e.target.value })}
+            placeholder="Hero description"
+            rows={4}
+          />
+          <input
+            value={hero.ctaLabel}
+            onChange={(e) => updateHero({ ctaLabel: e.target.value })}
+            placeholder="CTA label"
+          />
+          <input
+            value={hero.ctaHref}
+            onChange={(e) => updateHero({ ctaHref: e.target.value })}
+            placeholder="CTA link"
+          />
+        </div>
+        <div className="space-y-3 rounded-lg border border-border p-4">
+          <ImageUploader
+            value={hero.portraitImageUrl}
+            onUpload={(url, _ref) => updateHero({ portraitImageUrl: url, portraitImageRef: _ref || undefined })}
+            label="Upload hero image"
+          />
+          <ImageUploader
+            value={hero.backgroundImageUrl}
+            onUpload={(url, _ref) =>
+              updateHero({ backgroundImageUrl: url, backgroundImageRef: _ref || undefined })
+            }
+            label="Upload background image"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ContactEditor({
+  contact,
+  setContact,
+}: {
+  contact: ContactSection;
+  setContact: (c: ContactSection) => void;
+}) {
+  const updateItem = (index: number, patch: Partial<ContactSection["items"][number]>) => {
+    setContact({
+      ...contact,
+      items: contact.items.map((item, i) => (i === index ? { ...item, ...patch } : item)),
+    });
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="space-y-1">
+          <p className="text-xs text-muted-foreground">
+            These links appear in the home page Contact section.
+          </p>
+          <input
+            value={contact.heading}
+            onChange={(e) => setContact({ ...contact, heading: e.target.value })}
+            placeholder="Contact heading"
+          />
+        </div>
+        <button
+          type="button"
+          onClick={() =>
+            setContact({
+              ...contact,
+              items: [...contact.items, { label: "New Link", value: "", url: "", type: "social" }],
+            })
+          }
+          className="rounded-md bg-foreground px-3 py-1 text-[10px] tracking-wide text-background"
+        >
+          + Link
+        </button>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        {contact.items.map((item, index) => (
+          <div key={`${item.label}-${index}`} className="rounded-lg border border-border p-4">
+            <div className="grid gap-2">
+              <select
+                value={item.type}
+                onChange={(e) => updateItem(index, { type: e.target.value as ContactItemType })}
+              >
+                <option value="email">Email</option>
+                <option value="linkedin">LinkedIn</option>
+                <option value="behance">Behance</option>
+                <option value="social">Other link</option>
+                <option value="resume">Resume</option>
+              </select>
+              <input
+                value={item.label}
+                onChange={(e) => updateItem(index, { label: e.target.value })}
+                placeholder="Label"
+              />
+              <input
+                value={item.value}
+                onChange={(e) => updateItem(index, { value: e.target.value })}
+                placeholder="Display value"
+              />
+              <input
+                value={item.url}
+                onChange={(e) => updateItem(index, { url: e.target.value })}
+                placeholder={item.type === "email" ? "mailto:name@example.com" : "https://..."}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => setContact({ ...contact, items: contact.items.filter((_, i) => i !== index) })}
+              className="mt-3 rounded-md border border-red-500/30 px-3 py-1 text-[10px] tracking-wide text-red-500 hover:bg-red-500/10"
+            >
+              Remove
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -660,196 +893,124 @@ function ResumesEditor({
   resumes: Resume[];
   setResumes: (r: Resume[]) => void;
 }) {
-  const [activeIdx, setActiveIdx] = useState(0);
-  const [jsonInput, setJsonInput] = useState(resumes[0]?.json || "{}");
-  const [parseError, setParseError] = useState("");
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
 
-  const active = resumes[activeIdx];
-
-  const updateJson = (val: string) => {
-    setJsonInput(val);
-    try {
-      JSON.parse(val);
-      setParseError("");
-    } catch {
-      setParseError("Invalid JSON");
-    }
-  };
-
-  const saveJson = () => {
-    try {
-      JSON.parse(jsonInput);
-      const next = [...resumes];
-      next[activeIdx] = { ...next[activeIdx], json: jsonInput };
-      setResumes(next);
-      setParseError("");
-    } catch {
-      setParseError("Cannot save — invalid JSON");
-    }
-  };
-
-  const setGlobal = () => {
-    const next = resumes.map((r, i) => ({ ...r, global: i === activeIdx }));
+  const updateResume = (index: number, patch: Partial<Resume>) => {
+    const next = [...resumes];
+    next[index] = { ...next[index], ...patch };
     setResumes(next);
   };
 
-  return (
-    <div className="flex h-full flex-col gap-4">
-      <div className="flex flex-wrap items-center gap-2">
-        {resumes.map((r, i) => (
-          <button
-            key={r.role}
-            onClick={() => {
-              setActiveIdx(i);
-              setJsonInput(resumes[i].json);
-              setParseError("");
-            }}
-            className={`rounded-full px-4 py-1.5 text-xs tracking-wide transition-all ${
-              i === activeIdx
-                ? "bg-foreground text-background"
-                : "border border-border hover:bg-muted"
-            }`}
-          >
-            {r.global ? "\u2605 " : ""}
-            {r.role}
-          </button>
-        ))}
-      </div>
+  const setStarred = (index: number) => {
+    setResumes(resumes.map((resume, i) => ({ ...resume, global: i === index })));
+  };
 
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
-          {active?.global ? "\u2605 Global resume" : "Select a global resume"}
-        </span>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => {
-              localStorage.setItem("gr-resumes", JSON.stringify(resumes));
-              window.open(`/print-resume?role=${encodeURIComponent(active?.role || "")}`, "_blank");
-            }}
-            className="rounded-md border border-border px-3 py-1 text-[10px] tracking-wide transition-colors hover:bg-muted"
-          >
-            Download PDF
-          </button>
-          {!active?.global && (
-            <button
-              onClick={setGlobal}
-              className="rounded-md bg-foreground px-3 py-1 text-[10px] text-background transition-opacity hover:opacity-80"
-            >
-              Set as Global
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div className="grid flex-1 grid-cols-2 gap-4 overflow-hidden">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
-              JSON Editor
-            </span>
-            <button
-              onClick={saveJson}
-              className="rounded-md bg-foreground px-3 py-1 text-[10px] text-background transition-opacity hover:opacity-80"
-            >
-              Apply
-            </button>
-          </div>
-          <textarea
-            className="flex-1 resize-none rounded-md border border-border bg-muted/30 p-3 font-mono text-xs leading-relaxed outline-none focus:border-foreground"
-            value={jsonInput}
-            onChange={(e) => updateJson(e.target.value)}
-            spellCheck={false}
-          />
-          {parseError && <p className="text-xs text-red-500">{parseError}</p>}
-        </div>
-
-        <div className="flex flex-col gap-2 overflow-hidden">
-          <span className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
-            Preview
-          </span>
-          <div className="flex-1 overflow-y-auto rounded-md border border-border bg-muted/30 p-4">
-            <ResumePreview json={jsonInput} />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ResumePreview({ json }: { json: string }) {
-  let data: any;
-  try {
-    data = JSON.parse(json);
-  } catch {
-    return (
-      <p className="text-xs text-muted-foreground">Invalid JSON — fix errors to see preview</p>
-    );
-  }
+  const uploadResumePdf = async (index: number, file?: File) => {
+    if (!file) return;
+    if (file.type !== "application/pdf") {
+      window.alert("Please upload a PDF file.");
+      return;
+    }
+    setUploadingIndex(index);
+    try {
+      const uploaded = await uploadFile(file);
+      updateResume(index, { pdfUrl: uploaded.url, pdfRef: uploaded._ref });
+    } finally {
+      setUploadingIndex(null);
+    }
+  };
 
   return (
-    <div className="space-y-4 text-xs">
-      {Object.entries(data).map(([key, value]) => (
-        <div key={key}>
-          <SectionLabel>{key}</SectionLabel>
-          {renderValue(value)}
-        </div>
-      ))}
-    </div>
-  );
-}
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs text-muted-foreground">
+          Upload a PDF for each resume. The starred resume opens from the public resume buttons.
+        </p>
+        <button
+          type="button"
+          onClick={() =>
+            setResumes([
+              ...resumes,
+              { role: `Resume ${resumes.length + 1}`, json: "", global: resumes.length === 0 },
+            ])
+          }
+          className="rounded-md bg-foreground px-3 py-1 text-[10px] tracking-wide text-background"
+        >
+          + Resume
+        </button>
+      </div>
 
-function renderValue(value: any): React.ReactNode {
-  if (Array.isArray(value)) {
-    if (value.length === 0) return <p className="text-muted-foreground italic">(empty)</p>;
-    return (
-      <div className="space-y-2">
-        {value.map((item, i) => (
-          <div key={i}>
-            {typeof item === "object" && item !== null ? (
-              <div className="rounded-md border border-border p-2">
-                {Object.entries(item).map(([k, v]) => (
-                  <div key={k} className="flex items-baseline gap-2">
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground min-w-16">
-                      {k}
-                    </span>
-                    <span className="text-foreground">{String(v ?? "")}</span>
-                  </div>
-                ))}
+      {resumes.length === 0 && <p className="text-sm text-muted-foreground">No resumes yet.</p>}
+
+      <div className="grid gap-3 md:grid-cols-2">
+        {resumes.map((resume, index) => (
+          <div key={`${resume.role}-${index}`} className="rounded-lg border border-border p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 space-y-2">
+                <label className="block text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
+                  Section name
+                </label>
+                <input
+                  value={resume.role || ""}
+                  onChange={(e) => updateResume(index, { role: e.target.value })}
+                  placeholder="Resume section name"
+                />
               </div>
-            ) : (
-              <p className="text-foreground">- {String(item)}</p>
-            )}
+              <button
+                type="button"
+                onClick={() => setStarred(index)}
+                className={`rounded-full px-3 py-1 text-[10px] tracking-wide transition-colors ${
+                  resume.global
+                    ? "bg-foreground text-background"
+                    : "border border-border hover:bg-muted"
+                }`}
+                aria-pressed={!!resume.global}
+              >
+                {resume.global ? "Starred" : "Set starred"}
+              </button>
+            </div>
+
+            <div className="mt-4 rounded-md border border-dashed border-border p-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-medium">Resume PDF</p>
+                  <p className="mt-1 max-w-64 truncate text-[10px] text-muted-foreground">
+                    {resume.pdfUrl ? resume.pdfUrl : "No PDF uploaded"}
+                  </p>
+                </div>
+                <label className="cursor-pointer rounded-md border border-border px-3 py-1 text-[10px] tracking-wide transition-colors hover:bg-muted">
+                  {uploadingIndex === index ? "Uploading..." : "Upload PDF"}
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    className="hidden"
+                    disabled={uploadingIndex !== null}
+                    onChange={(e) => uploadResumePdf(index, e.target.files?.[0])}
+                  />
+                </label>
+              </div>
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => resume.pdfUrl && window.open(resume.pdfUrl, "_blank", "noopener,noreferrer")}
+                disabled={!resume.pdfUrl}
+                className="rounded-md border border-border px-3 py-1 text-[10px] tracking-wide transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Open PDF
+              </button>
+              <button
+                type="button"
+                onClick={() => setResumes(resumes.filter((_, i) => i !== index))}
+                className="rounded-md border border-red-500/30 px-3 py-1 text-[10px] tracking-wide text-red-500 hover:bg-red-500/10"
+              >
+                Remove
+              </button>
+            </div>
           </div>
         ))}
       </div>
-    );
-  }
-
-  if (typeof value === "object" && value !== null) {
-    return (
-      <div className="rounded-md border border-border p-2 space-y-1">
-        {Object.entries(value).map(([k, v]) => (
-          <div key={k} className="flex items-baseline gap-2">
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground min-w-16">
-              {k}
-            </span>
-            <span className="text-foreground">{String(v ?? "")}</span>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  if (typeof value === "string" && !value)
-    return <p className="text-muted-foreground italic">(empty)</p>;
-
-  return <p className="text-foreground">{String(value)}</p>;
-}
-
-function SectionLabel({ children }: { children: string }) {
-  return (
-    <div className="mb-1 text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
-      {children}
     </div>
   );
 }

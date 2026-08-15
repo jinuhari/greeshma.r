@@ -23,7 +23,12 @@ export const contactSection = defineType({
             { name: "label", title: "Label", type: "string" },
             { name: "value", title: "Value", type: "string" },
             { name: "url", title: "URL", type: "url" },
-            { name: "type", title: "Type", type: "string", options: { list: ["email", "social", "resume"] } },
+            {
+              name: "type",
+              title: "Type",
+              type: "string",
+              options: { list: ["email", "linkedin", "behance", "social", "resume"] },
+            },
           ],
           preview: {
             select: { title: "label", subtitle: "value" },

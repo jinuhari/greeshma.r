@@ -12,10 +12,12 @@ export const resume = defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
-      name: "json",
-      title: "JSON Data",
-      type: "text",
-      rows: 20,
+      name: "pdf",
+      title: "Resume PDF",
+      type: "file",
+      options: {
+        accept: "application/pdf",
+      },
     }),
     defineField({
       name: "global",

@@ -5,12 +5,17 @@ import archive3 from "@/assets/archive-3.jpg";
 import archive4 from "@/assets/archive-4.jpg";
 import archive5 from "@/assets/archive-5.jpg";
 import archive6 from "@/assets/archive-6.jpg";
+import heroArtwork from "@/assets/hero-artwork.jpg";
+import portraitImage from "@/assets/greeshma bgremoved.png";
 import { client } from "@/sanity/lib/client";
 import {
   caseStudiesQuery,
   archiveItemsQuery,
   timelineItemsQuery,
   caseStudyBySlugQuery,
+  resumesQuery,
+  contactSectionQuery,
+  heroSectionQuery,
 } from "@/sanity/lib/queries";
 import { urlFor } from "@/sanity/lib/image";
 
@@ -32,9 +37,62 @@ export interface TimelineItem {
 
 export interface Resume {
   role: string;
-  json: string;
+  json?: string;
   global?: boolean;
+  pdfUrl?: string;
+  pdfRef?: string;
 }
+
+export type ContactItemType = "email" | "linkedin" | "behance" | "social" | "resume";
+
+export interface ContactItem {
+  label: string;
+  value: string;
+  url: string;
+  type: ContactItemType;
+}
+
+export interface ContactSection {
+  heading: string;
+  items: ContactItem[];
+}
+
+export interface HeroSection {
+  eyebrow: string;
+  heading: string;
+  description: string;
+  ctaLabel: string;
+  ctaHref: string;
+  backgroundImageUrl: string;
+  backgroundImageRef?: string;
+  portraitImageUrl: string;
+  portraitImageRef?: string;
+}
+
+export const defaultHero: HeroSection = {
+  eyebrow: "Design practice 2013 - present",
+  heading: "Product interfaces shaped with an illustrator's eye and a research-led process.",
+  description:
+    "Greeshma R. designs digital products, visual systems, and brand-sensitive surfaces with a focus on clarity, rhythm, and finish.",
+  ctaLabel: "View selected work",
+  ctaHref: "#work",
+  backgroundImageUrl: heroArtwork,
+  portraitImageUrl: portraitImage,
+};
+
+export const defaultContact: ContactSection = {
+  heading: "Email / Social / Resume",
+  items: [
+    {
+      label: "Email",
+      value: "hello@greeshma.design",
+      url: "mailto:hello@greeshma.design",
+      type: "email",
+    },
+    { label: "LinkedIn", value: "LinkedIn", url: "", type: "linkedin" },
+    { label: "Behance", value: "Behance", url: "", type: "behance" },
+  ],
+};
 
 export function defaultResumes(): Resume[] {
   return [
@@ -439,6 +497,70 @@ export async function loadTimelineFromSanity(): Promise<TimelineItem[]> {
   } catch (err) {
     console.error("[Sanity] Failed to load timeline:", err);
     return loadTimeline();
+  }
+}
+
+export async function loadResumesFromSanity(): Promise<Resume[]> {
+  try {
+    const result = await fetchFromSanity<any[]>(resumesQuery);
+    if (!result || result.length === 0) return defaultResumes();
+    const adapted = result
+      .map((item: any) => ({
+        role: item.role || "",
+        json: item.json || "",
+        global: item.global || false,
+        pdfUrl: item.pdf?.asset?.url || "",
+        pdfRef: item.pdf?.asset?._id || item.pdf?.asset?._ref || undefined,
+      }))
+      .filter((item: Resume) => item.role);
+    return adapted.length > 0 ? adapted : defaultResumes();
+  } catch (err) {
+    console.error("[Sanity] Failed to load resumes:", err);
+    return defaultResumes();
+  }
+}
+
+export async function loadContactFromSanity(): Promise<ContactSection> {
+  try {
+    const result = await fetchFromSanity<any>(contactSectionQuery);
+    if (!result) return defaultContact;
+    return {
+      heading: result.heading || defaultContact.heading,
+      items:
+        result.items?.length > 0
+          ? result.items.map((item: any) => ({
+              label: item.label || "",
+              value: item.value || "",
+              url: item.url || "",
+              type: item.type || "social",
+            }))
+          : defaultContact.items,
+    };
+  } catch (err) {
+    console.error("[Sanity] Failed to load contact:", err);
+    return defaultContact;
+  }
+}
+
+export async function loadHeroFromSanity(): Promise<HeroSection> {
+  try {
+    const result = await fetchFromSanity<any>(heroSectionQuery);
+    if (!result) return defaultHero;
+    return {
+      eyebrow: result.eyebrow || defaultHero.eyebrow,
+      heading: result.heading || defaultHero.heading,
+      description: result.description || defaultHero.description,
+      ctaLabel: result.ctaLabel || defaultHero.ctaLabel,
+      ctaHref: result.ctaHref || defaultHero.ctaHref,
+      backgroundImageUrl: result.backgroundImage?.asset?.url || defaultHero.backgroundImageUrl,
+      backgroundImageRef:
+        result.backgroundImage?.asset?._id || result.backgroundImage?.asset?._ref || undefined,
+      portraitImageUrl: result.portraitImage?.asset?.url || defaultHero.portraitImageUrl,
+      portraitImageRef: result.portraitImage?.asset?._id || result.portraitImage?.asset?._ref || undefined,
+    };
+  } catch (err) {
+    console.error("[Sanity] Failed to load hero:", err);
+    return defaultHero;
   }
 }
 

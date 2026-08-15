@@ -4,9 +4,8 @@ import { toggleTheme } from "@/hooks/use-reveal";
 const SECTIONS = [
   { id: "top", label: "Intro" },
   { id: "work", label: "Work" },
-  { id: "archive", label: "Archive" },
   { id: "experience", label: "Experience" },
-  { id: "about", label: "About" },
+  { id: "archive", label: "Archive" },
   { id: "contact", label: "Contact" },
 ];
 

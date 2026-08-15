@@ -30,7 +30,18 @@ export const heroSectionQuery = `*[_type == "heroSection"][0]{
     label,
     value
   },
-  backgroundImage
+  backgroundImage{
+    asset->{
+      _id,
+      url
+    }
+  },
+  portraitImage{
+    asset->{
+      _id,
+      url
+    }
+  }
 }`;
 
 export const marqueeSectionQuery = `*[_type == "marqueeSection"][0]{
@@ -184,7 +195,13 @@ export const resumesQuery = `*[_type == "resume"] | order(orderRank asc){
   _id,
   role,
   json,
-  global
+  global,
+  pdf{
+    asset->{
+      _id,
+      url
+    }
+  }
 }`;
 
 export const allContentQuery = `{
