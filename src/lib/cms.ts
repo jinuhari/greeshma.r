@@ -14,6 +14,13 @@ export interface MediaItem {
   _ref?: string;
 }
 
+export interface VideoMedia {
+  src: string;
+  _ref?: string;
+  autoplay: boolean;
+  loop: boolean;
+}
+
 export type SectionType = "text" | "image" | "image-text" | "full-bleed";
 
 export interface CaseStudySection {
@@ -21,6 +28,7 @@ export interface CaseStudySection {
   title?: string;
   content?: string;
   images?: MediaItem[];
+  video?: VideoMedia;
   imagePosition?: "left" | "right";
 }
 

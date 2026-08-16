@@ -135,6 +135,24 @@ export const caseStudy = defineType({
           title: "Image Section",
           fields: [
             { name: "image", title: "Image", type: "image" },
+            {
+              name: "video",
+              title: "Video",
+              description: "Optional video shown below the image.",
+              type: "file",
+            },
+            {
+              name: "videoAutoplay",
+              title: "Auto-play Video",
+              type: "boolean",
+              initialValue: false,
+            },
+            {
+              name: "videoLoop",
+              title: "Loop Video",
+              type: "boolean",
+              initialValue: true,
+            },
             { name: "caption", title: "Caption", type: "string" },
             { name: "fullBleed", title: "Full Bleed", type: "boolean", initialValue: false },
           ],
@@ -148,6 +166,24 @@ export const caseStudy = defineType({
             { name: "title", title: "Title", type: "string" },
             { name: "content", title: "Content", type: "text", rows: 4 },
             { name: "image", title: "Image", type: "image" },
+            {
+              name: "video",
+              title: "Video",
+              description: "Optional video shown below the image.",
+              type: "file",
+            },
+            {
+              name: "videoAutoplay",
+              title: "Auto-play Video",
+              type: "boolean",
+              initialValue: false,
+            },
+            {
+              name: "videoLoop",
+              title: "Loop Video",
+              type: "boolean",
+              initialValue: true,
+            },
             {
               name: "imagePosition",
               title: "Image Position",

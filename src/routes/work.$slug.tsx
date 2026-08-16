@@ -4,6 +4,7 @@ import { useTheme } from "@/hooks/use-reveal";
 import { type CaseStudy } from "@/lib/cms";
 import { loadCaseStudyFromSanity, loadWorksFromSanity } from "@/lib/data";
 import { AppShell } from "@/components/app/app-shell";
+import { VideoPlayer } from "@/components/app/video-player";
 
 export const Route = createFileRoute("/work/$slug")({
   component: CaseStudyPage,
@@ -102,18 +103,9 @@ function CaseStudyNav({ work, allWorks }: { work: CaseStudy; allWorks: CaseStudy
 }
 
 function CaseStudyHero({ work }: { work: CaseStudy }) {
-  const toneMap: Record<string, string> = {
-    terracotta: "bg-terracotta/10",
-    coral: "bg-coral/10",
-    forest: "bg-forest/10",
-    indigo: "bg-indigo/10",
-  };
-
   return (
     <section className="redesign-detail-hero">
-      <div
-        className={`${toneMap[work.tone] || "bg-muted"} redesign-wrap redesign-detail-panel`}
-      >
+      <div className="redesign-wrap redesign-detail-panel">
         <div className="grid items-center gap-12 md:grid-cols-2">
           <div>
             <p className="eyebrow">
@@ -123,11 +115,11 @@ function CaseStudyHero({ work }: { work: CaseStudy }) {
             <p className="mt-6 text-sm text-muted-foreground">{work.role}</p>
             <p className="mt-4 max-w-lg text-base leading-relaxed md:text-lg">{work.summary}</p>
           </div>
-          <div className="hover-zoom rounded-lg">
+          <div className="hover-zoom">
             <img
               src={work.img}
               alt={work.title}
-              className="w-full rounded-lg object-cover"
+              className="w-full object-cover"
               width={1600}
               height={1100}
             />
@@ -191,9 +183,19 @@ function SectionRenderer({ section }: { section: import("@/lib/cms").CaseStudySe
       <section className="case-study-media mb-20 last:mb-0">
         {section.images?.map((img, i) => (
           <figure key={i} className="relative">
-            <div className="overflow-hidden rounded-lg bg-muted">
+            <div className="overflow-hidden">
               <img src={img.src} alt={img.caption || ""} className="w-full object-cover" />
             </div>
+            {section.video?.src && (
+              <VideoPlayer
+                src={section.video.src}
+                autoplay={section.video.autoplay}
+                loop={section.video.loop}
+                poster={img.src}
+                className="mt-4 w-full"
+                alt={img.caption || ""}
+              />
+            )}
             {img.caption && (
               <figcaption className="mt-3 px-6 text-center text-xs text-muted-foreground md:px-12">
                 {img.caption}
@@ -210,9 +212,19 @@ function SectionRenderer({ section }: { section: import("@/lib/cms").CaseStudySe
       <section className="case-study-media mb-20 last:mb-0">
         {section.images?.map((img, i) => (
           <figure key={i} className="relative">
-            <div className="overflow-hidden rounded-lg bg-muted">
+            <div className="overflow-hidden">
               <img src={img.src} alt={img.caption || ""} className="w-full object-cover" />
             </div>
+            {section.video?.src && (
+              <VideoPlayer
+                src={section.video.src}
+                autoplay={section.video.autoplay}
+                loop={section.video.loop}
+                poster={img.src}
+                className="mt-4 w-full"
+                alt={img.caption || ""}
+              />
+            )}
             {img.caption && (
               <figcaption className="mt-3 px-6 text-center text-xs text-muted-foreground md:px-12">
                 {img.caption}
@@ -228,9 +240,19 @@ function SectionRenderer({ section }: { section: import("@/lib/cms").CaseStudySe
     return (
       <section className="mb-20 last:mb-0 w-full">
         {section.images?.[0] && (
-          <div className="case-study-media mx-auto mb-10 overflow-hidden rounded-lg bg-muted">
+          <div className="case-study-media mx-auto mb-10 overflow-hidden">
             <img src={section.images[0].src} alt="" className="w-full object-cover" />
           </div>
+        )}
+        {section.video?.src && (
+          <VideoPlayer
+            src={section.video.src}
+            autoplay={section.video.autoplay}
+            loop={section.video.loop}
+            poster={section.images?.[0]?.src}
+            className="case-study-media mx-auto mb-10 w-full"
+            alt={section.title || ""}
+          />
         )}
         <div className="mx-auto max-w-3xl">
           {section.title && (

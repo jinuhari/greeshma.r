@@ -43,6 +43,24 @@ export const archiveItem = defineType({
       type: "image",
     }),
     defineField({
+      name: "video",
+      title: "Video",
+      description: "Optional video shown in place of the image.",
+      type: "file",
+    }),
+    defineField({
+      name: "videoAutoplay",
+      title: "Auto-play Video",
+      type: "boolean",
+      initialValue: false,
+    }),
+    defineField({
+      name: "videoLoop",
+      title: "Loop Video",
+      type: "boolean",
+      initialValue: true,
+    }),
+    defineField({
       name: "orderRank",
       title: "Order",
       type: "number",

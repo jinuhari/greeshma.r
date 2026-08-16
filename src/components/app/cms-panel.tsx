@@ -676,6 +676,54 @@ export function CmsPanel({
                       }}
                       label="Upload artwork"
                     />
+                    <VideoUploader
+                      value={item.video}
+                      onUpload={(url, _ref) => {
+                        const next = [...archive];
+                        next[i] = {
+                          ...next[i],
+                          video: url,
+                          videoRef: _ref || undefined,
+                          videoAutoplay: next[i].videoAutoplay ?? false,
+                          videoLoop: next[i].videoLoop ?? true,
+                        };
+                        setArchive(next);
+                      }}
+                      onRemove={() => {
+                        const next = [...archive];
+                        next[i] = { ...next[i], video: "", videoRef: undefined };
+                        setArchive(next);
+                      }}
+                      label="Upload video"
+                    />
+                    {item.video && (
+                      <div className="flex items-center gap-3">
+                        <label className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                          <input
+                            type="checkbox"
+                            checked={!!item.videoAutoplay}
+                            onChange={(e) => {
+                              const next = [...archive];
+                              next[i] = { ...next[i], videoAutoplay: e.target.checked };
+                              setArchive(next);
+                            }}
+                          />
+                          Auto-play
+                        </label>
+                        <label className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                          <input
+                            type="checkbox"
+                            checked={item.videoLoop !== false}
+                            onChange={(e) => {
+                              const next = [...archive];
+                              next[i] = { ...next[i], videoLoop: e.target.checked };
+                              setArchive(next);
+                            }}
+                          />
+                          Loop
+                        </label>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -1358,6 +1406,80 @@ function ImageUploader({
   );
 }
 
+function VideoUploader({
+  value,
+  onUpload,
+  onRemove,
+  label,
+}: {
+  value?: string;
+  onUpload: (url: string, _ref?: string) => void;
+  onRemove?: () => void;
+  label?: string;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setError("");
+    try {
+      const result = await uploadFile(file);
+      onUpload(result.url, result._ref);
+    } catch (err) {
+      console.error("Video upload failed", err);
+      setError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center gap-3">
+        {value && (
+          <video
+            src={value}
+            muted
+            playsInline
+            preload="metadata"
+            className="h-14 w-20 flex-shrink-0 rounded-md object-cover"
+          />
+        )}
+        <input
+          ref={inputRef}
+          type="file"
+          accept="video/*"
+          onChange={handleFile}
+          className="hidden"
+        />
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+          className="rounded-md bg-muted px-3 py-1.5 text-[10px] tracking-wide transition-colors hover:bg-muted/70 disabled:opacity-50"
+        >
+          {uploading ? "Uploading..." : label || "Upload video"}
+        </button>
+        {value && (
+          <button
+            type="button"
+            onClick={() => (onRemove ? onRemove() : onUpload(""))}
+            className="rounded-md bg-red-500/10 px-2 py-1 text-[10px] text-red-500 hover:bg-red-500/20"
+          >
+            Remove
+          </button>
+        )}
+      </div>
+      {error && <p className="text-[10px] text-red-500">{error}</p>}
+    </div>
+  );
+}
+
 function SectionEditor({
   section,
   index,
@@ -1499,6 +1621,71 @@ function SectionEditor({
                 }
                 label="Upload from device"
               />
+            </div>
+          )}
+        </div>
+      )}
+
+      {(section.type === "image" ||
+        section.type === "full-bleed" ||
+        section.type === "image-text") && (
+        <div className="mt-2 rounded-md border border-border p-3">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-[10px] font-mono text-muted-foreground">
+              Video (optional, shown below the image)
+            </span>
+          </div>
+          <VideoUploader
+            value={section.video?.src}
+            onUpload={(url, _ref) =>
+              onChange({
+                video: {
+                  src: url,
+                  _ref: _ref || undefined,
+                  autoplay: section.video?.autoplay ?? false,
+                  loop: section.video?.loop ?? true,
+                },
+              })
+            }
+            onRemove={() => onChange({ video: undefined })}
+            label="Upload video"
+          />
+          {section.video?.src && (
+            <div className="mt-2 flex items-center gap-4">
+              <label className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                <input
+                  type="checkbox"
+                  checked={!!section.video.autoplay}
+                  onChange={(e) =>
+                    onChange({
+                      video: {
+                        src: section.video?.src || "",
+                        _ref: section.video?._ref,
+                        autoplay: e.target.checked,
+                        loop: section.video?.loop ?? true,
+                      },
+                    })
+                  }
+                />
+                Auto-play
+              </label>
+              <label className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                <input
+                  type="checkbox"
+                  checked={section.video.loop !== false}
+                  onChange={(e) =>
+                    onChange({
+                      video: {
+                        src: section.video?.src || "",
+                        _ref: section.video?._ref,
+                        autoplay: section.video?.autoplay ?? false,
+                        loop: e.target.checked,
+                      },
+                    })
+                  }
+                />
+                Loop
+              </label>
             </div>
           )}
         </div>

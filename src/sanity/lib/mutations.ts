@@ -114,6 +114,12 @@ export async function syncAllToSanity(
             imgItem?._ref ? { url: imgItem.src, _ref: imgItem._ref } : imgItem?.src,
             existingSections[i]?.image,
           ),
+          video: resolveFile(
+            s.video?._ref ? { url: s.video.src, _ref: s.video._ref } : s.video?.src,
+            existingSections[i]?.video,
+          ),
+          videoAutoplay: !!s.video?.autoplay,
+          videoLoop: s.video ? !!s.video.loop : false,
           caption: imgItem?.caption,
           fullBleed: s.type === "full-bleed",
           _key: existingSections[i]?._key,
@@ -129,6 +135,12 @@ export async function syncAllToSanity(
             imgItem?._ref ? { url: imgItem.src, _ref: imgItem._ref } : imgItem?.src,
             existingSections[i]?.image,
           ),
+          video: resolveFile(
+            s.video?._ref ? { url: s.video.src, _ref: s.video._ref } : s.video?.src,
+            existingSections[i]?.video,
+          ),
+          videoAutoplay: !!s.video?.autoplay,
+          videoLoop: s.video ? !!s.video.loop : false,
           imagePosition: s.imagePosition || "left",
           _key: existingSections[i]?._key,
         };
@@ -179,6 +191,12 @@ export async function syncAllToSanity(
         item.imageRef ? { url: item.src, _ref: item.imageRef } : item.src,
         existing?.image,
       ),
+      video: resolveFile(
+        item.videoRef && item.video ? { url: item.video, _ref: item.videoRef } : item.video,
+        existing?.video,
+      ),
+      videoAutoplay: !!item.videoAutoplay,
+      videoLoop: item.video ? !!item.videoLoop : false,
       orderRank: i,
     });
   }

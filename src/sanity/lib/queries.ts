@@ -119,6 +119,14 @@ export const caseStudiesQuery = `*[_type == "caseStudy"] | order(orderRank asc){
     _type == "imageSection" => {
       _type,
       image,
+      video{
+        asset->{
+          _id,
+          url
+        }
+      },
+      videoAutoplay,
+      videoLoop,
       caption,
       fullBleed
     },
@@ -127,6 +135,14 @@ export const caseStudiesQuery = `*[_type == "caseStudy"] | order(orderRank asc){
       title,
       content,
       image,
+      video{
+        asset->{
+          _id,
+          url
+        }
+      },
+      videoAutoplay,
+      videoLoop,
       imagePosition
     }
   }
@@ -161,6 +177,14 @@ export const caseStudyBySlugQuery = `*[_type == "caseStudy" && slug.current == $
     _type == "imageSection" => {
       _type,
       image,
+      video{
+        asset->{
+          _id,
+          url
+        }
+      },
+      videoAutoplay,
+      videoLoop,
       caption,
       fullBleed
     },
@@ -169,6 +193,14 @@ export const caseStudyBySlugQuery = `*[_type == "caseStudy" && slug.current == $
       title,
       content,
       image,
+      video{
+        asset->{
+          _id,
+          url
+        }
+      },
+      videoAutoplay,
+      videoLoop,
       imagePosition
     }
   }
@@ -181,7 +213,15 @@ export const archiveItemsQuery = `*[_type == "archiveItem"] | order(orderRank as
   year,
   medium,
   aspectRatio,
-  image
+  image,
+  video{
+    asset->{
+      _id,
+      url
+    }
+  },
+  videoAutoplay,
+  videoLoop
 }`;
 
 export const timelineItemsQuery = `*[_type == "timelineItem"] | order(orderRank asc){

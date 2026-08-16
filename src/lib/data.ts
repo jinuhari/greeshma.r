@@ -27,6 +27,10 @@ export interface ArchiveItem {
   medium: string;
   ratio: string;
   imageRef?: string;
+  video?: string;
+  videoRef?: string;
+  videoAutoplay?: boolean;
+  videoLoop?: boolean;
 }
 
 export interface TimelineItem {
@@ -378,6 +382,14 @@ function adaptSanityCaseStudy(s: any): CaseStudy {
               _ref: sec.image?.asset?._ref || undefined,
             },
           ],
+          video: sec.video?.asset?.url
+            ? {
+                src: sec.video.asset.url,
+                _ref: sec.video.asset._id || sec.video.asset._ref || undefined,
+                autoplay: !!sec.videoAutoplay,
+                loop: sec.videoLoop !== false,
+              }
+            : undefined,
         };
       if (sec._type === "imageTextSection")
         return {
@@ -390,6 +402,14 @@ function adaptSanityCaseStudy(s: any): CaseStudy {
               _ref: sec.image?.asset?._ref || undefined,
             },
           ],
+          video: sec.video?.asset?.url
+            ? {
+                src: sec.video.asset.url,
+                _ref: sec.video.asset._id || sec.video.asset._ref || undefined,
+                autoplay: !!sec.videoAutoplay,
+                loop: sec.videoLoop !== false,
+              }
+            : undefined,
           imagePosition: sec.imagePosition || "left",
         };
       return { type: "text" as const, content: "" };
@@ -464,6 +484,10 @@ export async function loadArchiveFromSanity(): Promise<ArchiveItem[]> {
         medium: item.medium || "",
         ratio: item.aspectRatio || "aspect-[3/4]",
         imageRef: item.image?.asset?._ref || undefined,
+        video: item.video?.asset?.url || undefined,
+        videoRef: item.video?.asset?._id || item.video?.asset?._ref || undefined,
+        videoAutoplay: !!item.videoAutoplay,
+        videoLoop: item.videoLoop !== false,
       }))
       .filter((i: ArchiveItem) => i.label);
     if (adapted.length === 0) {

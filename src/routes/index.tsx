@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CustomCursorPointer } from "@/components/app/app-shell";
 import { CmsPanel } from "@/components/app/cms-panel";
 import { DotMatrixHero } from "@/components/app/dot-matrix-hero";
+import { VideoPlayer } from "@/components/app/video-player";
 import heroArt from "@/assets/hero-artwork.jpg";
 import linkedinLogo from "@/assets/linkedin.png";
 import behanceLogo from "@/assets/social.png";
@@ -167,7 +168,6 @@ function Home() {
         <DotMatrixHero />
         <div className="redesign-wrap redesign-hero-grid">
           <div className="hero-copy">
-            <p className="hero-intro">{cmsHero.eyebrow}</p>
             <h1 className="headline editorial-h">{cmsHero.heading}</h1>
             <p className="sub">{cmsHero.description}</p>
             <div className="cta-row">
@@ -320,7 +320,21 @@ function Home() {
                   aria-hidden={index >= cmsArchive.length}
                 >
                   <figure className="archive-thumb">
-                    <img src={item.src} alt={index >= cmsArchive.length ? "" : item.label} loading="lazy" />
+                    {item.video ? (
+                      <VideoPlayer
+                        src={item.video}
+                        autoplay={item.videoAutoplay}
+                        loop={item.videoLoop}
+                        poster={item.src || undefined}
+                        alt={index >= cmsArchive.length ? "" : item.label}
+                      />
+                    ) : (
+                      <img
+                        src={item.src}
+                        alt={index >= cmsArchive.length ? "" : item.label}
+                        loading="lazy"
+                      />
+                    )}
                   </figure>
                   <div className="archive-meta">
                     <p>{item.cat || item.medium || "Archive"}</p>
