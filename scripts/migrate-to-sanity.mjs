@@ -148,10 +148,10 @@ const singletons = [
   {
     _id: "heroSection",
     _type: "heroSection",
-    eyebrow: "A digital exhibition · 2013 — Present",
-    heading: "Designing thoughtful digital products through research, storytelling & craft.",
-    description: "Greeshma R. is a multidisciplinary designer working at the seam of product, brand, illustration and research — an artist first, trained through fine arts, film and interaction design.",
-    ctaLabel: "View Selected Work",
+    eyebrow: "Design practice 2013 - present",
+    heading: "Product interfaces shaped with an illustrator's eye and a research-led process.",
+    description: "Greeshma R. designs digital products, visual systems, and brand-sensitive surfaces with a focus on clarity, rhythm, and finish.",
+    ctaLabel: "View selected work",
     ctaHref: "#work",
     stats: [
       { value: "11", label: "years of practice" },

@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { toggleTheme } from "@/hooks/use-reveal";
 
 const SECTIONS = [
   { id: "top", label: "Intro" },
@@ -248,14 +247,6 @@ function StatusBar({
         >
           {sketchOn ? "Sketching…" : "Sketch"}
         </button>
-        <button
-          onClick={toggleTheme}
-          data-cursor="hover"
-          aria-label="Toggle theme"
-          className="rounded-full px-3 py-1 font-mono tracking-wide hover:bg-muted"
-        >
-          ◐
-        </button>
         <span className="hidden font-mono text-muted-foreground sm:inline">·</span>
         <span className="hidden pr-2 font-mono text-muted-foreground sm:inline">
           BLR {time}
@@ -298,13 +289,6 @@ function CommandPalette({
           document.getElementById(s.id)?.scrollIntoView({ behavior: "smooth" });
         },
       })),
-      {
-        id: "toggle-theme",
-        label: "Toggle light / dark",
-        hint: "◐",
-        group: "Actions",
-        run: () => toggleTheme(),
-      },
       {
         id: "toggle-sketch",
         label: "Toggle sketch mode",

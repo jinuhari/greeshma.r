@@ -84,6 +84,13 @@ export const defaultHero: HeroSection = {
   portraitImageUrl: portraitImage,
 };
 
+function isLegacyHeroContent(result: any): boolean {
+  return (
+    typeof result?.resumeUrl === "string" ||
+    (Array.isArray(result?.stats) && result.stats.length > 0)
+  );
+}
+
 export const defaultContact: ContactSection = {
   heading: "Email / Social / Resume",
   items: [
@@ -570,6 +577,7 @@ export async function loadHeroFromSanity(): Promise<HeroSection> {
   try {
     const result = await fetchFromSanity<any>(heroSectionQuery);
     if (!result) return defaultHero;
+    if (isLegacyHeroContent(result)) return defaultHero;
     return {
       eyebrow: result.eyebrow || defaultHero.eyebrow,
       heading: result.heading || defaultHero.heading,

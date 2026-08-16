@@ -10,14 +10,14 @@ export const heroSection = defineType({
       name: "eyebrow",
       title: "Eyebrow Text",
       type: "string",
-      initialValue: "A digital exhibition · 2013 — Present",
+      initialValue: "Design practice 2013 - present",
     }),
     defineField({
       name: "heading",
       title: "Heading",
       type: "string",
       initialValue:
-        "Designing thoughtful digital products through research, storytelling & craft.",
+        "Product interfaces shaped with an illustrator's eye and a research-led process.",
     }),
     defineField({
       name: "description",
@@ -29,7 +29,7 @@ export const heroSection = defineType({
       name: "ctaLabel",
       title: "CTA Button Label",
       type: "string",
-      initialValue: "View Selected Work",
+      initialValue: "View selected work",
     }),
     defineField({
       name: "ctaHref",

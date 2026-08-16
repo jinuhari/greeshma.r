@@ -31,18 +31,7 @@ export function useReveal() {
 export function useTheme() {
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const saved = localStorage.getItem("gr-theme");
-    if (saved === "dark") {
-      document.documentElement.classList.add("dark");
-      return;
-    }
-    // Default to light mode when there is no explicit preference.
+    localStorage.removeItem("gr-theme");
     document.documentElement.classList.remove("dark");
   }, []);
-}
-
-export function toggleTheme() {
-  const root = document.documentElement;
-  const isDark = root.classList.toggle("dark");
-  localStorage.setItem("gr-theme", isDark ? "dark" : "light");
 }
