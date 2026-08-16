@@ -7,6 +7,7 @@ import { CmsPanel } from "@/components/app/cms-panel";
 import { DotMatrixHero } from "@/components/app/dot-matrix-hero";
 import { VideoPlayer } from "@/components/app/video-player";
 import heroArt from "@/assets/hero-artwork.jpg";
+import heroPortrait from "@/assets/hero-portrait.jpg";
 import linkedinLogo from "@/assets/linkedin.png";
 import behanceLogo from "@/assets/social.png";
 import workImage from "@/assets/greeshma bgremoved.png";
@@ -37,6 +38,25 @@ function getWorkCategories(work: CaseStudy): string[] {
 
 const WORKS_PAGE_SIZE = 4;
 
+function preloadImages(srcs: Array<string | undefined>): Promise<void> {
+  return Promise.all(
+    srcs.map(
+      (src) =>
+        new Promise<void>((resolve) => {
+          if (!src) {
+            resolve();
+            return;
+          }
+          const img = new Image();
+          img.onload = () => resolve();
+          img.onerror = () => resolve();
+          img.src = src;
+          setTimeout(resolve, 2500);
+        }),
+    ),
+  ).then(() => undefined);
+}
+
 function contactHref(item: ContactItem, resumeHref: string): string {
   if (item.type === "resume") return resumeHref;
   if (contactPlatform(item) === "email") {
@@ -57,8 +77,10 @@ function contactPlatform(item: ContactItem): ContactItem["type"] {
 function ContactLogo({ item }: { item: ContactItem }) {
   const platform = contactPlatform(item);
   if (platform === "email") return <Mail className="contact-link-icon" aria-hidden="true" />;
-  if (platform === "linkedin") return <img className="contact-link-icon" src={linkedinLogo} alt="" aria-hidden="true" />;
-  if (platform === "behance") return <img className="contact-link-icon" src={behanceLogo} alt="" aria-hidden="true" />;
+  if (platform === "linkedin")
+    return <img className="contact-link-icon" src={linkedinLogo} alt="" aria-hidden="true" />;
+  if (platform === "behance")
+    return <img className="contact-link-icon" src={behanceLogo} alt="" aria-hidden="true" />;
   return null;
 }
 
@@ -68,6 +90,7 @@ function Home() {
   const [showAllWorks, setShowAllWorks] = useState(false);
   const [cmsWorks, setCmsWorks] = useState<CaseStudy[]>([]);
   const [worksLoading, setWorksLoading] = useState(true);
+  const [heroLoading, setHeroLoading] = useState(true);
   const [cmsArchive, setCmsArchive] = useState(() => loadArchive());
   const [cmsTimeline, setCmsTimeline] = useState(() => loadTimeline());
   const [cmsResumes, setCmsResumes] = useState<Resume[]>(() => defaultResumes());
@@ -96,6 +119,12 @@ function Home() {
     setCmsContact(c);
     setCmsHero(h);
     setWorksLoading(false);
+    await preloadImages([
+      h.backgroundImageUrl || defaultHero.backgroundImageUrl,
+      h.portraitImageUrl || defaultHero.portraitImageUrl,
+    ]);
+    if (token !== refreshToken.current) return;
+    setHeroLoading(false);
   }, []);
 
   useEffect(() => {
@@ -112,8 +141,7 @@ function Home() {
   const shownWorks = useMemo(
     () =>
       cmsWorks.filter(
-        (work) =>
-          activeCategory === "All work" || getWorkCategories(work).includes(activeCategory),
+        (work) => activeCategory === "All work" || getWorkCategories(work).includes(activeCategory),
       ),
     [activeCategory, cmsWorks],
   );
@@ -162,39 +190,52 @@ function Home() {
       </header>
 
       <section className="redesign-hero" id="top">
-        <div className="redesign-hero-bg">
-          <img src={cmsHero.backgroundImageUrl || heroArt} alt="" width={1800} height={1200} />
-        </div>
-        <DotMatrixHero />
-        <div className="redesign-wrap redesign-hero-grid">
-          <div className="hero-copy">
-            <h1 className="headline editorial-h">{cmsHero.heading}</h1>
-            <p className="sub">{cmsHero.description}</p>
-            <div className="cta-row">
-              <a href={cmsHero.ctaHref || "#work"} className="notch-btn">
-                {cmsHero.ctaLabel || "View selected work"}
-              </a>
-              <a
-                href={resumeHref}
-                className="link-underline"
-                target="_blank"
-                rel="noreferrer"
-              >
-                View Resume
-              </a>
+        {heroLoading ? (
+          <div className="hero-skeleton" aria-hidden="true">
+            <div className="hero-skeleton-bg" />
+            <div className="redesign-wrap redesign-hero-grid">
+              <div className="hero-skeleton-copy">
+                <div className="hero-skeleton-line hero-skeleton-line-lg" />
+                <div className="hero-skeleton-line" />
+                <div className="hero-skeleton-line hero-skeleton-line-sm" />
+              </div>
+              <div className="hero-skeleton-portrait" />
             </div>
           </div>
-          <figure className="hero-portrait-frame">
-            <div className="hero-portrait">
-              <img
-                src={cmsHero.portraitImageUrl || workImage}
-                alt="Portrait of Greeshma R."
-                width={1200}
-                height={1500}
-              />
+        ) : (
+          <>
+            <div className="redesign-hero-bg">
+              <img src={cmsHero.backgroundImageUrl || heroArt} alt="" width={1800} height={1200} />
             </div>
-          </figure>
-        </div>
+            <div className="redesign-wrap redesign-hero-grid">
+              <div className="hero-copy">
+                <h1 className="headline editorial-h">{cmsHero.heading}</h1>
+                <p className="sub">{cmsHero.description}</p>
+                <div className="cta-row">
+                  <a href={cmsHero.ctaHref || "#work"} className="notch-btn">
+                    {cmsHero.ctaLabel || "View selected work"}
+                  </a>
+                  <a href={resumeHref} className="link-underline" target="_blank" rel="noreferrer">
+                    View Resume
+                  </a>
+                </div>
+              </div>
+              <figure className="hero-portrait-frame">
+                <div className="hero-particle-orb" aria-hidden="true">
+                  <DotMatrixHero />
+                </div>
+                <div className="hero-portrait">
+                  <img
+                    src={cmsHero.portraitImageUrl || heroPortrait}
+                    alt="Portrait of Greeshma R."
+                    width={1200}
+                    height={1500}
+                  />
+                </div>
+              </figure>
+            </div>
+          </>
+        )}
       </section>
 
       <section className="redesign-block work-section" id="work">
@@ -234,10 +275,6 @@ function Home() {
                 {visibleWorks.map((work) => (
                   <article className="work-card" key={work.slug}>
                     <a href={`/work/${work.slug}`} className="work-thumb">
-                      <span className="idx">
-                        {String(shownWorks.indexOf(work) + 1).padStart(2, "0")} /{" "}
-                        {String(shownWorks.length).padStart(2, "0")}
-                      </span>
                       <img
                         src={work.img || workImage}
                         alt={`${work.title} case study`}
@@ -247,12 +284,8 @@ function Home() {
                       />
                     </a>
                     <div className="work-content">
-                      <p className="work-meta">
-                        {work.year} - {work.kicker}
-                      </p>
                       <h3 className="editorial-h">{work.title}</h3>
                       <p className="role">{work.role}</p>
-                      <p className="work-copy">{work.summary}</p>
                       <div className="work-actions">
                         <a href={`/work/${work.slug}`} className="notch-btn">
                           Read case study <span aria-hidden="true">-&gt;</span>
@@ -281,7 +314,9 @@ function Home() {
           <div className="section-heading-row section-heading-compact">
             <div>
               <p className="section-kicker">Experience</p>
-              <h2 className="editorial-h category-heading">A timeline of practice, not a CV dump.</h2>
+              <h2 className="editorial-h category-heading">
+                A timeline of practice, not a CV dump.
+              </h2>
             </div>
           </div>
           <div className="timeline-list">

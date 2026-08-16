@@ -1,20 +1,31 @@
 import { useEffect, useRef } from "react";
 
-const GAP = 34; // px between dots
-const DOT_RADIUS = 1.6;
-const DOT_ALPHA = 0.24;
-const RIPPLE_RADIUS = 110; // how far the pointer's push reaches
-const PUSH_STRENGTH = 1.1; // force applied to dots caught in the ripple
-const SPRING = 0.08; // how eagerly a dot returns to its resting spot
-const DAMPING = 0.85; // friction that settles the motion, like water calming down
-const MAX_OFFSET = GAP * 0.55; // caps travel so neighbouring dots never crowd/overlap
+const NUM_DOTS = 60;
+const DOT_RADIUS = 1.8;
+const DOT_ALPHA = 0.55;
+const RING_RADIUS_FACTOR = 0.4; // ring radius as a fraction of the smaller orb dimension
+const SPRING_K = 12; // Hooke's law: acceleration per px of displacement
+const DAMPING = 3.0; // velocity damping coefficient (1/s)
+const ATTRACT_RADIUS = 140; // px around the pointer that pulls dots in
+const ATTRACT_STRENGTH = 2200; // acceleration injected at the pointer centre
+const MAX_OFFSET = 30; // px a dot may travel from its rest seat
+const SWAY_AMPLITUDE = 2; // gentle idle breathing of the ring
 
-type DotState = { ox: number; oy: number; vx: number; vy: number };
+type Dot = {
+  rx: number; // rest position on the ring
+  ry: number;
+  x: number; // live position
+  y: number;
+  vx: number; // velocity
+  vy: number;
+  phase: number; // per-dot offset for the idle sway
+};
 
 /**
- * Canvas-based grid of dots that drifts in a slow wave and gives way to the
- * pointer like water — dots get pushed aside and spring back to rest, rather
- * than changing size. Purely decorative — sits behind the hero copy.
+ * Canvas-based ring of dots that sits behind the hero portrait.
+ * The dots are seats on a circle and are simulated as a real spring-mass
+ * system: the pointer attracts nearby dots toward it, and Hooke's law plus
+ * viscous damping pulls them back onto the ring.
  */
 export function DotMatrixHero() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -31,21 +42,25 @@ export function DotMatrixHero() {
 
     let width = 0;
     let height = 0;
-    let cols = 0;
-    let rows = 0;
     let raf = 0;
-    let t = 0;
-    let dotColor = "#1c1c1a";
-    let dots: DotState[] = [];
+    let last = 0;
+    let time = 0;
+    let dots: Dot[] = [];
+    const dotColor = "#f97316";
 
     const pointer = { x: -9999, y: -9999, active: false };
 
-    const readDotColor = () => {
-      dotColor =
-        getComputedStyle(document.documentElement).getPropertyValue("--foreground").trim() ||
-        dotColor;
+    const buildRing = () => {
+      const cx = width / 2;
+      const cy = height / 2;
+      const radius = Math.max(24, Math.min(width, height) * RING_RADIUS_FACTOR);
+      dots = Array.from({ length: NUM_DOTS }, (_, i) => {
+        const angle = (i / NUM_DOTS) * Math.PI * 2;
+        const rx = cx + Math.cos(angle) * radius;
+        const ry = cy + Math.sin(angle) * radius;
+        return { rx, ry, x: rx, y: ry, vx: 0, vy: 0, phase: Math.random() * Math.PI * 2 };
+      });
     };
-    readDotColor();
 
     const resize = () => {
       const rect = host.getBoundingClientRect();
@@ -54,9 +69,7 @@ export function DotMatrixHero() {
       canvas.width = width * dpr;
       canvas.height = height * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      cols = Math.ceil(width / GAP) + 1;
-      rows = Math.ceil(height / GAP) + 1;
-      dots = Array.from({ length: cols * rows }, () => ({ ox: 0, oy: 0, vx: 0, vy: 0 }));
+      buildRing();
     };
     resize();
 
@@ -70,63 +83,73 @@ export function DotMatrixHero() {
       pointer.active = false;
     };
 
-    const draw = () => {
-      ctx.clearRect(0, 0, width, height);
+    const physics = (dt: number) => {
+      const dtFixed = Math.min(dt, 1 / 30);
+      for (const dot of dots) {
+        // The rest seat breathes slowly so the ring feels organic, not rigid.
+        const rx = dot.rx + Math.sin(time * 1.4 + dot.phase) * SWAY_AMPLITUDE;
+        const ry = dot.ry + Math.cos(time * 1.1 + dot.phase) * SWAY_AMPLITUDE;
 
-      for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < cols; col++) {
-          const index = row * cols + col;
-          const dot = dots[index];
-          const restX = col * GAP;
-          const restY = row * GAP + Math.sin(t + col * 0.35 + row * 0.22) * 5;
-          const x = restX + dot.ox;
-          const y = restY + dot.oy;
+        // Hooke's law: the spring pulls the dot back toward its seat.
+        dot.vx += (rx - dot.x) * SPRING_K * dtFixed;
+        dot.vy += (ry - dot.y) * SPRING_K * dtFixed;
 
-          if (pointer.active) {
-            const dx = x - pointer.x;
-            const dy = y - pointer.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < RIPPLE_RADIUS && dist > 0.01) {
-              const push = (1 - dist / RIPPLE_RADIUS) * PUSH_STRENGTH;
-              dot.vx += (dx / dist) * push;
-              dot.vy += (dy / dist) * push;
-            }
+        // Pointer attraction: dots lean toward the cursor as it hovers nearby.
+        if (pointer.active) {
+          const dx = pointer.x - dot.x;
+          const dy = pointer.y - dot.y;
+          const distSq = dx * dx + dy * dy;
+          if (distSq > 0.01 && distSq < ATTRACT_RADIUS * ATTRACT_RADIUS) {
+            const dist = Math.sqrt(distSq);
+            const falloff = 1 - dist / ATTRACT_RADIUS;
+            dot.vx += (dx / dist) * ATTRACT_STRENGTH * falloff * falloff * dtFixed;
+            dot.vy += (dy / dist) * ATTRACT_STRENGTH * falloff * falloff * dtFixed;
           }
-
-          // Spring back toward the resting position, damped like settling water.
-          dot.vx += -dot.ox * SPRING;
-          dot.vy += -dot.oy * SPRING;
-          dot.vx *= DAMPING;
-          dot.vy *= DAMPING;
-          dot.ox += dot.vx;
-          dot.oy += dot.vy;
-
-          // Clamp travel distance so pushed dots never crowd into their neighbours.
-          const offsetDist = Math.sqrt(dot.ox * dot.ox + dot.oy * dot.oy);
-          if (offsetDist > MAX_OFFSET) {
-            const scale = MAX_OFFSET / offsetDist;
-            dot.ox *= scale;
-            dot.oy *= scale;
-          }
-
-          ctx.beginPath();
-          ctx.arc(x, y, DOT_RADIUS, 0, Math.PI * 2);
-          ctx.globalAlpha = DOT_ALPHA;
-          ctx.fillStyle = dotColor;
-          ctx.fill();
         }
+
+        // Viscous damping, then integrate velocity into position.
+        const damp = Math.max(0, 1 - DAMPING * dtFixed);
+        dot.vx *= damp;
+        dot.vy *= damp;
+        dot.x += dot.vx * dtFixed;
+        dot.y += dot.vy * dtFixed;
+
+        // Keep dots from tearing the ring apart while they wobble.
+        const dx = dot.x - rx;
+        const dy = dot.y - ry;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > MAX_OFFSET) {
+          const scale = MAX_OFFSET / dist;
+          dot.x = rx + dx * scale;
+          dot.y = ry + dy * scale;
+        }
+      }
+    };
+
+    const draw = (now: number) => {
+      const dt = (now - last) / 1000;
+      last = now;
+
+      ctx.clearRect(0, 0, width, height);
+      if (!prefersReducedMotion) {
+        physics(dt);
+        time += dt;
+      }
+
+      ctx.fillStyle = dotColor;
+      ctx.globalAlpha = DOT_ALPHA;
+      for (const dot of dots) {
+        ctx.beginPath();
+        ctx.arc(dot.x, dot.y, DOT_RADIUS, 0, Math.PI * 2);
+        ctx.fill();
       }
       ctx.globalAlpha = 1;
 
-      if (!prefersReducedMotion) {
-        t += 0.018;
-      }
       raf = requestAnimationFrame(draw);
     };
-    raf = requestAnimationFrame(draw);
 
-    const themeObserver = new MutationObserver(readDotColor);
-    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    last = performance.now();
+    raf = requestAnimationFrame(draw);
 
     window.addEventListener("resize", resize);
     host.addEventListener("pointermove", onPointerMove);
@@ -134,7 +157,6 @@ export function DotMatrixHero() {
 
     return () => {
       cancelAnimationFrame(raf);
-      themeObserver.disconnect();
       window.removeEventListener("resize", resize);
       host.removeEventListener("pointermove", onPointerMove);
       host.removeEventListener("pointerleave", onPointerLeave);

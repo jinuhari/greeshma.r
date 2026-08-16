@@ -56,3 +56,6 @@ src/lib/impeccable/[0-9a-f]*/
 .sanity/
 .pnpmrc.json
 pnpm-workspace.yaml
+
+# Raw source assets (not used by the build)
+IMG_0124.HEIC

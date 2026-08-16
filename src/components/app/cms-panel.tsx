@@ -434,12 +434,9 @@ export function CmsPanel({
                         const cs: CaseStudy = {
                           slug: `case-${Date.now()}`,
                           n,
-                          year: "",
                           title: "New Case Study",
-                          kicker: "",
                           img: "",
                           role: "",
-                          summary: "",
                           categories: [],
                           outcomes: [],
                           tone: "terracotta",
@@ -552,7 +549,7 @@ export function CmsPanel({
                               <div className="flex items-start justify-between gap-2">
                                 <div className="min-w-0 flex-1">
                                   <p className="truncate font-display text-sm">{w.title || "Untitled"}</p>
-                                  <p className="truncate text-[10px] text-muted-foreground">{w.year} · {w.kicker}</p>
+                                  <p className="truncate text-[10px] text-muted-foreground">{w.role}</p>
                                 </div>
                                 <div className="flex flex-shrink-0 items-center gap-1">
                                   <button
@@ -1153,14 +1150,8 @@ function WorkEditor({
         <Field label="Slug">
           <input value={work.slug} className="bg-muted/50" readOnly />
         </Field>
-        <Field label="Year">
-          <input value={work.year} onChange={(e) => set({ year: e.target.value })} />
-        </Field>
         <Field label="Number">
           <input value={work.n} onChange={(e) => set({ n: e.target.value })} />
-        </Field>
-        <Field label="Kicker" className="col-span-2">
-          <input value={work.kicker} onChange={(e) => set({ kicker: e.target.value })} />
         </Field>
       </div>
 
@@ -1174,13 +1165,6 @@ function WorkEditor({
 
       <Field label="Role">
         <input value={work.role} onChange={(e) => set({ role: e.target.value })} />
-      </Field>
-      <Field label="Summary">
-        <textarea
-          rows={3}
-          value={work.summary}
-          onChange={(e) => set({ summary: e.target.value })}
-        />
       </Field>
 
       <Field label="Categories">

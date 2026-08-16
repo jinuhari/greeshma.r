@@ -6,7 +6,7 @@ import archive4 from "@/assets/archive-4.jpg";
 import archive5 from "@/assets/archive-5.jpg";
 import archive6 from "@/assets/archive-6.jpg";
 import heroArtwork from "@/assets/hero-artwork.jpg";
-import portraitImage from "@/assets/greeshma bgremoved.png";
+import portraitImage from "@/assets/hero-portrait.jpg";
 import { client } from "@/sanity/lib/client";
 import {
   caseStudiesQuery,
@@ -362,13 +362,10 @@ function adaptSanityCaseStudy(s: any): CaseStudy {
   return {
     slug: s.slug?.current || "",
     n: String(s.number || "").padStart(2, "0"),
-    year: s.year || "",
     title: s.title || "",
-    kicker: s.kicker || "",
     img: s.coverImage ? urlFor(s.coverImage).url() : "",
     imgRef: coverRef || undefined,
     role: s.role || "",
-    summary: s.summary || "",
     categories: s.categories || [],
     outcomes: (s.outcomes || []).map((o: any) => ({ k: o.label || "", v: o.value || "" })),
     tone: s.tone || "terracotta",

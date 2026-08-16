@@ -24,16 +24,6 @@ export const caseStudy = defineType({
       type: "number",
     }),
     defineField({
-      name: "year",
-      title: "Year",
-      type: "string",
-    }),
-    defineField({
-      name: "kicker",
-      title: "Kicker",
-      type: "string",
-    }),
-    defineField({
       name: "coverImage",
       title: "Cover Image",
       type: "image",
@@ -42,12 +32,6 @@ export const caseStudy = defineType({
       name: "role",
       title: "Role",
       type: "string",
-    }),
-    defineField({
-      name: "summary",
-      title: "Summary",
-      type: "text",
-      rows: 3,
     }),
     defineField({
       name: "categories",
@@ -205,6 +189,6 @@ export const caseStudy = defineType({
     },
   ],
   preview: {
-    select: { title: "title", subtitle: "year", media: "coverImage" },
+    select: { title: "title", subtitle: "role", media: "coverImage" },
   },
 });

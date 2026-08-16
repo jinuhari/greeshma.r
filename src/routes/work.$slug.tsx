@@ -59,12 +59,10 @@ function CaseStudyPage() {
 
   return (
     <div className="redesign-page">
-      <div className="redesign-callout">Case study view - editorial redesign</div>
       <CaseStudyNav work={work} allWorks={allWorks} />
-      <CaseStudyHero work={work} />
       <CaseStudyContent work={work} />
       <CaseStudyFooter work={work} allWorks={allWorks} />
-      <AppShell />
+      <AppShell hideStatusBar />
     </div>
   );
 }
@@ -74,9 +72,7 @@ function CaseStudyLoading() {
     <div className="redesign-page">
       <div className="case-study-skeleton" aria-hidden="true">
         <div className="redesign-wrap">
-          <div className="case-study-skeleton-line case-study-skeleton-eyebrow" />
           <div className="case-study-skeleton-line case-study-skeleton-title" />
-          <div className="case-study-skeleton-hero" />
         </div>
       </div>
     </div>
@@ -102,50 +98,9 @@ function CaseStudyNav({ work, allWorks }: { work: CaseStudy; allWorks: CaseStudy
   );
 }
 
-function CaseStudyHero({ work }: { work: CaseStudy }) {
-  return (
-    <section className="redesign-detail-hero">
-      <div className="redesign-wrap redesign-detail-panel">
-        <div className="grid items-center gap-12 md:grid-cols-2">
-          <div>
-            <p className="eyebrow">
-              {work.year} — {work.kicker}
-            </p>
-            <h1 className="editorial-h mt-6 text-5xl md:text-7xl lg:text-8xl">{work.title}</h1>
-            <p className="mt-6 text-sm text-muted-foreground">{work.role}</p>
-            <p className="mt-4 max-w-lg text-base leading-relaxed md:text-lg">{work.summary}</p>
-          </div>
-          <div className="hover-zoom">
-            <img
-              src={work.img}
-              alt={work.title}
-              className="w-full object-cover"
-              width={1600}
-              height={1100}
-            />
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function CaseStudyContent({ work }: { work: CaseStudy }) {
   return (
     <article className="redesign-wrap redesign-detail-content">
-      <div className="mx-auto max-w-3xl">
-        <dl className="mb-20 grid grid-cols-2 gap-8 border-b border-border pb-12 md:grid-cols-4">
-          {work.outcomes.map((o) => (
-            <div key={o.k}>
-              <dt className="text-[10px] tracking-[0.2em] text-muted-foreground uppercase">
-                {o.k}
-              </dt>
-              <dd className="mt-2 font-display text-3xl">{o.v}</dd>
-            </div>
-          ))}
-        </dl>
-      </div>
-
       {/* Keep the editorial copy easy to read, while letting every visual use the
           full case-study canvas. */}
       <div className="case-study-sections">
@@ -255,9 +210,7 @@ function SectionRenderer({ section }: { section: import("@/lib/cms").CaseStudySe
           />
         )}
         <div className="mx-auto max-w-3xl">
-          {section.title && (
-            <h2 className="font-display text-3xl md:text-4xl">{section.title}</h2>
-          )}
+          {section.title && <h2 className="font-display text-3xl md:text-4xl">{section.title}</h2>}
           {section.title && <div className="mt-4 h-px w-12 bg-accent" />}
           <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
             {section.content}
@@ -307,7 +260,6 @@ function CaseStudyFooter({
             <span className="font-display text-2xl transition-colors group-hover:text-accent md:text-3xl">
               {prev.title}
             </span>
-            <span className="text-xs text-muted-foreground">{prev.kicker}</span>
           </Link>
 
           <Link
@@ -321,7 +273,6 @@ function CaseStudyFooter({
             <span className="font-display text-2xl transition-colors group-hover:text-accent md:text-3xl">
               {next.title}
             </span>
-            <span className="text-xs text-muted-foreground">{next.kicker}</span>
           </Link>
         </div>
 

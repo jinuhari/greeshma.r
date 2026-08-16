@@ -35,13 +35,10 @@ export interface CaseStudySection {
 export interface CaseStudy {
   slug: string;
   n: string;
-  year: string;
   title: string;
-  kicker: string;
   img: string;
   imgRef?: string;
   role: string;
-  summary: string;
   /** Flexible taxonomy used to group work on the home page and in Sanity. */
   categories: string[];
   outcomes: Outcome[];
@@ -57,13 +54,9 @@ export const works: CaseStudy[] = [
   {
     slug: "udaan",
     n: "01",
-    year: "2024",
     title: "Udaan",
-    kicker: "Product · Visual System · Campaigns",
     img: workUdaan,
     role: "Associate Manager, Visual Designer — UI",
-    summary:
-      "Reshaping India's largest B2B commerce app: a mobile experience, brand campaigns and a scalable visual system used across product surfaces.",
     categories: ["UI/UX", "Visual Design"],
     outcomes: [
       { k: "Retail partners", v: "3M+" },
@@ -110,13 +103,9 @@ export const works: CaseStudy[] = [
   {
     slug: "tomodachi",
     n: "02",
-    year: "2023",
     title: "Tomodachi",
-    kicker: "Android · Interaction · Research",
     img: workTomodachi,
     role: "Lead Interaction Designer",
-    summary:
-      "A companion app that teaches Japanese through daily rituals — grounded in ethnographic interviews and a soft, warm visual language.",
     categories: ["UI/UX", "UX Research"],
     outcomes: [
       { k: "Study cohort", v: "42 learners" },
@@ -163,13 +152,9 @@ export const works: CaseStudy[] = [
   {
     slug: "qualin",
     n: "03",
-    year: "2023",
     title: "Qualin",
-    kicker: "Brand · Identity · Typography",
     img: workQualin,
     role: "Brand & Visual Designer",
-    summary:
-      "A quiet, considered identity for a wellness house — from wordmark to editorial guidelines to a full typographic system.",
     categories: ["Graphic Design", "Visual Design", "Branding"],
     outcomes: [
       { k: "Wordmarks explored", v: "27" },
@@ -216,13 +201,9 @@ export const works: CaseStudy[] = [
   {
     slug: "weaving-voices",
     n: "04",
-    year: "2022",
     title: "Weaving Voices",
-    kicker: "UX Research · Participatory Design",
     img: workResearch,
     role: "Design Researcher, IISc NDIN",
-    summary:
-      "A participatory study with weaving communities in rural Karnataka — documenting practice, ritual and the everyday tools of a craft in transition.",
     categories: ["UX Research", "Visual Design"],
     outcomes: [
       { k: "Field visits", v: "6 villages" },

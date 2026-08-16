@@ -20,12 +20,9 @@ function adaptSanityCaseStudy(sanityCaseStudy: any): CaseStudy | null {
   return {
     slug: sanityCaseStudy.slug.current,
     n: String(sanityCaseStudy.number || "").padStart(2, "0"),
-    year: sanityCaseStudy.year || "",
     title: sanityCaseStudy.title || "",
-    kicker: sanityCaseStudy.kicker || "",
     img: sanityCaseStudy.coverImage ? urlFor(sanityCaseStudy.coverImage).url() : "",
     role: sanityCaseStudy.role || "",
-    summary: sanityCaseStudy.summary || "",
     categories: sanityCaseStudy.categories || [],
     outcomes: (sanityCaseStudy.outcomes || []).map((o: any) => ({
       k: o.label || "",

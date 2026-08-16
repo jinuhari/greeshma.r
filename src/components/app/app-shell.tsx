@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 const SECTIONS = [
-  { id: "top", label: "Intro" },
   { id: "work", label: "Work" },
   { id: "experience", label: "Experience" },
   { id: "archive", label: "Archive" },
@@ -12,7 +11,7 @@ function useActiveSection() {
   const [active, setActive] = useState("top");
   useEffect(() => {
     const els = SECTIONS.map((s) => document.getElementById(s.id)).filter(
-      (e): e is HTMLElement => !!e
+      (e): e is HTMLElement => !!e,
     );
     if (!els.length) return;
     const io = new IntersectionObserver(
@@ -23,7 +22,7 @@ function useActiveSection() {
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
         if (visible) setActive(visible.target.id);
       },
-      { rootMargin: "-40% 0px -50% 0px", threshold: 0 }
+      { rootMargin: "-40% 0px -50% 0px", threshold: 0 },
     );
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
@@ -248,9 +247,7 @@ function StatusBar({
           {sketchOn ? "Sketching…" : "Sketch"}
         </button>
         <span className="hidden font-mono text-muted-foreground sm:inline">·</span>
-        <span className="hidden pr-2 font-mono text-muted-foreground sm:inline">
-          BLR {time}
-        </span>
+        <span className="hidden pr-2 font-mono text-muted-foreground sm:inline">BLR {time}</span>
       </div>
     </div>
   );
@@ -320,7 +317,7 @@ function CommandPalette({
         run: () => window.open("https://behance.net", "_blank"),
       },
     ],
-    [onToggleSketch]
+    [onToggleSketch],
   );
 
   const filtered = useMemo(() => {
@@ -330,7 +327,7 @@ function CommandPalette({
       (it) =>
         it.label.toLowerCase().includes(s) ||
         it.hint?.toLowerCase().includes(s) ||
-        it.group.toLowerCase().includes(s)
+        it.group.toLowerCase().includes(s),
     );
   }, [q, items]);
 
@@ -365,9 +362,7 @@ function CommandPalette({
         className="w-full max-w-xl overflow-hidden rounded-xl border border-border bg-background animate-scale-in"
       >
         <div className="flex items-center gap-3 border-b border-border px-4 py-3">
-          <span className="font-mono text-xs tracking-[0.2em] text-muted-foreground">
-            ⌘K
-          </span>
+          <span className="font-mono text-xs tracking-[0.2em] text-muted-foreground">⌘K</span>
           <input
             ref={inputRef}
             value={q}
@@ -426,9 +421,7 @@ function CommandPalette({
                   >
                     <span>{it.label}</span>
                     {it.hint && (
-                      <span className="font-mono text-[11px] text-muted-foreground">
-                        {it.hint}
-                      </span>
+                      <span className="font-mono text-[11px] text-muted-foreground">{it.hint}</span>
                     )}
                   </button>
                 );
@@ -473,8 +466,7 @@ function SketchOverlay({ on, onClear }: { on: boolean; onClear: () => void }) {
 
     const ctx = canvas.getContext("2d")!;
     const accent =
-      getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() ||
-      "#C96C4A";
+      getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#C96C4A";
     ctx.strokeStyle = accent;
 
     let drawing = false;
@@ -554,7 +546,7 @@ export function CustomCursorPointer() {
   return <Cursor />;
 }
 
-export function AppShell() {
+export function AppShell({ hideStatusBar = false }: { hideStatusBar?: boolean }) {
   const active = useActiveSection();
   const [cmdOpen, setCmdOpen] = useState(false);
   const [sketch, setSketch] = useState(false);
@@ -584,12 +576,14 @@ export function AppShell() {
       <ScrollProgressBar />
       <Cursor />
       <SectionDots active={active} />
-      <StatusBar
-        active={active}
-        onOpenCmd={() => setCmdOpen(true)}
-        sketchOn={sketch}
-        onToggleSketch={() => setSketch((v) => !v)}
-      />
+      {!hideStatusBar && (
+        <StatusBar
+          active={active}
+          onOpenCmd={() => setCmdOpen(true)}
+          sketchOn={sketch}
+          onToggleSketch={() => setSketch((v) => !v)}
+        />
+      )}
       <CommandPalette
         open={cmdOpen}
         onClose={() => setCmdOpen(false)}
