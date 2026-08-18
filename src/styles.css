@@ -748,7 +748,7 @@ footer { padding-bottom: 5rem; }
 .archive-track {
   display: flex;
   width: max-content;
-  align-items: center;
+  align-items: flex-end;
   gap: clamp(0.75rem, 1.4vw, 1.25rem);
   animation: archive-auto-scroll 46s linear infinite;
 }
@@ -756,6 +756,9 @@ footer { padding-bottom: 5rem; }
 .archive-card {
   width: clamp(180px, 21vw, 330px);
   flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  height: clamp(300px, 42vh, 480px);
 }
 
 .archive-card:nth-child(6n + 1) {
@@ -764,40 +767,34 @@ footer { padding-bottom: 5rem; }
 
 .archive-card:nth-child(6n + 2) {
   width: clamp(160px, 18vw, 280px);
-  transform: translateY(2rem);
 }
 
 .archive-card:nth-child(6n + 3) {
   width: clamp(220px, 24vw, 360px);
-  transform: translateY(-1.25rem);
 }
 
 .archive-card:nth-child(6n + 5) {
   width: clamp(190px, 20vw, 310px);
-  transform: translateY(1.1rem);
 }
 
 .archive-thumb {
-  aspect-ratio: 4 / 5;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
   background: transparent;
 }
 
-.archive-card:nth-child(6n + 1) .archive-thumb,
-.archive-card:nth-child(6n + 4) .archive-thumb {
-  aspect-ratio: 5 / 4;
-}
-
-.archive-card:nth-child(6n + 3) .archive-thumb {
-  aspect-ratio: 1 / 1;
-}
-
 .archive-thumb img,
 .archive-thumb video {
-  width: 100%;
-  height: 100%;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
   display: block;
-  object-fit: cover;
+  object-fit: contain;
   filter: grayscale(0);
   transition: filter 0.35s ease, transform 0.5s ease;
 }
@@ -809,7 +806,10 @@ footer { padding-bottom: 5rem; }
 }
 
 .archive-meta {
-  padding-top: 0.75rem;
+  margin-top: auto;
+  padding-top: 0.85rem;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .archive-meta p,
@@ -1392,4 +1392,10 @@ footer { padding-bottom: 5rem; }
 .cms-panel textarea {
   resize: vertical;
   font-family: inherit;
+}
+
+.cms-panel .timeline-year-input {
+  width: 2.75rem;
+  flex: 0 0 auto;
+  padding: 0.5rem 0.4rem;
 }

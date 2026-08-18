@@ -112,10 +112,10 @@ function Home() {
       loadHeroFromSanity(),
     ]);
     if (token !== refreshToken.current) return;
-    if (w.length) setCmsWorks(w);
-    if (a.length) setCmsArchive(a);
-    if (t.length) setCmsTimeline(t);
-    if (r.length) setCmsResumes(r);
+    setCmsWorks(w);
+    setCmsArchive(a);
+    setCmsTimeline(t);
+    setCmsResumes(r);
     setCmsContact(c);
     setCmsHero(h);
     setWorksLoading(false);
@@ -350,7 +350,7 @@ function Home() {
             <div className="archive-track">
               {[...cmsArchive, ...cmsArchive].map((item, index) => (
                 <article
-                  className="archive-card"
+                  className={`archive-card ${item.video ? "archive-card--video" : ""}`}
                   key={`${item.label}-${index}`}
                   aria-hidden={index >= cmsArchive.length}
                 >
@@ -358,8 +358,8 @@ function Home() {
                     {item.video ? (
                       <VideoPlayer
                         src={item.video}
-                        autoplay={item.videoAutoplay}
-                        loop={item.videoLoop}
+                        autoplay
+                        loop
                         poster={item.src || undefined}
                         alt={index >= cmsArchive.length ? "" : item.label}
                       />

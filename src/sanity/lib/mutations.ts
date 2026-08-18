@@ -44,13 +44,13 @@ function resolveImage(
   value: string | { url: string; _ref?: string } | undefined,
   existing: any,
 ): any {
-  if (!value) return existing || undefined;
-  if (typeof value === "object" && value._ref) {
-    return { _type: "image", asset: { _ref: value._ref } };
+  if (value === undefined) return existing || undefined;
+  if (typeof value === "object") {
+    if (value._ref) return { _type: "image", asset: { _ref: value._ref } };
+    return resolveImage(value.url, existing);
   }
-  const url = typeof value === "string" ? value : value.url;
-  if (!url) return existing || undefined;
-  const ref = urlToAssetRef(url);
+  if (value === "") return null;
+  const ref = urlToAssetRef(value);
   if (ref) return ref;
   return existing || undefined;
 }
@@ -59,10 +59,12 @@ function resolveFile(
   value: string | { url: string; _ref?: string } | undefined,
   existing: any,
 ): any {
-  if (!value) return existing || undefined;
-  if (typeof value === "object" && value._ref) {
-    return { _type: "file", asset: { _ref: value._ref } };
+  if (value === undefined) return existing || undefined;
+  if (typeof value === "object") {
+    if (value._ref) return { _type: "file", asset: { _ref: value._ref } };
+    return resolveFile(value.url, existing);
   }
+  if (value === "") return null;
   return existing || undefined;
 }
 
@@ -108,10 +110,15 @@ export async function syncAllToSanity(
       }
       if (s.type === "image" || s.type === "full-bleed") {
         const imgItem = s.images?.[0];
+        const hasImages = !!s.images && s.images.length > 0;
         return {
           _type: "imageSection",
           image: resolveImage(
-            imgItem?._ref ? { url: imgItem.src, _ref: imgItem._ref } : imgItem?.src,
+            imgItem?._ref
+              ? { url: imgItem.src, _ref: imgItem._ref }
+              : hasImages
+                ? imgItem?.src
+                : "",
             existingSections[i]?.image,
           ),
           video: resolveFile(
@@ -127,12 +134,17 @@ export async function syncAllToSanity(
       }
       if (s.type === "image-text") {
         const imgItem = s.images?.[0];
+        const hasImages = !!s.images && s.images.length > 0;
         return {
           _type: "imageTextSection",
           title: s.title,
           content: s.content,
           image: resolveImage(
-            imgItem?._ref ? { url: imgItem.src, _ref: imgItem._ref } : imgItem?.src,
+            imgItem?._ref
+              ? { url: imgItem.src, _ref: imgItem._ref }
+              : hasImages
+                ? imgItem?.src
+                : "",
             existingSections[i]?.image,
           ),
           video: resolveFile(
@@ -192,8 +204,6 @@ export async function syncAllToSanity(
         item.videoRef && item.video ? { url: item.video, _ref: item.videoRef } : item.video,
         existing?.video,
       ),
-      videoAutoplay: !!item.videoAutoplay,
-      videoLoop: item.video ? !!item.videoLoop : false,
       orderRank: i,
     });
   }

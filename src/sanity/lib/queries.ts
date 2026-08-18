@@ -213,9 +213,7 @@ export const archiveItemsQuery = `*[_type == "archiveItem"] | order(orderRank as
       _id,
       url
     }
-  },
-  videoAutoplay,
-  videoLoop
+  }
 }`;
 
 export const timelineItemsQuery = `*[_type == "timelineItem"] | order(orderRank asc){

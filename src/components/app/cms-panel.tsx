@@ -47,7 +47,7 @@ export function CmsPanel({
   works: CaseStudy[];
   setWorks: (w: CaseStudy[]) => void;
   archive: ArchiveItem[];
-  setArchive: (a: ArchiveItem[]) => void;
+  setArchive: (a: ArchiveItem[] | ((prev: ArchiveItem[]) => ArchiveItem[])) => void;
   timeline: TimelineItem[];
   setTimeline: (t: TimelineItem[]) => void;
   resumes: Resume[];
@@ -65,6 +65,7 @@ export function CmsPanel({
   const [newBucketName, setNewBucketName] = useState("");
   const [dragSlug, setDragSlug] = useState<string | null>(null);
   const [dragOverBucket, setDragOverBucket] = useState<string | null>(null);
+  const [dragArchiveIndex, setDragArchiveIndex] = useState<number | null>(null);
   const [customBuckets, setCustomBuckets] = useState<string[]>([]);
   const [renamingBucket, setRenamingBucket] = useState<string | null>(null);
   const [renameBucketName, setRenameBucketName] = useState("");
@@ -101,9 +102,9 @@ export function CmsPanel({
     recordHistory();
     setWorksProp(w);
   };
-  const setArchive = (a: ArchiveItem[]) => {
+  const setArchive = (a: ArchiveItem[] | ((prev: ArchiveItem[]) => ArchiveItem[])) => {
     recordHistory();
-    setArchiveProp(a);
+    setArchiveProp((prev) => (typeof a === "function" ? a(prev) : a));
   };
   const setTimeline = (t: TimelineItem[]) => {
     recordHistory();
@@ -589,8 +590,8 @@ export function CmsPanel({
                 <button
                   type="button"
                   onClick={() =>
-                    setArchive([
-                      ...archive,
+                    setArchive((prev) => [
+                      ...prev,
                       {
                         src: "",
                         label: "New Artwork",
@@ -613,52 +614,78 @@ export function CmsPanel({
 
               <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
                 {archive.map((item: any, i) => (
-                  <div key={item._id || i} className="rounded-lg border border-border p-3">
+                  <div
+                    key={item._id || i}
+                    draggable
+                    onDragStart={() => setDragArchiveIndex(i)}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      if (dragArchiveIndex === null || dragArchiveIndex === i) return;
+                      setArchive((prev) => {
+                        const next = [...prev];
+                        const [moved] = next.splice(dragArchiveIndex, 1);
+                        next.splice(i, 0, moved);
+                        return next;
+                      });
+                      setDragArchiveIndex(i);
+                    }}
+                    onDrop={(e) => e.preventDefault()}
+                    onDragEnd={() => setDragArchiveIndex(null)}
+                    className={`cursor-grab rounded-lg border p-3 transition-colors active:cursor-grabbing ${
+                      dragArchiveIndex === i
+                        ? "border-accent bg-accent/5 opacity-60"
+                        : "border-border"
+                    }`}
+                  >
                     <div className="flex items-start justify-between">
                       <div className="flex-1 space-y-1">
                         <input
                           className="w-full bg-transparent text-sm font-medium outline-none"
                           value={item.label || ""}
-                          onChange={(e) => {
-                            const next = [...archive];
-                            next[i] = { ...next[i], label: e.target.value };
-                            setArchive(next);
-                          }}
+                          onChange={(e) =>
+                            setArchive((prev) =>
+                              prev.map((it, j) =>
+                                j === i ? { ...it, label: e.target.value } : it,
+                              ),
+                            )
+                          }
                           placeholder="Artwork title"
                         />
                         <input
                           className="w-full bg-transparent text-[10px] text-muted-foreground outline-none"
                           value={item.cat || ""}
-                          onChange={(e) => {
-                            const next = [...archive];
-                            next[i] = { ...next[i], cat: e.target.value };
-                            setArchive(next);
-                          }}
+                          onChange={(e) =>
+                            setArchive((prev) =>
+                              prev.map((it, j) => (j === i ? { ...it, cat: e.target.value } : it)),
+                            )
+                          }
                           placeholder="Category"
                         />
                         <input
                           className="w-full bg-transparent text-[10px] text-muted-foreground outline-none"
                           value={item.year || ""}
-                          onChange={(e) => {
-                            const next = [...archive];
-                            next[i] = { ...next[i], year: e.target.value };
-                            setArchive(next);
-                          }}
+                          onChange={(e) =>
+                            setArchive((prev) =>
+                              prev.map((it, j) => (j === i ? { ...it, year: e.target.value } : it)),
+                            )
+                          }
                           placeholder="Year"
                         />
                         <input
                           className="w-full bg-transparent text-[10px] text-muted-foreground outline-none"
                           value={item.medium || ""}
-                          onChange={(e) => {
-                            const next = [...archive];
-                            next[i] = { ...next[i], medium: e.target.value };
-                            setArchive(next);
-                          }}
+                          onChange={(e) =>
+                            setArchive((prev) =>
+                              prev.map((it, j) =>
+                                j === i ? { ...it, medium: e.target.value } : it,
+                              ),
+                            )
+                          }
                           placeholder="Medium"
                         />
                       </div>
                       <button
-                        onClick={() => setArchive(archive.filter((_, j) => j !== i))}
+                        onClick={() => setArchive((prev) => prev.filter((_, j) => j !== i))}
                         className="ml-2 text-xs text-muted-foreground hover:text-red-500"
                       >
                         ✕
@@ -666,61 +693,33 @@ export function CmsPanel({
                     </div>
                     <ImageUploader
                       value={item.src}
-                      onUpload={(url, _ref) => {
-                        const next = [...archive];
-                        next[i] = { ...next[i], src: url, imageRef: _ref || undefined };
-                        setArchive(next);
-                      }}
+                      onUpload={(url, _ref) =>
+                        setArchive((prev) =>
+                          prev.map((it, j) =>
+                            j === i ? { ...it, src: url, imageRef: _ref || undefined } : it,
+                          ),
+                        )
+                      }
                       label="Upload artwork"
                     />
                     <VideoUploader
                       value={item.video}
-                      onUpload={(url, _ref) => {
-                        const next = [...archive];
-                        next[i] = {
-                          ...next[i],
-                          video: url,
-                          videoRef: _ref || undefined,
-                          videoAutoplay: next[i].videoAutoplay ?? false,
-                          videoLoop: next[i].videoLoop ?? true,
-                        };
-                        setArchive(next);
-                      }}
-                      onRemove={() => {
-                        const next = [...archive];
-                        next[i] = { ...next[i], video: "", videoRef: undefined };
-                        setArchive(next);
-                      }}
+                      onUpload={(url, _ref) =>
+                        setArchive((prev) =>
+                          prev.map((it, j) =>
+                            j === i ? { ...it, video: url, videoRef: _ref || undefined } : it,
+                          ),
+                        )
+                      }
+                      onRemove={() =>
+                        setArchive((prev) =>
+                          prev.map((it, j) =>
+                            j === i ? { ...it, video: "", videoRef: undefined } : it,
+                          ),
+                        )
+                      }
                       label="Upload video"
                     />
-                    {item.video && (
-                      <div className="flex items-center gap-3">
-                        <label className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                          <input
-                            type="checkbox"
-                            checked={!!item.videoAutoplay}
-                            onChange={(e) => {
-                              const next = [...archive];
-                              next[i] = { ...next[i], videoAutoplay: e.target.checked };
-                              setArchive(next);
-                            }}
-                          />
-                          Auto-play
-                        </label>
-                        <label className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                          <input
-                            type="checkbox"
-                            checked={item.videoLoop !== false}
-                            onChange={(e) => {
-                              const next = [...archive];
-                              next[i] = { ...next[i], videoLoop: e.target.checked };
-                              setArchive(next);
-                            }}
-                          />
-                          Loop
-                        </label>
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
@@ -734,10 +733,17 @@ export function CmsPanel({
               )}
               {timeline.map((item: any, i) => (
                 <div key={item._id || i} className="rounded-lg border border-border p-4">
-                  <div className="flex gap-4">
-                    <span className="mt-0.5 font-mono text-xs text-muted-foreground">
-                      {item.year}
-                    </span>
+                  <div className="flex items-start gap-3">
+                    <input
+                      className="timeline-year-input mt-0.5 bg-transparent font-mono text-xs text-muted-foreground outline-none"
+                      value={item.year || ""}
+                      onChange={(e) => {
+                        const next = [...timeline];
+                        next[i] = { ...next[i], year: e.target.value };
+                        setTimeline(next);
+                      }}
+                      placeholder="Year"
+                    />
                     <div className="flex-1 space-y-1">
                       <input
                         className="w-full bg-transparent font-medium outline-none"
@@ -1631,7 +1637,9 @@ function SectionEditor({
                 },
               })
             }
-            onRemove={() => onChange({ video: undefined })}
+            onRemove={() =>
+              onChange({ video: { src: "", _ref: undefined, autoplay: false, loop: true } })
+            }
             label="Upload video"
           />
           {section.video?.src && (

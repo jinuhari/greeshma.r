@@ -29,8 +29,6 @@ export interface ArchiveItem {
   imageRef?: string;
   video?: string;
   videoRef?: string;
-  videoAutoplay?: boolean;
-  videoLoop?: boolean;
 }
 
 export interface TimelineItem {
@@ -437,24 +435,12 @@ async function fetchFromSanity<T>(
 export async function loadWorksFromSanity(): Promise<CaseStudy[]> {
   try {
     const result = await fetchFromSanity<any[]>(caseStudiesQuery);
-    if (!result || result.length === 0) {
-      console.warn("[Sanity] No case studies found, using static defaults");
-      return loadWorks();
-    }
+    if (!result || result.length === 0) return [];
     const adapted = result.map(adaptSanityCaseStudy).filter((c: any) => c.slug);
-    if (adapted.length === 0) {
-      console.warn("[Sanity] All case studies filtered out, using static defaults");
-      return loadWorks();
-    }
-    const defaultsBySlug = new Map(defaultWorks.map((w) => [w.slug, w]));
-    return adapted.map((s: CaseStudy) => {
-      const fallback = defaultsBySlug.get(s.slug);
-      if (!fallback) return s;
-      return { ...s, img: s.img || fallback.img };
-    });
+    return adapted;
   } catch (err) {
     console.error("[Sanity] Failed to load case studies:", err);
-    return loadWorks();
+    return [];
   }
 }
 
@@ -475,10 +461,7 @@ export async function loadCaseStudyFromSanity(slug: string): Promise<CaseStudy |
 export async function loadArchiveFromSanity(): Promise<ArchiveItem[]> {
   try {
     const result = await fetchFromSanity<any[]>(archiveItemsQuery);
-    if (!result || result.length === 0) {
-      console.warn("[Sanity] No archive items found, using static defaults");
-      return loadArchive();
-    }
+    if (!result || result.length === 0) return [];
     const adapted = result
       .map((item: any) => ({
         src: item.image ? urlFor(item.image).url() : "",
@@ -490,30 +473,19 @@ export async function loadArchiveFromSanity(): Promise<ArchiveItem[]> {
         imageRef: item.image?.asset?._ref || undefined,
         video: item.video?.asset?.url || undefined,
         videoRef: item.video?.asset?._id || item.video?.asset?._ref || undefined,
-        videoAutoplay: !!item.videoAutoplay,
-        videoLoop: item.videoLoop !== false,
       }))
       .filter((i: ArchiveItem) => i.label);
-    if (adapted.length === 0) {
-      console.warn("[Sanity] All archive items filtered out, using static defaults");
-      return loadArchive();
-    }
-    const defaultsByLabel = new Map(defaultArchive.map((a) => [a.label, a]));
-    return adapted.map((a: ArchiveItem) => {
-      const fallback = defaultsByLabel.get(a.label);
-      if (!fallback) return a;
-      return { ...a, src: a.src || fallback.src };
-    });
+    return adapted;
   } catch (err) {
     console.error("[Sanity] Failed to load archive:", err);
-    return loadArchive();
+    return [];
   }
 }
 
 export async function loadTimelineFromSanity(): Promise<TimelineItem[]> {
   try {
     const result = await fetchFromSanity<any[]>(timelineItemsQuery);
-    if (!result || result.length === 0) return loadTimeline();
+    if (!result || result.length === 0) return [];
     const adapted = result
       .map((item: any) => ({
         year: item.year || "",
@@ -521,17 +493,17 @@ export async function loadTimelineFromSanity(): Promise<TimelineItem[]> {
         where: item.where || "",
       }))
       .filter((i: TimelineItem) => i.title);
-    return adapted.length > 0 ? adapted : loadTimeline();
+    return adapted;
   } catch (err) {
     console.error("[Sanity] Failed to load timeline:", err);
-    return loadTimeline();
+    return [];
   }
 }
 
 export async function loadResumesFromSanity(): Promise<Resume[]> {
   try {
     const result = await fetchFromSanity<any[]>(resumesQuery);
-    if (!result || result.length === 0) return defaultResumes();
+    if (!result || result.length === 0) return [];
     const adapted = result
       .map((item: any) => ({
         role: item.role || "",
@@ -541,10 +513,10 @@ export async function loadResumesFromSanity(): Promise<Resume[]> {
         pdfRef: item.pdf?.asset?._id || item.pdf?.asset?._ref || undefined,
       }))
       .filter((item: Resume) => item.role);
-    return adapted.length > 0 ? adapted : defaultResumes();
+    return adapted;
   } catch (err) {
     console.error("[Sanity] Failed to load resumes:", err);
-    return defaultResumes();
+    return [];
   }
 }
 

@@ -49,18 +49,6 @@ export const archiveItem = defineType({
       type: "file",
     }),
     defineField({
-      name: "videoAutoplay",
-      title: "Auto-play Video",
-      type: "boolean",
-      initialValue: false,
-    }),
-    defineField({
-      name: "videoLoop",
-      title: "Loop Video",
-      type: "boolean",
-      initialValue: true,
-    }),
-    defineField({
       name: "orderRank",
       title: "Order",
       type: "number",
